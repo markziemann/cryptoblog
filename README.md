@@ -5,7 +5,7 @@ https://cryptodatamagic.blogspot.com/
 
 Disclaimer: This is not financial advice.
 
-Disclosure: I hold all of the cryptocurrencies mentioned in this pot.
+Disclosure: I hold many/all of the cryptocurrencies mentioned in these posts.
 
 If this post helped you, consider a small donation. 
 
