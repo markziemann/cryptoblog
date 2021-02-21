@@ -1,0 +1,108 @@
+---
+title: "Does volatility decrease with increasing market cap?"
+author: "Mark Ziemann"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+theme: cosmo
+---
+
+## Intro
+
+As a market grows, it is thought that volatility reduces. Lets see if this is the case with bitcoin.
+
+```{r,lib}
+
+library("jsonlite")
+library("tidyverse")
+library("runner")
+
+```
+
+## Get data
+
+We will be simplifying things by working only with the market cap of the top two stablecoins Tether (USDT) and USD Coin (USDC) against cryptocurrencies Bitcoin (BTC) and Ethereum (ETH).
+
+```{r,getdata}
+download.file("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=2021-02-19",destfile="btcdat.txt")
+btcdat <- fromJSON("btcdat.txt")
+head(btcdat$data$quotes)
+
+btc_mc <- btcdat$data$quotes$quote$USD$market_cap
+
+times_mc <- btcdat$data$quotes$quote$USD$timestamp
+
+percent_moves <- (btcdat$data$quotes$quote$USD$close - btcdat$data$quotes$quote$USD$open)/btcdat$data$quotes$quote$USD$open * 100
+
+mc <- data.frame(times_mc, btc_mc, percent_moves, abs(percent_moves) )
+
+mc$times_mc <- as.Date(sapply(strsplit(mc$times_mc,"T"),"[[",1))
+
+```
+
+## Now  calculate sliding window information
+
+Let's try a 100 day sliding window and compare mean abs percent daily change over time.
+
+```{r,vol1}
+
+mc$btc_mc_runav <- runner(mc$btc_mc,k=100,f=mean)
+
+mc$btc_abs_moves_runav <- runner(mc$abs.percent_moves.,k=100,f=mean)
+
+mc_subset = mc[seq(1, nrow(mc), 100), ]
+
+model <- lm(btc_abs_moves_runav ~ times_mc, data = mc_subset)
+model
+
+p <- ggplot(mc_subset, aes(x=times_mc, y=btc_abs_moves_runav)) +
+  geom_point() + 
+  xlab("") +
+  ylab("absolute daily percent move (100 day sliding window)") +
+  stat_smooth(method = lm,fullrange=TRUE)
+
+p
+
+cor.test(as.numeric(mc_subset$times_mc),mc_subset$btc_abs_moves_runav)
+
+```
+
+This chart indicates that BTC volatility has reduced over time.
+Statistical test suggests the association is not strong.
+Bull/bear markets after halvings looks to cause a massive spike in volatility which tapers off after.
+
+## Now plot by market cap
+
+Put the market cap on the x axis.
+
+```{r,vol2}
+
+model <- lm(btc_abs_moves_runav ~ btc_mc, data = mc_subset)
+model
+
+p <- ggplot(mc_subset, aes(x=btc_mc, y=btc_abs_moves_runav)) +
+  geom_point() + 
+  scale_x_continuous(trans='log10') +
+  xlab("BTC market cap") +
+  ylab("absolute daily percent move (100 day sliding window)") +
+  stat_smooth(method = lm,fullrange=TRUE)
+p
+
+```
+
+This chart shows that market cap doesn't really correlate with reducing volatility.
+
+## Conclusion
+
+This analysis shows there is a weak trend for reducing volatility over time.
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
