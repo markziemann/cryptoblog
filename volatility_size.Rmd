@@ -41,35 +41,26 @@ mc$times_mc <- as.Date(sapply(strsplit(mc$times_mc,"T"),"[[",1))
 
 ```
 
-## Now  calculate sliding window information
+## Calculate correlation
 
-Let's try a 100 day sliding window and compare mean abs percent daily change over time.
+```{r,correl}
 
-```{r,vol1}
+model <- lm(mc$abs.percent_moves. ~ times_mc, data = mc)
+summary(model)
 
-mc$btc_mc_runav <- runner(mc$btc_mc,k=100,f=mean)
+cor.test(as.numeric(mc$times_mc),mc$abs.percent_moves.)
 
-mc$btc_abs_moves_runav <- runner(mc$abs.percent_moves.,k=100,f=mean)
+plot(mc$times_mc,mc$abs.percent_moves.,pch=19,cex=0.5,ylab="absolute daily % change")
+lines(as.numeric(mc$times_mc), predict(model), col = 'red',lwd=3)
 
-mc_subset = mc[seq(1, nrow(mc), 100), ]
-
-model <- lm(btc_abs_moves_runav ~ times_mc, data = mc_subset)
-model
-
-p <- ggplot(mc_subset, aes(x=times_mc, y=btc_abs_moves_runav)) +
-  geom_point() + 
-  xlab("") +
-  ylab("absolute daily percent move (100 day sliding window)") +
-  stat_smooth(method = lm,fullrange=TRUE)
-
-p
-
-cor.test(as.numeric(mc_subset$times_mc),mc_subset$btc_abs_moves_runav)
+plot(mc$times_mc,mc$abs.percent_moves.,pch=19,cex=0.5,ylab="absolute daily % change",ylim=c(2.4,3))
+lines(as.numeric(mc$times_mc), predict(model), col = 'red',lwd=3)
 
 ```
 
-This chart indicates that BTC volatility has reduced over time.
-Statistical test suggests the association is not strong.
+This chart indicates that BTC volatility has reduced over time from daily swings of 2.9 percent per day to 2.4%.
+This is still very high volatility as compared to stocks, which rarely have daily changes greater than 2-3%.
+Statistical test suggests the association is 98% certain it is a real effect.
 Bull/bear markets after halvings looks to cause a massive spike in volatility which tapers off after.
 
 ## Now plot by market cap
@@ -78,24 +69,30 @@ Put the market cap on the x axis.
 
 ```{r,vol2}
 
-model <- lm(btc_abs_moves_runav ~ btc_mc, data = mc_subset)
-model
+mc$log_btc_mc <- log(mc$btc_mc)
 
-p <- ggplot(mc_subset, aes(x=btc_mc, y=btc_abs_moves_runav)) +
-  geom_point() + 
-  scale_x_continuous(trans='log10') +
-  xlab("BTC market cap") +
-  ylab("absolute daily percent move (100 day sliding window)") +
-  stat_smooth(method = lm,fullrange=TRUE)
-p
+model <- lm(abs.percent_moves. ~ log_btc_mc, data = mc)
+summary(model)
+
+cor.test(mc$log_btc_mc,mc$abs.percent_moves.)
+
+plot(mc$log_btc_mc ,mc$abs.percent_moves.,pch=19,cex=0.5,ylab="absolute daily % change",xlab="log10 mkt cap")
+lines(mc$log_btc_mc, predict(model), col = 'red',lwd=3)
+
+plot(mc$log_btc_mc ,mc$abs.percent_moves.,pch=19,cex=0.5,ylab="absolute daily % change",
+  xlab="log10 mkt cap",ylim=c(2.3,3))
+
+lines(mc$log_btc_mc, predict(model), col = 'red',lwd=3)
 
 ```
 
-This chart shows that market cap doesn't really correlate with reducing volatility.
+This chart shows that volatility actually increases with market cap, which might be due to BTC entering 
+current bull market.
 
 ## Conclusion
 
 This analysis shows there is a weak trend for reducing volatility over time.
+Volatility increases with market cap but that may simply be due to entering recent all time highs.
 
 ## Session information
 
