@@ -10,6 +10,8 @@ A quantitative look at the crypto market
 
 * How high will the 2021 top be?
 
+* EMAs on a logarithmic chart to time the market top
+
 * Is 2021 bull run a supercycle?
 
 * predicting the top of the 2021 market with stablecoin dominance
