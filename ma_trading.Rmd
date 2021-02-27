@@ -236,6 +236,8 @@ colnames(sell) <- c("sell_date","sell_price")
 
 trades <- cbind(buy,sell)
 
+nrow(trades)
+
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - 0.0025
 
 trades 
@@ -296,6 +298,8 @@ trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - 0.0025
 
 trades
+
+nrow(trades)
 
 prod(trades$diff)
 
