@@ -1,5 +1,5 @@
 ---
-title: "Does volatility decrease with increasing market cap?"
+title: "Trading based on MA and EMA crosses"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:
