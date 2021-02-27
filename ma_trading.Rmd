@@ -29,7 +29,11 @@ We will be simplifying things by working only with the market cap of the top two
 
 ```{r,getdata}
 
-download.file("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=2021-02-19",destfile="btcdat.txt")
+if ( ! file.exists("btcdat.txt") ) {
+
+  download.file("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=2021-02-19",destfile="btcdat.txt")
+
+}
 
 btcdat <- fromJSON("btcdat.txt")
 
