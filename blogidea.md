@@ -23,3 +23,4 @@ Crypto	34	117	344.1%
 			
 			19.3
 
+* guessing the top: s2f, rainbow, pi cycle top indicator

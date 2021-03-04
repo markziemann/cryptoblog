@@ -25,26 +25,34 @@ library(tidyverse)
 
 We will be simplifying things by working only with the market cap of the top two stablecoins Tether (USDT) and USD Coin (USDC) against cryptocurrencies Bitcoin (BTC) and Ethereum (ETH).
 
+
+
+
+
 ```{r,getdata}
-download.file("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2019-01-01&time_end=2021-02-19",destfile="btcdat.txt")
+
+mydate <- Sys.Date()-1
+
+BTCURL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2019-01-01&time_end=",mydate,sep="")
+download.file(BTCURL,destfile="btcdat.txt")
 btcdat <- fromJSON("btcdat.txt")
 head(btcdat$data$quotes)
 btc_mc <- btcdat$data$quotes$quote$USD$market_cap
 
-
-download.file("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2019-01-01&time_end=2021-02-19",destfile="ethdat.txt")
+ETHURL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2019-01-01&time_end=",mydate,sep="")
+download.file(ETHURL,destfile="ethdat.txt")
 ethdat <- fromJSON("ethdat.txt")
 head(ethdat$data$quotes)
 eth_mc <- ethdat$data$quotes$quote$USD$market_cap 
 
-
-download.file("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=USDT&convert=USD&interval=daily&time_start=2019-01-01&time_end=2021-02-19",destfile="usdtdat.txt")
+USDTURL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=USDT&convert=USD&interval=daily&time_start=2019-01-01&time_end=",mydate,sep="")
+download.file(USDTURL,destfile="usdtdat.txt")
 usdtdat <- fromJSON("usdtdat.txt")
 head(usdtdat$data$quotes)
 usdt_mc <- usdtdat$data$quotes$quote$USD$market_cap
 
-
-download.file("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=USDT&convert=USD&interval=daily&time_start=2019-01-01&time_end=2021-02-19",destfile="usdcdat.txt")
+USDCURL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=USDT&convert=USD&interval=daily&time_start=2019-01-01&time_end=",mydate,sep="")
+download.file(USDCURL,destfile="usdcdat.txt")
 usdcdat <- fromJSON("usdcdat.txt")
 head(usdcdat$data$quotes)
 usdc_mc <- usdcdat$data$quotes$quote$USD$market_cap
