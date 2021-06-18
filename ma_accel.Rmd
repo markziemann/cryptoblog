@@ -1,0 +1,136 @@
+---
+title: "Trading based on MA and EMA crosses"
+author: "Mark Ziemann"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+theme: cosmo
+---
+
+## Intro
+
+Trading off moving averages, exponenial moving averages and crosses between these is a popular method for timing entry and exit of positions.
+In this blog post I will be trilaing simple moving averages to find the one which performs the best.
+
+```{r,lib}
+
+library("jsonlite")
+library("tidyverse")
+library("runner")
+library("quantmod")
+library("TTR")
+library("vioplot")
+
+```
+
+## Get data
+
+Obtaining BTC historical data (daily).
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+
+if ( ! file.exists("btcdat.txt") ) {
+
+  download.file(URL,destfile="btcdat.txt")
+
+}
+
+btcdat <- fromJSON("btcdat.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close)
+colnames(price) <- c("date","Close")
+price$date <- sapply(strsplit(price$date,"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),2][2] 
+mystart <- price[c(1,nrow(price)),2][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+
+```
+
+
+## Moving average function
+
+Assuming 0.1% trading fee, as per binance current rate.
+
+```{r,sma,fig.width=8,fig.height=8}
+
+
+n=43
+fee=0.001
+
+ma <- SMA(Cl(price),n=n)
+
+price2 <- price
+
+price2$ma <- ma
+
+price2$higher <- price2$Close > price2$ma
+
+yesterday <- price2$higher
+
+yesterday <- c(NA,yesterday)
+
+yesterday <- yesterday[1:(length(yesterday)-1)]
+
+price2$yesterday <- yesterday
+
+price2$trade <- apply(price2,1,function(x) {
+  as.numeric(as.logical(x[4])) - as.numeric(as.logical(x[5]))
+} )
+
+ma_v <- unlist(sapply(n:nrow(price2) , function(x) {
+  ( price2$ma[x] - price2$ma[x-1] ) / price2$ma[x]     
+}))
+
+ma_a <- unlist(sapply(n:nrow(price2) , function(x) {
+  ( price2$ma_v[x] - price2$ma_v[x-1] ) / price2$ma_v[x] 
+}))
+
+price2$ma_v <- c( rep(NA, n -1 ) , ma_v )
+
+price2$ma_a <- c( rep(NA, n -1 ) , ma_a )
+
+price2$smoothed_accelerator <- SMA(price2$ma_a,n)
+
+HEADER=paste("moving average")
+
+par(mfrow=c(3,1))
+
+plot(price2$Close~as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="moving average")
+grid()
+lines( ma  ~ as.Date(price2$date) ,col="red")
+
+plot(price2$ma_v~as.Date(price2$date),type="l",
+  ylim=c(-0.02,0.03),xlab="Date",ylab="change in ma", main="change in moving average")
+grid()
+
+plot(price2$smoothed_accelerator ~as.Date(price2$date),type="l", 
+  ylim=c(-2,5), xlab="Date",ylab="change in change in ma", main="smoothed change in change in moving average")
+grid()
+
+
+```
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
