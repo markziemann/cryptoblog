@@ -207,6 +207,7 @@ plot(price$Close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=SMA_HEADER)
 grid()
 lines(ma~ as.Date(price$date) ,col="red")
+sma_trades <- trades
 
 ```
 
@@ -248,7 +249,7 @@ plot(price$Close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=EMA_HEADER)
 grid()
 lines(ma~ as.Date(price$date) ,col="red")
-
+ema_trades <- trades
 
 ```
 
