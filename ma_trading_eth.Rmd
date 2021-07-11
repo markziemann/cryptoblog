@@ -32,9 +32,13 @@ Obtaining BTC historical data (daily).
 
 ```{r,getdata}
 
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+
 if ( ! file.exists("ethdat.txt") ) {
 
-  download.file("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=2021-02-26",destfile="ethdat.txt")
+  download.file(URL,destfile="ethdat.txt")
 
 }
 
