@@ -40,15 +40,15 @@ Obtaining BTC historical data (daily).
 
 mydate <- Sys.Date()-1
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
 
-if ( ! file.exists("btcdat.txt") ) {
+if ( ! file.exists("ethdat.txt") ) {
 
-  download.file(URL,destfile="btcdat.txt")
+  download.file(URL,destfile="ethdat.txt")
 
 }
 
-btcdat <- fromJSON("btcdat.txt")
+btcdat <- fromJSON("ethdat.txt")
 price <- btcdat$data$quotes
 price <- data.frame(price$time_close,price$quote$USD$close)
 colnames(price) <- c("date","Close")
@@ -347,7 +347,7 @@ lines(ma2~ as.Date(price$date) ,col="blue")
 
 fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
 
-res_sma_fees <- sapply(fee_levels,function(x) {
+res_sma_fees <- sapply(fee_levels,function(x) { 
   smacross(price,rownames(best_sma)[1],fee=x)
 } )
 plot(fee_levels,res_sma_fees ,pch=19,xlab="fee proportion",ylab="fold return",
@@ -356,7 +356,7 @@ mtext(SMA_HEADER)
 abline(h=hodl,col="red")
 grid()
 
-res_ema_fees <- sapply(fee_levels,function(x) {
+res_ema_fees <- sapply(fee_levels,function(x) { 
   emacross(price,rownames(best_ema)[1],fee=x)
 } )
 plot(fee_levels,res_ema_fees ,pch=19,xlab="fee proportion",ylab="fold return",
