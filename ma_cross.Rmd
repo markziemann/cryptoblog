@@ -22,7 +22,10 @@ library("quantmod")
 library("TTR")
 library("vioplot")
 library("reshape2")
-library(gplots)
+library("gplots")
+library("parallel")
+
+NUMCORES=detectCores()
 
 ```
 
@@ -159,14 +162,18 @@ fee=0.001
 
 mas <- expand.grid(4:200,4:200)
 
-res_sma <- sapply(1:nrow(mas),function(n) { smacross(price,n,fee) } )
+res_sma <- mclapply(1:nrow(mas),function(n) {
+ smacross(price,n,fee) 
+} , mc.cores=NUMCORES)
 mas1 <- as.data.frame(mas)
-mas1$returns <- res_sma
+mas1$returns <- unlist(res_sma)
 head(mas1[order(-mas1$returns),],20)
 
-res_ema <- sapply(1:nrow(mas),function(n) { emacross(price,n,fee) } )
+res_ema <- mclapply(1:nrow(mas),function(n) {
+  emacross(price,n,fee) 
+} ,  mc.cores=NUMCORES)
 mas2 <- as.data.frame(mas)
-mas2$returns <- res_ema
+mas2$returns <- unlist(res_ema)
 head(mas2[order(-mas2$returns),],20)
 
 ```
