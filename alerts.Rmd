@@ -21,6 +21,7 @@ library("tidyverse")
 library("runner")
 library("quantmod")
 library("TTR")
+library("RPushbullet")
 
 TESTING = TRUE
 
@@ -59,13 +60,13 @@ today_signal <- price[nrow(price),"signal"]
 previous_signal <- price[(nrow(price)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    btc_signal="SIGNAL_BUY"
+    btc_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) { 
-    btc_signal="SIGNAL_SELL"
+    btc_signal="SELL"
   }
 } else {
-btc_signal <- "SIGNAL_NONE"
+btc_signal <- "NONE"
 }
 btc_signal
 
@@ -74,6 +75,17 @@ plot(price$Close~as.Date(price$date),type="l",
 grid()
 lines(price$ma~ as.Date(price$date) ,col="red")
 
+```
+
+Send a push notification.
+
+```{r,btcpush}
+
+if ( btc_signal != "NONE") {
+  MYNOTE <- paste("The BTC 43D MA signal is", btc_signal, 
+    ". Visit https://blinder.cc/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
 
 ```
 
@@ -110,13 +122,13 @@ today_signal <- price[nrow(price),"signal"]
 previous_signal <- price[(nrow(price)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    eth_signal="SIGNAL_BUY"
+    eth_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    eth_signal="SIGNAL_SELL"
+    eth_signal="SELL"
   }
 } else {
-  eth_signal <- "SIGNAL_NONE"
+  eth_signal <- "NONE"
 }
 
 eth_signal
@@ -126,6 +138,17 @@ plot(price$Close~as.Date(price$date),type="l",
 grid()
 lines(price$ma~ as.Date(price$date) ,col="red")
 
+```
+
+Send a push notification.
+
+```{r,ethpush}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste("The ETH 34D MA signal is", eth_signal,
+   ". Visit https://blinder.cc/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
 
 ```
 
