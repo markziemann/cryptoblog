@@ -44,7 +44,7 @@ btcdat <- fromJSON("btcdat.txt")
 price <- btcdat$data$quotes
 price <- data.frame(price$time_close,price$quote$USD$close)
 colnames(price) <- c("date","Close")
-price$date <- sapply(strsplit(price$date,"T"),"[[",1)
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 
 ```
 
@@ -57,9 +57,7 @@ mystart <- price[c(1,nrow(price)),2][1]
 hodl <- (myend - mystart) / mystart
 hodl
 
-
 ```
-
 
 ## Moving average function
 
@@ -76,9 +74,7 @@ yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
 price2$yesterday <- yesterday
-price2$trade <- apply(price2,1,function(x) {
-  as.numeric(as.logical(x[4])) - as.numeric(as.logical(x[5]))
-} )
+price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
@@ -113,9 +109,7 @@ yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
 price2$yesterday <- yesterday
-price2$trade <- apply(price2,1,function(x) {
-  as.numeric(as.logical(x[4])) - as.numeric(as.logical(x[5]))
-} )
+price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
@@ -183,9 +177,7 @@ yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
 price2$yesterday <- yesterday
-price2$trade <- apply(price2,1,function(x) {
-  as.numeric(as.logical(x[4])) - as.numeric(as.logical(x[5]))
-} )
+price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
@@ -225,9 +217,7 @@ yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
 price2$yesterday <- yesterday
-price2$trade <- apply(price2,1,function(x) {
-  as.numeric(as.logical(x[4])) - as.numeric(as.logical(x[5]))
-} )
+price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
@@ -269,9 +259,7 @@ yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
 price2$yesterday <- yesterday
-price2$trade <- apply(price2,1,function(x) {
-  as.numeric(as.logical(x[4])) - as.numeric(as.logical(x[5]))
-} )
+price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }

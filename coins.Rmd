@@ -56,7 +56,7 @@ fetch <- function(myid) {
   price <- dat$data$quotes
   price <- data.frame(price$time_close,price$quote$USD$close)
   colnames(price) <- c("date","Close")
-  price$date <- sapply(strsplit(price$date,"T"),"[[",1)
+  price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
   return(price)
 }
 
