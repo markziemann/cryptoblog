@@ -23,7 +23,19 @@ library("quantmod")
 library("TTR")
 library("RPushbullet")
 
-TESTING = TRUE
+TESTING = FALSE
+
+```
+
+## Get current price data
+
+```{r,getcurrent1}
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=200"
+download.file(URL,destfile="cmcdat.txt")
+cmcdat <- fromJSON("cmcdat.txt")
+cmcdf <- data.frame(cmcdat$data[,1:4],cmcdat$data$quote$USD)
+dim(cmcdf)
 
 ```
 
@@ -38,10 +50,15 @@ mydate <- Sys.Date()-1
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=",datebefore,"&time_end=",mydate,sep="")
 download.file(URL,destfile="btcdat.txt")
 btcdat <- fromJSON("btcdat.txt")
-price <- btcdat$data$quotes
-price <- data.frame(price$time_close,price$quote$USD$close)
-colnames(price) <- c("date","Close")
-price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+btcdat <- btcdat$data$quotes
+
+dates <- btcdat$time_close
+dates <- sapply(strsplit(as.character(dates),"T"),"[[",1)
+dates <- c(dates, as.Date(tail(dates,1))+1)
+
+Close <- c(btcdat$quote$USD$close, cmcdf[which(cmcdf$symbol=="BTC"),5])
+
+price <- data.frame(dates,Close)
 
 if ( TESTING == TRUE) {
   price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
@@ -100,10 +117,15 @@ mydate <- Sys.Date()-1
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=",datebefore,"&time_end=",mydate,sep="")
 download.file(URL,destfile="ethdat.txt")
 ethdat <- fromJSON("ethdat.txt")
-price <- ethdat$data$quotes
-price <- data.frame(price$time_close,price$quote$USD$close)
-colnames(price) <- c("date","Close")
-price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+ethdat <- ethdat$data$quotes
+
+dates <- ethdat$time_close
+dates <- sapply(strsplit(as.character(dates),"T"),"[[",1)
+dates <- c(dates, as.Date(tail(dates,1))+1)
+
+Close <- c(ethdat$quote$USD$close, cmcdf[which(cmcdf$symbol=="ETH"),5])
+
+price <- data.frame(dates,Close)
 
 if ( TESTING == TRUE) {
   price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
