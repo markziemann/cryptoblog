@@ -174,8 +174,137 @@ if ( eth_signal != "NONE") {
 
 ```
 
-## Session information
 
+## Delay 11 mins to get the close data
+
+Sleep for a while
+
+```{r,sleepytime}
+
+Sys.sleep(1)
+#Sys.sleep(11*60)
+
+
+```
+
+## DMI BTC
+
+```{r,dmi_btc,fig.height=10,fig.width=8}
+
+datebefore <- Sys.Date()-100
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=",datebefore,"&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat.txt")
+btcdat <- fromJSON("btcdat.txt")
+price <- btcdat$data$quotes
+
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+dmi.adx <- ADX(price[,c("high","low","close")],n=6)
+price <- cbind(price,dmi.adx)
+price$signal <- dmi.adx[,1] > dmi.adx[,2]                        
+tail(price)
+
+today_signal <- price[nrow(price),"signal"]
+previous_signal <- price[(nrow(price)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="DMI BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="DMI SELL"
+  }
+} else {
+  btc_signal <- "NONE"
+}
+
+btc_signal
+price <- as.data.frame(price)
+par(mfrow=c(2,1))
+plot(price$close~as.Date(price$date),type="l",
+  xlab="Date",ylab="price (USD)",main="BTC USD price")
+grid()
+plot(price$DIp~as.Date(price$date),type="l", col="blue",
+  xlab="Date",ylab="price (USD)",main="BTC 6d DMI")
+grid()
+lines(price$DIn ~ as.Date(price$date) ,col="red")
+
+```
+
+Send a push notification.
+
+```{r,btcpush2}
+
+if ( btc_signal != "NONE") {
+  MYNOTE <- paste("BTC is flashing a ", btc_signal,
+   ". Visit https://blinder.cc/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
+
+```
+
+## DMI ETH
+
+```{r,dmi_eth,fig.height=10,fig.width=8}
+
+datebefore <- Sys.Date()-100
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=",datebefore,"&time_end=",mydate,sep="")
+download.file(URL,destfile="ethdat.txt")
+ethdat <- fromJSON("ethdat.txt")
+price <- ethdat$data$quotes
+
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+dmi.adx <- ADX(price[,c("high","low","close")],n=6)
+price <- cbind(price,dmi.adx)
+price$signal <- dmi.adx[,1] > dmi.adx[,2]
+tail(price)
+
+today_signal <- price[nrow(price),"signal"]
+previous_signal <- price[(nrow(price)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="DMI BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="DMI SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+eth_signal
+price <- as.data.frame(price)
+par(mfrow=c(2,1))
+plot(price$close~as.Date(price$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH USD price")
+grid()
+plot(price$DIp~as.Date(price$date),type="l", col="blue",
+  xlab="Date",ylab="price (USD)",main="ETH 6d DMI")
+grid()
+lines(price$DIn ~ as.Date(price$date) ,col="red")
+
+```
+
+Send a push notification.
+
+```{r,ethpush2}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste("ETH is flashing a ", eth_signal,
+   ". Visit https://blinder.cc/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
+
+```
+
+
+
+
+## Session information
 For reproducibility
 
 ```{r,sessioninfo}
