@@ -1,0 +1,269 @@
+---
+title: "ETH Trading based on Directional Movement Index (DMI)"
+author: "Mark Ziemann"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+theme: cosmo
+---
+
+## Intro
+
+Trading off moving averages, exponenial moving averages and crosses between these is a popular method for timing entry and exit of positions.
+In this blog post I will be trilaing simple moving averages to find the one which performs the best.
+
+```{r,lib}
+
+library("jsonlite")
+library("tidyverse")
+library("runner")
+library("quantmod")
+library("TTR")
+library("vioplot")
+
+```
+
+## Get data
+
+Obtaining ETH historical data (daily).
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+
+if ( ! file.exists("ethdat.txt") ) {
+
+  download.file(URL,destfile="ethdat.txt")
+
+}
+
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),4][2] 
+mystart <- price[c(1,nrow(price)),4][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## Basic look at the indicator
+
+Default n = 14.
+
+```{r,dmi1,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+price2 <- tail(price,730)
+dmi.adx <- ADX(price2[,c("high","low","close")])
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(dmi.adx[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="DMI",main="DMI",ylim=c(0,60))
+lines(as.Date(price2$date), dmi.adx[,2]  , col="red"  )
+grid()
+
+price2 <- tail(price,150)
+dmi.adx <- ADX(price2[,c("high","low","close")],n=3)
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(dmi.adx[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="DMI",main="DMI",ylim=c(0,60))
+lines(as.Date(price2$date), dmi.adx[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+
+```
+
+## DMI trading function
+
+Assuming 0.1% trading fee, as per binance current rate.
+
+```{r,sma}
+
+
+dmi <- function(price,n,fee) {
+  dmi.adx <- ADX(price[,c("high","low","close")],n=n)
+  price2 <- price
+  price2 <- cbind(price2,dmi.adx)
+  price2$higher <- price2$DIp > price2$DIn
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+}
+
+```
+
+
+## Backtesting
+
+```{r,backtest}
+
+fee=0.001
+
+myrange <- 3:200
+res_dmi <- t(sapply(myrange,function(n) { dmi(price,n,fee) } ))
+rownames(res_dmi) <- myrange
+colnames(res_dmi) <- c("returns","n trades")
+
+
+
+```
+
+## Plots
+
+```{r,plots,fig.height=8,fig.width=8}
+
+
+plot(res_dmi[,2],res_dmi[,1],log="y", cex=2, pch=19,col="gray",
+  xlab="num trades",ylab="fold returns")
+text(res_dmi[,2],res_dmi[,1],labels=rownames(res_dmi),cex=1.5)
+abline(h=hodl,col="red")
+grid()
+
+
+res_dmi <- c(0,0,res_dmi[,1])
+
+plot(res_dmi,pch=19,xlab="n interval (days)",ylab="fold return",main="DMI")
+abline(h=hodl,col="red")
+grid()
+
+plot(res_dmi+1,pch=19,xlim=c(1,50),xlab="n interval (days)",ylab="fold return",main="DMI",log="y")
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Optimisation
+
+```{r,best_sma,fig.width=10,fig.height=8}
+
+best_n = 7
+best_n
+
+dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
+price2 <- price
+price2 <- cbind(price2,dmi.adx)
+price2$higher <- price2$DIp > price2$DIn
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c(1,2)]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c(1,2)]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+nrow(trades)
+trades
+prod(trades$diff)
+
+
+HEADER=paste(best_n,"DMI")
+par(mfrow=c(2,1))
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(dmi.adx[,1] ~ as.Date(price$date),type="l",col="blue",
+  xlab="Date",ylab="DMI",main="DMI",ylim=c(0,60))
+lines(as.Date(price$date), dmi.adx[,2]  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+
+```
+
+## Effect of fees
+
+```{r,fees,fig.width=8,fig.height=7}
+
+fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
+
+res_fees <- sapply(fee_levels,function(x) { dmi(price,best_n,fee=x) } )
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext(HEADER)
+abline(h=hodl,col="red")
+grid()
+
+
+```
+
+## Trades by year
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
+yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+vioplot(yearly)
+barplot(sapply(yearly,prod))
+abline(h=1,col="red",lty=2)
+
+```
+
+
+
+
+## Conclusion
+
+Hodling ETH over this period gave a 378 fold return.
+Here we are looking at using the DMI as a buy/sell indicator.
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
