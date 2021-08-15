@@ -42,7 +42,7 @@ if ( ! file.exists("ethdat.txt") ) {
 
 dat <- fromJSON("ethdat.txt")
 price <- dat$data$quotes
-price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,strongsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 

@@ -34,15 +34,11 @@ mydate <- Sys.Date()-1
 
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
 
-if ( ! file.exists("btcdat.txt") ) {
-
-  download.file(URL,destfile="btcdat.txt")
-
-}
+download.file(URL,destfile="btcdat.txt")
 
 btcdat <- fromJSON("btcdat.txt")
 price <- btcdat$data$quotes
-price <- data.frame(price$time_close,price$quote$USD$close)
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","Close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 

@@ -1,5 +1,5 @@
 ---
-title: "Trading based on MA and EMA crosses"
+title: "Trading ETH based on MA and EMA crosses"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:
@@ -36,15 +36,11 @@ mydate <- Sys.Date()-1
 
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
 
-if ( ! file.exists("ethdat.txt") ) {
-
-  download.file(URL,destfile="ethdat.txt")
-
-}
+download.file(URL,destfile="ethdat.txt")
 
 btcdat <- fromJSON("ethdat.txt")
 price <- btcdat$data$quotes
-price <- data.frame(price$time_close,price$quote$USD$close)
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","Close")
 price$date <- sapply(strsplit(price$date,"T"),"[[",1)
 
@@ -69,7 +65,7 @@ Assuming 0.1% trading fee, as per binance current rate.
 
 ```{r,sma}
 
-sma <- function(price,n,fee) { 
+sma <- function(price,n,fee) {
 ma <- SMA(Cl(price),n=n)
 price2 <- price
 price2$ma <- ma
@@ -78,13 +74,11 @@ yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
 price2$yesterday <- yesterday
-price2$trade <- apply(price2,1,function(x) {
-  as.numeric(as.logical(x[4])) - as.numeric(as.logical(x[5]))
-} )
+price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c(1,2)]  
+buy <- subset(price2,trade==1)[,c(1,2)]
 colnames(buy) <- c("buy_date","buy_price")
 sell <- subset(price2,trade==-1)[,c(1,2)]
 colnames(sell) <- c("sell_date","sell_price")
@@ -97,6 +91,7 @@ trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
 return(prod(trades$diff))
 }
+
 
 
 ```
@@ -115,9 +110,7 @@ yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
 price2$yesterday <- yesterday
-price2$trade <- apply(price2,1,function(x) {
-  as.numeric(as.logical(x[4])) - as.numeric(as.logical(x[5]))
-} )
+price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
@@ -126,7 +119,7 @@ colnames(buy) <- c("buy_date","buy_price")
 sell <- subset(price2,trade==-1)[,c(1,2)]
 colnames(sell) <- c("sell_date","sell_price")
 if( nrow(buy) != nrow(sell) ) {
-  MIN=min(nrow(buy),nrow(sell)) 
+  MIN=min(nrow(buy),nrow(sell))
   buy <- buy[1:MIN,]
   sell <- sell[1:MIN,]
 }
@@ -134,6 +127,8 @@ trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
 return(prod(trades$diff))
 }
+
+
 
 ```
 
@@ -177,6 +172,7 @@ grid()
 
 best_sma = which(res_sma==max(res_sma))
 best_sma
+
 ma <- SMA(Cl(price),n=best_sma)
 price2 <- price
 price2$ma <- ma
@@ -185,13 +181,11 @@ yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
 price2$yesterday <- yesterday
-price2$trade <- apply(price2,1,function(x) {
-  as.numeric(as.logical(x[4])) - as.numeric(as.logical(x[5]))
-} )
+price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c(1,2)]  
+buy <- subset(price2,trade==1)[,c(1,2)]
 colnames(buy) <- c("buy_date","buy_price")
 sell <- subset(price2,trade==-1)[,c(1,2)]
 colnames(sell) <- c("sell_date","sell_price")
@@ -201,8 +195,7 @@ if( nrow(buy) != nrow(sell) ) {
   sell <- sell[1:MIN,]
 }
 trades <- cbind(buy,sell)
-nrow(trades)
-trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - (2 * fee )
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
 trades 
 prod(trades$diff)
 SMA_HEADER=paste(best_sma,"day moving average")
@@ -219,7 +212,8 @@ sma_trades <- trades
 
 best_ema = which(res_ema==max(res_ema))
 best_ema
-ma <- EMA(Cl(price),n=best_ema)
+
+ma <- EMA(Cl(price),n=best_sma)
 price2 <- price
 price2$ma <- ma
 price2$higher <- price2$Close > price2$ma
@@ -227,9 +221,7 @@ yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
 price2$yesterday <- yesterday
-price2$trade <- apply(price2,1,function(x) {
-  as.numeric(as.logical(x[4])) - as.numeric(as.logical(x[5]))
-} )
+price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
