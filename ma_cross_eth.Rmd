@@ -1,5 +1,5 @@
 ---
-title: "Trading based on MA and EMA crosses"
+title: "Trading ETH based on MA and EMA crosses"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:
@@ -34,7 +34,7 @@ NUMCORES=detectCores()
 
 ## Get data
 
-Obtaining BTC historical data (daily).
+Obtaining ETH historical data (daily).
 
 ```{r,getdata}
 
@@ -48,9 +48,9 @@ if ( ! file.exists("ethdat.txt") ) {
 
 }
 
-btcdat <- fromJSON("ethdat.txt")
-price <- btcdat$data$quotes
-price <- data.frame(price$time_close,price$quote$USD$close)
+dat <- fromJSON("btcdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","Close")
 price$date <- sapply(strsplit(price$date,"T"),"[[",1)
 
@@ -88,9 +88,7 @@ if (n1 != n2) {
   yesterday <- c(NA,yesterday)
   yesterday <- yesterday[1:(length(yesterday)-1)]
   price2$yesterday <- yesterday
-  price2$trade <- apply(price2,1,function(x) {
-    as.numeric(as.logical(x[5])) - as.numeric(as.logical(x[6]))
-  } )
+  price2$trade <- price2$higher - price2$yesterday
   price2 <- price2[which(price2$trade!=0),]
   if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
   if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
@@ -132,9 +130,7 @@ if (n1 != n2) {
   yesterday <- c(NA,yesterday)
   yesterday <- yesterday[1:(length(yesterday)-1)]
   price2$yesterday <- yesterday
-  price2$trade <- apply(price2,1,function(x) {
-    as.numeric(as.logical(x[5])) - as.numeric(as.logical(x[6]))
-  } )
+  price2$trade <- price2$higher - price2$yesterday
   price2 <- price2[which(price2$trade!=0),]
   if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
   if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
@@ -168,7 +164,7 @@ mas <- expand.grid(4:100,4:100)
 res_sma <- mclapply(1:nrow(mas),function(n) {
  smacross(price,n,fee) 
 } , mc.cores=NUMCORES)
-mas1 <- as.data.frame(mas)
+mas1 <- as.data.frame(mas,stringsAsFactors=FALSE)
 mas1$returns <- unlist(res_sma)
 best_sma <- head(mas1[order(-mas1$returns),],20)
 best_sma
@@ -177,7 +173,7 @@ best_sma
 res_ema <- mclapply(1:nrow(mas),function(n) {
   emacross(price,n,fee) 
 } ,  mc.cores=NUMCORES)
-mas2 <- as.data.frame(mas)
+mas2 <- as.data.frame(mas,stringsAsFactors=FALSE)
 mas2$returns <- unlist(res_ema)
 best_ema <- head(mas2[order(-mas2$returns),],20)
 best_ema
@@ -254,9 +250,7 @@ if (n1 != n2) {
   yesterday <- c(NA,yesterday)
   yesterday <- yesterday[1:(length(yesterday)-1)]
   price2$yesterday <- yesterday
-  price2$trade <- apply(price2,1,function(x) {
-    as.numeric(as.logical(x[5])) - as.numeric(as.logical(x[6]))
-  } )
+  price2$trade <- price2$higher - price2$yesterday
   price2 <- price2[which(price2$trade!=0),]
   if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
   if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
@@ -306,9 +300,7 @@ if (n1 != n2) {
   yesterday <- c(NA,yesterday)
   yesterday <- yesterday[1:(length(yesterday)-1)]
   price2$yesterday <- yesterday
-  price2$trade <- apply(price2,1,function(x) {
-    as.numeric(as.logical(x[5])) - as.numeric(as.logical(x[6]))
-  } )
+  price2$trade <- price2$higher - price2$yesterday
   price2 <- price2[which(price2$trade!=0),]
   if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
   if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
@@ -347,7 +339,7 @@ lines(ma2~ as.Date(price$date) ,col="blue")
 
 fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
 
-res_sma_fees <- sapply(fee_levels,function(x) { 
+res_sma_fees <- sapply(fee_levels,function(x) {
   smacross(price,rownames(best_sma)[1],fee=x)
 } )
 plot(fee_levels,res_sma_fees ,pch=19,xlab="fee proportion",ylab="fold return",
@@ -356,7 +348,7 @@ mtext(SMA_HEADER)
 abline(h=hodl,col="red")
 grid()
 
-res_ema_fees <- sapply(fee_levels,function(x) { 
+res_ema_fees <- sapply(fee_levels,function(x) {
   emacross(price,rownames(best_ema)[1],fee=x)
 } )
 plot(fee_levels,res_ema_fees ,pch=19,xlab="fee proportion",ylab="fold return",
@@ -375,12 +367,14 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
 sma_trades$year <- sapply(strsplit(sma_trades[,"sell_date"],"-"),"[[",1)
 sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,"diff"] } )
+sma_yearly <- sma_yearly[which(lapply(sma_yearly,length)>0)]
 vioplot(sma_yearly)
 barplot(sapply(sma_yearly,prod))
 abline(h=1,col="red",lty=2)
 
 ema_trades$year <- sapply(strsplit(ema_trades[,"sell_date"],"-"),"[[",1)
 ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,"diff"] } )
+ema_yearly <- ema_yearly[which(lapply(ema_yearly,length)>0)]
 vioplot(ema_yearly)
 barplot(sapply(ema_yearly,prod))
 abline(h=1,col="red",lty=2)
@@ -390,7 +384,7 @@ abline(h=1,col="red",lty=2)
 
 ## Conclusion
 
-Hodling BTC over this period gave a 378 fold return.
+Hodling ETH over this period gave a 378 fold return.
 The best simple moving average was 18 days, which gave a 1366 fold return (with fees at 0.1%).
 The best exponential moving average was 16 days, which gave a return of 1680 fold.
 The fee rate strongly affects the fold return, so it is definitely worthwhile to seek lower price exchanges.
