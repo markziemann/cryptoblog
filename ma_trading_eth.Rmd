@@ -28,7 +28,7 @@ library("vioplot")
 
 ## Get data
 
-Obtaining BTC historical data (daily).
+Obtaining ETH historical data (daily).
 
 ```{r,getdata}
 
@@ -278,13 +278,19 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 sma_trades$year <- sapply(strsplit(sma_trades[,3],"-"),"[[",1)
 sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,5] } )
 vioplot(sma_yearly)
-barplot(sapply(sma_yearly,prod))
+
+yr <- sapply(sma_yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
 ema_trades$year <- sapply(strsplit(ema_trades[,3],"-"),"[[",1)
 ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,5] } )
 vioplot(ema_yearly)
-barplot(sapply(ema_yearly,prod))
+
+yr <- sapply(ema_yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
 ```

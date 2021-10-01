@@ -245,7 +245,10 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
 yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
 vioplot(yearly)
-barplot(sapply(yearly,prod))
+
+yr <- sapply(yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
 ```

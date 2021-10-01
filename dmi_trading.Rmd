@@ -34,11 +34,7 @@ mydate <- Sys.Date()-1
 
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
 
-if ( ! file.exists("btcdat.txt") ) {
-
-  download.file(URL,destfile="btcdat.txt")
-
-}
+download.file(URL,destfile="btcdat.txt")
 
 btcdat <- fromJSON("btcdat.txt")
 price <- btcdat$data$quotes
@@ -143,21 +139,17 @@ res_dmi <- t(sapply(myrange,function(n) { dmi(price,n,fee) } ))
 rownames(res_dmi) <- myrange
 colnames(res_dmi) <- c("returns","n trades")
 
-
-
 ```
 
 ## Plots
 
 ```{r,plots,fig.height=8,fig.width=8}
 
-
 plot(res_dmi[,2],res_dmi[,1],log="y", cex=2, pch=19,col="gray",
   xlab="num trades",ylab="fold returns")
 text(res_dmi[,2],res_dmi[,1],labels=rownames(res_dmi),cex=1.5)
 abline(h=hodl,col="red")
 grid()
-
 
 res_dmi <- c(0,0,res_dmi[,1])
 
@@ -175,7 +167,7 @@ grid()
 
 ```{r,best_sma,fig.width=10,fig.height=8}
 
-best_n = 3
+best_n = 6
 best_n
 
 dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
@@ -245,7 +237,10 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
 yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
 vioplot(yearly)
-barplot(sapply(yearly,prod))
+
+yr <- sapply(yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
 ```
