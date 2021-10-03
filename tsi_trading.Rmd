@@ -58,7 +58,7 @@ hodl
 
 ## Basic look at the indicator
 
-Default n = 14.
+Default indicator.
 
 ```{r,tsi1,fig.height=10,fig.width=8}
 
@@ -208,13 +208,19 @@ Set 1 higher time frames.
 
 Best: n1=5, n2=5, nsig=50 --> 2692 returns per trade
 
+But those give are relatively low mean ROI, so risk is higher for human doing the trade at the close.
+Should look for mean ROI and total returns to be higher than the original indicator.
+
+I ran seq(2,200,1) for n1,n2,ns and it took a while.
+Here is a cut down parameter space.
+
 ```{r,backtest1}
 
 fee=0.001
 
-n1r <- seq(5,100,5)
-n2r <- seq(5,100,5)
-nsr <- seq(5,100,5)
+n1r <- seq(2,107,1)
+n2r <- seq(2,20,1)
+nsr <- seq(2,20,1)
 params <- expand.grid(n1r,n2r,nsr)
 colnames(params) <- c("n1","n2","nsignal")
 res <- mclapply(X=1:nrow(params) , FUN=function(i) {
@@ -222,7 +228,7 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   n2=as.numeric(params[i,2])
   ns=as.numeric(params[i,3])
   mytsi(price,n1=n1,n2=n2,ns=ns,fee=fee)
-} , mc.cores=4)
+} , mc.cores = detectCores())
 res <- as.data.frame(do.call(rbind, res))
 colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
@@ -247,12 +253,32 @@ head(res3[order(-res3$returns),],50)
 
 ## Plots
 
-```{plots1}
+From this result it looks like the following paraleters work best 
+
+n1=98
+
+n2=15
+
+ns=5
+
+```{r,plots1}
 
 plot(res2$mean , res2$returns, log="y",xlab="mean ROI", ylab="total returns")
 points(basic_mean,basic_returns,col="red",pch=19,cex=2)
 abline(h=hodl,col="red")
 grid()
+
+res4 <- subset(res2, returns >= basic_returns & mean >= basic_mean)
+plot(res4$mean , res4$returns, log="y",xlab="mean ROI", ylab="total returns")
+points(basic_mean,basic_returns,col="red",pch=19,cex=2)
+abline(h=hodl,col="red")
+grid()
+
+res5 <- subset(res2,returns > 50000 & mean > 1.145 )
+res5 %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+res6 <- subset(res2,returns > 1E5 & mean > 1.1 )
+res6 %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -262,9 +288,9 @@ Long timeframe best
 
 ```{r,best1,fig.width=10,fig.height=8}
 
-best_n1 = 5
-best_n2 = 5
-best_ns = 20
+best_n1 = 98
+best_n2 = 15
+best_ns = 5
 
 tsi <- TSI(price$close , n.first = best_n1, n.second = best_n2, n.signal = best_ns )
 price2 <- price
@@ -308,50 +334,6 @@ plot(tsi[,1] ~ as.Date(price$date),type="l",col="blue",
 lines(as.Date(price$date), tsi[,2]  , col="red"  )
 grid()
 par(mfrow=c(1,1))
-
-```
-
-## Backtesting 2
-
-Set 2 smaller time frames.
-
-Best: n1=1, n2=2, nsig=67 --> 2692 returns per trade
-
-```{r,backtest2}
-
-n1r <- seq(1,10,1)
-n2r <- seq(2,20,1)
-nsr <- seq(2,100,1)
-
-params <- expand.grid(n1r,n2r,nsr)
-
-colnames(params) <- c("n1","n2","nsignal")
-
-res <- lapply(X=1:nrow(params) , FUN=function(i) {
-  n1=as.numeric(params[i,1])
-  n2=as.numeric(params[i,2])
-  ns=as.numeric(params[i,3])
-  mytsi(price,n1=n1,n2=n2,ns=ns,fee=fee)
-} )
-
-res <- as.data.frame(do.call(rbind, res))
-
-colnames(res) <- c("returns","trades")
-
-res2 <- cbind(params,res)
-
-res2$returnspertrade <- res2$returns/res2$trades
-
-head(res2[order(-res2$returns),],50)
-#%>% kbl() %>%  kable_paper("hover", full_width = F)
-
-head(res2[order(-res2$returnspertrade),],50)
-#%>% kbl() %>%  kable_paper("hover", full_width = F)
-
-res3 <- subset(res2,trades<250)
-
-head(res3[order(-res3$returns),],50)
-#%>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -468,6 +450,38 @@ par(mfrow=c(1,1))
 
 fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
 
+# original
+best_n1 = 25
+best_n2 = 13
+best_ns = 7
+
+mytsi(price,n1=best_n1,n2=best_n2,ns=best_ns,fee=fee)
+
+res_fees <- sapply(fee_levels,function(x) {
+  mytsi(price,n1=best_n1,n2=best_n2,ns=best_ns,fee=x)
+} )
+
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext("higher time frame")
+abline(h=hodl,col="red")
+grid()
+
+# optimised
+best_n1 = 98
+best_n2 = 15
+best_ns = 5
+
+mytsi(price,n1=best_n1,n2=best_n2,ns=best_ns,fee=fee)
+
+res_fees <- sapply(fee_levels,function(x) {
+  mytsi(price,n1=best_n1,n2=best_n2,ns=best_ns,fee=x)
+} )
+
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext("higher time frame")
+abline(h=hodl,col="red")
+grid()
+
 best_n1 = 5
 best_n2 = 5
 best_ns = 20
@@ -514,8 +528,6 @@ plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold re
 mtext("lower time frame high trade number")
 abline(h=hodl,col="red")
 grid()
-
-
 
 ```
 
