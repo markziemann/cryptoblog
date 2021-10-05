@@ -1,5 +1,5 @@
 ---
-title: "Trading based on Directional Movement Index (DMI)"
+title: "Trading based on True Strength Indicator (TSI)"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:
@@ -154,6 +154,7 @@ mytsi <- function(price,n1,n2,ns,fee) {
 best_n1 = 25
 best_n2 = 13
 best_ns = 7
+fee = 0.001
 
 tsi <- TSI(price$close , n.first = best_n1, n.second = best_n2, n.signal = best_ns )
 price2 <- price
