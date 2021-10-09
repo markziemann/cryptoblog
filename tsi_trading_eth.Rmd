@@ -33,11 +33,11 @@ Obtaining BTC historical data (daily).
 
 mydate <- Sys.Date()-1
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
 
-download.file(URL,destfile="btcdat.txt")
+download.file(URL,destfile="ethdat.txt")
 
-btcdat <- fromJSON("btcdat.txt")
+dat <- fromJSON("ethdat.txt")
 price <- btcdat$data$quotes
 price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
@@ -540,7 +540,6 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
 trades0$year <- sapply(strsplit(trades0[,3],"-"),"[[",1)
 yearly <- sapply(years,function(y) { x <- subset(trades0,year==y)[,5] } )
-vioplot(yearly)
 yr <- sapply(yearly,prod)
 barplot(yr)
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
@@ -548,7 +547,6 @@ abline(h=1,col="red",lty=2)
 
 trades1$year <- sapply(strsplit(trades1[,3],"-"),"[[",1)
 yearly <- sapply(years,function(y) { x <- subset(trades1,year==y)[,5] } )
-vioplot(yearly)
 yr <- sapply(yearly,prod)
 barplot(yr)
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
@@ -556,7 +554,6 @@ abline(h=1,col="red",lty=2)
 
 trades2$year <- sapply(strsplit(trades2[,3],"-"),"[[",1)
 yearly <- sapply(years,function(y) { x <- subset(trades2,year==y)[,5] } )
-vioplot(yearly)
 yr <- sapply(yearly,prod)
 barplot(yr)
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
@@ -564,7 +561,6 @@ abline(h=1,col="red",lty=2)
 
 trades3$year <- sapply(strsplit(trades3[,3],"-"),"[[",1)
 yearly <- sapply(years,function(y) { x <- subset(trades3,year==y)[,5] } )
-vioplot(yearly)
 yr <- sapply(yearly,prod)
 barplot(yr)
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
