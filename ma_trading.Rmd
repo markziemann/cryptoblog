@@ -1,26 +1,42 @@
 ---
-title: "Trading based on MA and EMA crosses"
+title: "Trading BTC based on MA and EMA crosses"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:
   html_document:
     toc: true
+    toc_float: true
+    code_folding: hide
 theme: cosmo
 ---
 
+Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading.Rmd
+
+If you find this resource useful, consider a small tip.
+
+BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+
+LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
+
 ## Intro
 
-Trading off moving averages, exponenial moving averages and crosses between these is a popular method for timing entry and exit of positions.
-In this blog post I will be trilaing simple moving averages to find the one which performs the best.
+Trading off simple moving averages (SMA), exponenial moving averages (EMA) and crosses between these is 
+a popular method for timing entry and exit of positions.
+In this blog post I will be exploring MA strategies on the daily timeframe to find the ones which 
+perform best.
+
+Reminder: this is not financial advice.
 
 ```{r,lib}
 
-library("jsonlite")
-library("tidyverse")
-library("runner")
-library("quantmod")
-library("TTR")
-library("vioplot")
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+})
 
 ```
 
@@ -36,8 +52,8 @@ URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?
 
 download.file(URL,destfile="btcdat.txt")
 
-btcdat <- fromJSON("btcdat.txt")
-price <- btcdat$data$quotes
+dat <- fromJSON("btcdat.txt")
+price <- dat$data$quotes
 price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","Close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
@@ -45,6 +61,8 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 ```
 
 ## Calculate hodl returns
+
+It's important to calculate the returns for simply holding the asset rather than actively trading.
 
 ```{r,hodl}
 
@@ -57,9 +75,10 @@ hodl
 
 ## Moving average function
 
-Assuming 0.1% trading fee, as per binance current rate.
+Here are the functions for trading based on SMA and EMAs, buying when the price breaks through the
+MA line and sell when it falls below the MA line. All trades are executed at the end of the daily session (UTC midnight).
 
-```{r,sma}
+```{r,functions}
 
 sma <- function(price,n,fee) {
 ma <- SMA(Cl(price),n=n)
@@ -87,14 +106,6 @@ trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
 return(c(prod(trades$diff),nrow(trades)))
 }
-
-
-```
-
-## Exponential moving average function
-
-
-```{r,ema}
 
 ema <- function(price,n,fee) {
 ma <- EMA(Cl(price),n=n)
@@ -127,6 +138,11 @@ return(c(prod(trades$diff),nrow(trades)))
 
 ## Backtesting
 
+Let's look back in time and trial SMA and EMA strategies with an interval from 3 to 200 days.
+
+Let's assume a 0.1% trading fee, as per binance current rate.
+
+
 ```{r,backtest}
 
 fee=0.001
@@ -153,47 +169,63 @@ res_ema <- res
 
 ## Plots
 
-```{r,plots,fig.height=8,fig.width=8}
+Now let's look at which of the approaches works best.
+
+
+```{r,plots1,fig.height=8,fig.width=8}
 
 plot(x=myrange, y=res_sma$returns, pch=19,
-  xlab="moving average interval (days)",ylab="fold return",main="SMA")
+  xlab="moving average interval (days)",ylab="fold return",main="BTC daily SMA")
 abline(h=hodl,col="red")
 grid()
 
 plot(x=myrange,y=res_sma$returns, pch=19,
-  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="SMA")
+  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="BTC daily SMA")
 abline(h=hodl,col="red")
 grid()
 
 plot(x=myrange,y=res_ema$returns, pch=19,
-  xlab="moving average interval (days)",ylab="fold return",main="EMA")
+  xlab="moving average interval (days)",ylab="fold return",main="BTC daily EMA")
 abline(h=hodl,col="red")
 grid()
 
 plot(x=myrange,y=res_ema$returns, pch=19,
-  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="EMA")
+  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="BTC daily EMA")
 abline(h=hodl,col="red")
 grid()
 
-plot(res_sma$mean,res_sma$returns, main="SMA",
+```
+
+Some of those gains look very high, but the time frames are quite short.
+Could it mean that there are a lot of trades each with very small gains?
+
+```{r,plots2,fig.height=8,fig.width=8}
+
+plot(res_sma$mean,res_sma$returns, main="BTC daily SMA",
   xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_sma$mean,res_sma$returns , cex=1, labels=rownames(res_sma))
 abline(h=hodl,col="red")
 
-plot(res_ema$mean,res_ema$returns, main="EMA",
+plot(res_ema$mean,res_ema$returns, main="BTC daily EMA",
   xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_ema$mean,res_ema$returns , cex=1, labels=rownames(res_ema))
 abline(h=hodl,col="red")
 
-plot(res_sma$trades,res_sma$returns, main="SMA",
+```
+
+Now we'll have a look at how many trades are required for these approaches.
+
+```{r,plots3,fig.height=8,fig.width=8}
+
+plot(res_sma$trades,res_sma$returns, main="BTC daily SMA",
   xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_sma$trades,res_sma$returns , cex=1, labels=rownames(res_sma))
 abline(h=hodl,col="red")
 
-plot(res_ema$trades,res_ema$returns, main="SMA",
+plot(res_ema$trades,res_ema$returns, main="BTC daily EMA",
   xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_ema$trades,res_ema$returns , cex=1, labels=rownames(res_ema))
@@ -204,9 +236,11 @@ abline(h=hodl,col="red")
 
 ## Optimisation
 
+Now let's select the two best approaches and show the history of trades.
+
 ```{r,best_sma,fig.width=10,fig.height=8}
 
-best_sma = which(res_sma==max(res_sma))
+best_sma = as.numeric(rownames(res_sma)[which(res_sma==max(res_sma))])
 best_sma
 ma <- SMA(Cl(price),n=best_sma)
 price2 <- price
@@ -232,8 +266,8 @@ if( nrow(buy) != nrow(sell) ) {
 sma_trades <- cbind(buy,sell)
 nrow(sma_trades)
 sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trades$buy_price ) +1 - (2 * fee )
-sma_trades 
 prod(sma_trades$diff)
+sma_trades
 SMA_HEADER=paste(best_sma,"day moving average")
 
 plot(price$Close~as.Date(price$date),type="l",log="y",
@@ -243,6 +277,8 @@ lines(ma~ as.Date(price$date) ,col="red")
 
 ```
 
+I like the 43 day MA because the gains are very high, but requires fewer trades - this is particularly good if the trades are 
+executed manually.
 
 ```{r,sma43,fig.width=10,fig.height=8}
 
@@ -272,10 +308,9 @@ if( nrow(buy) != nrow(sell) ) {
 sma_trades <- cbind(buy,sell)
 nrow(sma_trades)
 sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trades$buy_price ) +1 - (2 * fee )
-sma_trades
 prod(sma_trades$diff)
+sma_trades
 SMA_HEADER=paste(best_sma,"day moving average")
-
 plot(price$Close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=SMA_HEADER)
 grid()
@@ -283,12 +318,11 @@ lines(ma~ as.Date(price$date) ,col="red")
 
 ```
 
-
-
+Now have a look at the best EMA option.
 
 ```{r,best_ema,fig.width=10,fig.height=8}
 
-best_ema = which(res_ema==max(res_ema))
+best_ema = as.numeric(rownames(res_ema)[which(res_ema==max(res_ema))])
 best_ema
 ma <- EMA(Cl(price),n=best_ema)
 price2 <- price
@@ -325,10 +359,9 @@ lines(ma~ as.Date(price$date) ,col="red")
 
 ```
 
-
-
-
 ## Effect of fees
+
+The fee levels are a serious consideration because they will erode the profits if fees are too high.
 
 ```{r,fees,fig.width=8,fig.height=7}
 
@@ -350,6 +383,8 @@ grid()
 
 ## Trades by year
 
+We know that bitcoin moves in four year cycles lets take a look at profits over the years.
+
 ```{r,yearly}
 
 years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
@@ -359,7 +394,7 @@ sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,5] } )
 vioplot(sma_yearly)
 
 yr <- sapply(sma_yearly,prod)
-barplot(yr)
+barplot(yr,ylab="yearly fold returns",main="BTC daily SMA")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
@@ -368,20 +403,20 @@ ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,5] } )
 vioplot(ema_yearly)
 
 yr <- sapply(ema_yearly,prod)
-barplot(yr)
+barplot(yr,ylab="yearly fold returns",main="BTC daily EMA")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
 ```
 
-
 ## Conclusion
 
-Hodling BTC over this period gave a 378 fold return.
-The best simple moving average was 18 days, which gave a 1366 fold return (with fees at 0.1%).
-The best exponential moving average was 16 days, which gave a return of 1680 fold.
-The fee rate strongly affects the fold return, so it is definitely worthwhile to seek lower price exchanges.
-Profitability varies strongly by year with bull market most profitable and bear market least profitable.
+The best SMAs were 11 and 43 days, and the returns were approx 3x better than simply hodling.
+The best EMAs was 7 and 14 days.
+Based on minimising the number of trades for only a small reduction of returns, it appears the 43d SMA is preferred.
+The fee rate strongly affects the fold return, so it is definitely worthwhile to seek exchanges with lower fees.
+Profitability varies strongly by year with bull market most profitable and bear market least profitable, meaning it is probably a 
+good idea to sit funds in fiat for 12 months following a cycle top.
 
 ## Session information
 
