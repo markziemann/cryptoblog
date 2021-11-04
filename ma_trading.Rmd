@@ -36,13 +36,14 @@ suppressPackageStartupMessages({
   library("quantmod")
   library("TTR")
   library("vioplot")
+  library("kableExtra")
 })
 
 ```
 
 ## Get data
 
-Obtaining BTC historical data (daily).
+Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
 
 ```{r,getdata}
 
@@ -63,6 +64,9 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 ## Calculate hodl returns
 
 It's important to calculate the returns for simply holding the asset rather than actively trading.
+
+The number shown here is the fold return on investment.
+BTC has appreciated a lot since 2013! 
 
 ```{r,hodl}
 
@@ -169,8 +173,7 @@ res_ema <- res
 
 ## Plots
 
-Now let's look at which of the approaches works best.
-
+Now let's look at which of these approaches works best.
 
 ```{r,plots1,fig.height=8,fig.width=8}
 
@@ -216,6 +219,7 @@ abline(h=hodl,col="red")
 ```
 
 Now we'll have a look at how many trades are required for these approaches.
+Ideally we don't want to be making trades every few days.
 
 ```{r,plots3,fig.height=8,fig.width=8}
 
@@ -238,10 +242,12 @@ abline(h=hodl,col="red")
 
 Now let's select the two best approaches and show the history of trades.
 
+### Best SMA
+
 ```{r,best_sma,fig.width=10,fig.height=8}
 
 best_sma = as.numeric(rownames(res_sma)[which(res_sma==max(res_sma))])
-best_sma
+message(paste("Best SMA period:",best_sma))
 ma <- SMA(Cl(price),n=best_sma)
 price2 <- price
 price2$ma <- ma
@@ -264,12 +270,12 @@ if( nrow(buy) != nrow(sell) ) {
   sell <- sell[1:MIN,]
 }
 sma_trades <- cbind(buy,sell)
-nrow(sma_trades)
+message(paste("Number of trades:",nrow(sma_trades)))
 sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trades$buy_price ) +1 - (2 * fee )
-prod(sma_trades$diff)
-sma_trades
+message(paste("Total ROI:",prod(sma_trades$diff)))
+message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
+sma_trades  %>% kbl() %>%  kable_styling()
 SMA_HEADER=paste(best_sma,"day moving average")
-
 plot(price$Close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=SMA_HEADER)
 grid()
@@ -277,13 +283,15 @@ lines(ma~ as.Date(price$date) ,col="red")
 
 ```
 
+### 43D SMA
+
 I like the 43 day MA because the gains are very high, but requires fewer trades - this is particularly good if the trades are 
 executed manually.
 
 ```{r,sma43,fig.width=10,fig.height=8}
 
 best_sma = 43
-best_sma
+message(paste("Selected SMA period:",best_sma))
 ma <- SMA(Cl(price),n=best_sma)
 price2 <- price
 price2$ma <- ma
@@ -306,10 +314,11 @@ if( nrow(buy) != nrow(sell) ) {
   sell <- sell[1:MIN,]
 }
 sma_trades <- cbind(buy,sell)
-nrow(sma_trades)
+message(paste("Number of trades:",nrow(sma_trades)))
 sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trades$buy_price ) +1 - (2 * fee )
-prod(sma_trades$diff)
-sma_trades
+message(paste("Total ROI:",prod(sma_trades$diff)))
+message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
+sma_trades  %>% kbl() %>%  kable_styling()
 SMA_HEADER=paste(best_sma,"day moving average")
 plot(price$Close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=SMA_HEADER)
@@ -318,12 +327,14 @@ lines(ma~ as.Date(price$date) ,col="red")
 
 ```
 
+### Best EMA
+
 Now have a look at the best EMA option.
 
 ```{r,best_ema,fig.width=10,fig.height=8}
 
 best_ema = as.numeric(rownames(res_ema)[which(res_ema==max(res_ema))])
-best_ema
+message(paste("Best EMA period:",best_ema))
 ma <- EMA(Cl(price),n=best_ema)
 price2 <- price
 price2$ma <- ma
@@ -347,11 +358,11 @@ if( nrow(buy) != nrow(sell) ) {
 }
 ema_trades <- cbind(buy,sell)
 ema_trades$diff <- ( ( ema_trades$sell_price - ema_trades$buy_price ) / ema_trades$buy_price ) +1 - ( 2 * fee )
-ema_trades
-nrow(ema_trades)
-prod(ema_trades$diff)
+message(paste("Number of trades:",nrow(ema_trades)))
+message(paste("Total ROI:",prod(ema_trades$diff)))
+message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
+sma_trades  %>% kbl() %>%  kable_styling()
 EMA_HEADER=paste(best_ema,"day exponential moving average")
-
 plot(price$Close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=EMA_HEADER)
 grid()
@@ -383,7 +394,7 @@ grid()
 
 ## Trades by year
 
-We know that bitcoin moves in four year cycles lets take a look at profits over the years.
+We know that bitcoin moves in four year cycles. Lets take a look at profits over the years.
 
 ```{r,yearly}
 
@@ -391,19 +402,19 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
 sma_trades$year <- sapply(strsplit(sma_trades[,3],"-"),"[[",1)
 sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,5] } )
-vioplot(sma_yearly)
+vioplot(sma_yearly,ylab="trade ROI distribution",main="BTC daily SMA strategy")
 
 yr <- sapply(sma_yearly,prod)
-barplot(yr,ylab="yearly fold returns",main="BTC daily SMA")
+barplot(yr,ylab="yearly fold returns",main="BTC daily SMA strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
 ema_trades$year <- sapply(strsplit(ema_trades[,3],"-"),"[[",1)
 ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,5] } )
-vioplot(ema_yearly)
+vioplot(ema_yearly,ylab="trade ROI distribution",main="BTC daily EMA strategy")
 
 yr <- sapply(ema_yearly,prod)
-barplot(yr,ylab="yearly fold returns",main="BTC daily EMA")
+barplot(yr,ylab="yearly fold returns",main="BTC daily EMA strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
@@ -413,10 +424,19 @@ abline(h=1,col="red",lty=2)
 
 The best SMAs were 11 and 43 days, and the returns were approx 3x better than simply hodling.
 The best EMAs was 7 and 14 days.
-Based on minimising the number of trades for only a small reduction of returns, it appears the 43d SMA is preferred.
-The fee rate strongly affects the fold return, so it is definitely worthwhile to seek exchanges with lower fees.
-Profitability varies strongly by year with bull market most profitable and bear market least profitable, meaning it is probably a 
-good idea to sit funds in fiat for 12 months following a cycle top.
+Based on minimising the number of trades for only a small reduction of returns, it appears 
+the 43d SMA is preferred.
+Another reason why I like the 43 day is that the range from 40-44 are all giving good 
+returns, this gives more confidence to this range as being profitable in future.
+The fee rate strongly affects the fold return, so it is definitely worthwhile to seek 
+exchanges with lower fees.
+Profitability varies strongly by year with bull market most profitable and bear market least 
+profitable, meaning it is probably a good idea to sit funds in fiat for 12 months following
+ a cycle top.
+
+If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
+These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
+Subscribing to alerts costs 0.0005 BTC per year.
 
 ## Session information
 
