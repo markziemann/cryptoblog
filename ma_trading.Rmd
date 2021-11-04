@@ -25,7 +25,7 @@ a popular method for timing entry and exit of positions.
 In this blog post I will be exploring MA strategies on the daily timeframe to find the ones which 
 perform best.
 
-Reminder: this is not financial advice.
+This page is designed to be updated daily - today's date is shown below.
 
 ```{r,lib}
 
@@ -39,7 +39,11 @@ suppressPackageStartupMessages({
   library("kableExtra")
 })
 
+Sys.Date()
+
 ```
+
+Reminder: this is not financial advice.
 
 ## Get data
 
