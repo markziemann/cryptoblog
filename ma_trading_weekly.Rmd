@@ -268,7 +268,7 @@ sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trad
 message(paste("Total ROI:",prod(sma_trades$diff)))
 message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
 sma_trades  %>% kbl() %>%  kable_styling()
-SMA_HEADER=paste(best_sma,"day moving average")
+SMA_HEADER=paste(best_sma,"week moving average")
 plot(price$Close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=SMA_HEADER)
 grid()
@@ -311,7 +311,7 @@ message(paste("Number of trades:",nrow(ema_trades)))
 message(paste("Total ROI:",prod(ema_trades$diff)))
 message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
 sma_trades  %>% kbl() %>%  kable_styling()
-EMA_HEADER=paste(best_ema,"day exponential moving average")
+EMA_HEADER=paste(best_ema,"week exponential moving average")
 plot(price$Close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=EMA_HEADER)
 grid()
