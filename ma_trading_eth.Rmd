@@ -10,7 +10,7 @@ output:
 theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading.Rmd
+Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading_eth.Rmd
 
 If you find this resource useful, consider a small tip.
 
