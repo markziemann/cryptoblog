@@ -1,5 +1,5 @@
 ---
-title: "Trading BTC based on weekly MA and EMAs"
+title: "Trading ETH based on weekly MA and EMAs"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:
@@ -10,7 +10,7 @@ output:
 theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading_weekly.Rmd
+Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading_weekly_eth.Rmd
 
 If you find this resource useful, consider a small tip.
 
@@ -47,17 +47,17 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining BTC historical data (weekly) from CoinMarketCap.com from June 2013 to present.
+Obtaining ETH historical data (weekly) from CoinMarketCap.com from August 2015 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=weekly&time_start=2013-06-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=weekly&time_start=2013-06-01&time_end=",mydate,sep="")
 
-download.file(URL,destfile="btcdat.txt")
+download.file(URL,destfile="ethdat.txt")
 
-dat <- fromJSON("btcdat.txt")
+dat <- fromJSON("ethdat.txt")
 price <- dat$data$quotes
 price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","Close")
@@ -70,7 +70,7 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 It's important to calculate the returns for simply holding the asset rather than actively trading.
 
 The number shown here is the fold return on investment.
-BTC has appreciated a lot since 2013! 
+ETH has appreciated a lot since 2015! 
 
 ```{r,hodl}
 
@@ -146,7 +146,7 @@ return(c(prod(trades$diff),nrow(trades)))
 
 ## Backtesting
 
-Let's look back in time and trial SMA and EMA strategies with an interval from 3 to 200 weeks.
+Let's look back in time and trial SMA and EMA strategies with an interval from 3 to 20 weeks.
 
 Let's assume a 0.1% trading fee, as per binance current rate.
 
@@ -182,12 +182,12 @@ Now let's look at which of these approaches works best.
 ```{r,plots1,fig.height=8,fig.width=8}
 
 plot(x=myrange, y=res_sma$returns, pch=19,
-  xlab="moving average interval (weeks)",ylab="fold return",main="BTC weekly SMA")
+  xlab="moving average interval (weeks)",ylab="fold return",main="ETH weekly SMA")
 abline(h=hodl,col="red")
 grid()
 
 plot(x=myrange,y=res_ema$returns, pch=19,
-  xlab="moving average interval (weeks)",ylab="fold return",main="BTC weekly EMA")
+  xlab="moving average interval (weeks)",ylab="fold return",main="ETH weekly EMA")
 abline(h=hodl,col="red")
 grid()
 
@@ -198,13 +198,13 @@ Could it mean that there are a lot of trades each with very small gains?
 
 ```{r,plots2,fig.height=8,fig.width=8}
 
-plot(res_sma$mean,res_sma$returns, main="BTC weekly SMA",
+plot(res_sma$mean,res_sma$returns, main="ETH weekly SMA",
   xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_sma$mean,res_sma$returns , cex=1, labels=rownames(res_sma))
 abline(h=hodl,col="red")
 
-plot(res_ema$mean,res_ema$returns, main="BTC weekly EMA",
+plot(res_ema$mean,res_ema$returns, main="ETH weekly EMA",
   xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_ema$mean,res_ema$returns , cex=1, labels=rownames(res_ema))
@@ -216,13 +216,13 @@ Now we'll have a look at how many trades are required for these approaches.
 
 ```{r,plots3,fig.height=8,fig.width=8}
 
-plot(res_sma$trades,res_sma$returns, main="BTC weekly SMA",
+plot(res_sma$trades,res_sma$returns, main="ETH weekly SMA",
   xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_sma$trades,res_sma$returns , cex=1, labels=rownames(res_sma))
 abline(h=hodl,col="red")
 
-plot(res_ema$trades,res_ema$returns, main="BTC weekly EMA",
+plot(res_ema$trades,res_ema$returns, main="ETH weekly EMA",
   xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_ema$trades,res_ema$returns , cex=1, labels=rownames(res_ema))
@@ -343,7 +343,8 @@ grid()
 
 ## Trades by year
 
-We know that bitcoin moves in four year cycles. Lets take a look at profits over the years.
+We know that bitcoin moves in four year cycles, and that ethereum tends to follow bitcoin price. 
+Lets take a look at profits over the years.
 
 ```{r,yearly}
 
@@ -351,19 +352,19 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
 sma_trades$year <- sapply(strsplit(sma_trades[,3],"-"),"[[",1)
 sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,5] } )
-vioplot(sma_yearly,ylab="trade ROI distribution",main="BTC weekly SMA strategy")
+vioplot(sma_yearly,ylab="trade ROI distribution",main="ETH weekly SMA strategy")
 
 yr <- sapply(sma_yearly,prod)
-barplot(yr,ylab="yearly fold returns",main="BTC weekly SMA strategy")
+barplot(yr,ylab="yearly fold returns",main="ETH weekly SMA strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
 ema_trades$year <- sapply(strsplit(ema_trades[,3],"-"),"[[",1)
 ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,5] } )
-vioplot(ema_yearly,ylab="trade ROI distribution",main="BTC weekly EMA strategy")
+vioplot(ema_yearly,ylab="trade ROI distribution",main="ETH weekly EMA strategy")
 
 yr <- sapply(ema_yearly,prod)
-barplot(yr,ylab="yearly fold returns",main="BTC weekly EMA strategy")
+barplot(yr,ylab="yearly fold returns",main="ETH weekly EMA strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
@@ -371,10 +372,12 @@ abline(h=1,col="red",lty=2)
 
 ## Conclusion
 
-The best SMA was on the 6 week interval, and the returns were approx 2.7x better than simply hodling.
-The best EMA was also on the 6 wk, but returns were lower than the 6 wk SMA.
-These weekly MA strategies might be useful if you don't want to be checking charts every day.
-Indeed the retrns on the weekly chart appear only a bit lower than the daily MA strategy.
+The best SMA was on the 5 week interval, and the returns were approx 1.5x better than simply hodling.
+The best EMA was also on the 5 wk, and returns were 1.75x better than hodling.
+The weekly MA strategy appears to be better with ETH as compared to BTC, simply because ETH is a younger asset and therefore more volatile.
+
+These weekly MA strategies might be useful if you don't want to be checking charts every day, but the returns shown here were much 
+lower than for the ETH daily MA strategy.
 
 If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
 These alerts are sent at 30 mins before the close of the weekly session and will assist you in sticking to your desired strategy.
