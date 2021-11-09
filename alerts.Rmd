@@ -1,5 +1,5 @@
 ---
-title: "MA and EMA cross alerts"
+title: "Daily alerts for BTC and ETH"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:
@@ -181,12 +181,17 @@ Sleep for a while
 
 ```{r,sleepytime}
 
-Sys.sleep(11*60)
+Sys.sleep(15*60)
+#Sys.sleep(1)
 
 
 ```
 
 ## DMI BTC
+
+Directional movement indicator is a highly profitable approach to identify trend changes.
+DMI using a 25 day interval gives returns 4x better than the 43D SMA approach.
+
 
 ```{r,dmi_btc,fig.height=10,fig.width=8}
 
@@ -200,7 +205,7 @@ price <- btcdat$data$quotes
 price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
-dmi.adx <- ADX(price[,c("high","low","close")],n=6)
+dmi.adx <- ADX(price[,c("high","low","close")],n=26)
 price <- cbind(price,dmi.adx)
 price$signal <- dmi.adx[,1] > dmi.adx[,2]                        
 tail(price)
@@ -245,6 +250,8 @@ if ( btc_signal != "NONE") {
 
 ## DMI ETH
 
+For ETH, the 19 day interval DMI gave a good return.
+
 ```{r,dmi_eth,fig.height=10,fig.width=8}
 
 datebefore <- Sys.Date()-100
@@ -257,7 +264,7 @@ price <- ethdat$data$quotes
 price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
-dmi.adx <- ADX(price[,c("high","low","close")],n=6)
+dmi.adx <- ADX(price[,c("high","low","close")],n=19)
 price <- cbind(price,dmi.adx)
 price$signal <- dmi.adx[,1] > dmi.adx[,2]
 tail(price)
