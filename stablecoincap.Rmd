@@ -1,12 +1,23 @@
 ---
-title: "Stablecoin dominance as a tool for timing the market top"
-author: "Mark Ziemann"
+title: "Stablecoin dominance: a tool for timing the market top?"
+author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
   html_document:
     toc: true
+    toc_float: true
+    code_folding: hide
 theme: cosmo
 ---
+
+
+Source: https://github.com/markziemann/cryptoblog/blob/main/stablecoincap.Rmd
+
+If you find this resource useful, consider a small tip.
+
+BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+
+LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
 
 ## Intro
 
@@ -14,67 +25,75 @@ I had an idea that the share of stablecoins could be used to predict the end of 
 and yes it appears that a jump in stablecoin dominance began in mid 2020, peaking in September and then began dropping, coinciding with the bull run of January 2021.
 The concept is that once stablecoin dominance returns to normal levels, the bull market will start to run out of steam due to falling inflows relative to profit takers.
 
+This page is designed to be updated daily - today's date is shown below.
+
 ```{r,lib}
 
+suppressPackageStartupMessages({
 library(jsonlite)
 library(tidyverse)
+})
+
+Sys.Date()
 
 ```
+
+Reminder: this is not financial advice.
 
 ## Get data
 
 We will be simplifying things by working only with the market cap of the top two stablecoins Tether (USDT) and USD Coin (USDC) against cryptocurrencies Bitcoin (BTC) and Ethereum (ETH).
 
+Here is a graph of the market cap of these assets since 2019.
 
-
-
-
-```{r,getdata}
+```{r,getdata,fig.height=8,fig.width=8}
 
 mydate <- Sys.Date()-1
 
 BTCURL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2019-01-01&time_end=",mydate,sep="")
 download.file(BTCURL,destfile="btcdat.txt")
 btcdat <- fromJSON("btcdat.txt")
-head(btcdat$data$quotes)
 btc_mc <- btcdat$data$quotes$quote$USD$market_cap
 
 ETHURL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2019-01-01&time_end=",mydate,sep="")
 download.file(ETHURL,destfile="ethdat.txt")
 ethdat <- fromJSON("ethdat.txt")
-head(ethdat$data$quotes)
 eth_mc <- ethdat$data$quotes$quote$USD$market_cap 
 
 USDTURL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=USDT&convert=USD&interval=daily&time_start=2019-01-01&time_end=",mydate,sep="")
 download.file(USDTURL,destfile="usdtdat.txt")
 usdtdat <- fromJSON("usdtdat.txt")
-head(usdtdat$data$quotes)
 usdt_mc <- usdtdat$data$quotes$quote$USD$market_cap
 
 USDCURL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=USDC&convert=USD&interval=daily&time_start=2019-01-01&time_end=",mydate,sep="")
 download.file(USDCURL,destfile="usdcdat.txt")
 usdcdat <- fromJSON("usdcdat.txt")
-head(usdcdat$data$quotes)
 usdc_mc <- usdcdat$data$quotes$quote$USD$market_cap
 
 times_mc <- btcdat$data$quotes$quote$USD$timestamp
 mc <- data.frame(times_mc,btc_mc,eth_mc,usdt_mc,usdc_mc)
 
+mc$total <- mc$btc_mc + mc$eth_mc + mc$usdt_mc + mc$usdc_mc
+mc$sc <- mc$usdt_mc + mc$usdc_mc
+mc$scrat <- mc$sc / mc$total
+mc$times_mc <- as.character(mc$times_mc)
+mc$times_mc <- as.Date(sapply(strsplit(mc$times_mc,"T"),"[[",1))
+
+plot(mc$times_mc,mc$btc_mc,type="l",col="orange",ylab="market cap (USD)")
+lines(mc$times_mc,mc$eth_mc,col="blue")
+lines(mc$times_mc,mc$usdt_mc,col="green")
+lines(mc$times_mc,mc$usdc_mc,col="red")
+legend("topleft", legend=c("BTC", "ETH", "USDT", "USDC"),
+       col=c("orange", "blue", "green", "red"), lty=1:4)
 
 ```
 
-## Now calculate stablecoin dominance
+## Now chart the stablecoin dominance
 
+As you can see, the 3% target is very important as it was the lowest level reached during the rally of early 2021.
+If history repeats, we would anticipate a market slowdown (reversal) when it again reaches 3% in late 2021 or early 2022.
 
-```{r,scdom}
-
-mc$total <- mc$btc_mc + mc$eth_mc + mc$usdt_mc + mc$usdc_mc
-
-mc$sc <- mc$usdt_mc + mc$usdc_mc
-
-mc$scrat <- mc$sc / mc$total
-
-mc$times_mc <- as.Date(sapply(strsplit(mc$times_mc,"T"),"[[",1))
+```{r,scdom,fig.height=8,fig.width=8}
 
 p <- ggplot(mc, aes(x=times_mc, y=scrat)) +
   geom_line() + 
@@ -86,29 +105,15 @@ p
 
 ```
 
-## When was maximum stablecoin dominance?
-
-```{r,scmax}
-
-mc[which(mc$scrat == max(mc$scrat) ),]
-
-mc[which(mc$scrat == min(mc$scrat) ),]
-
-```
-
 ## Calculate the linear model for stablecoin dominance since the peak
 
-```{r,lm}
+This will help to predict the time it will take to hit the 3% target
+
+```{r,lm,fig.height=8,fig.width=8}
 
 top <- mc[which(mc$scrat == max(mc$scrat) ),]
 
-mc_pk <- mc[631:nrow(mc),]
-
-p <- ggplot(mc_pk, aes(x=times_mc, y=scrat)) +
-  geom_point() + 
-  ylab("stablecoin dominance") +
-  xlab("")
-p
+mc_pk <- mc[rownames(top):nrow(mc),]
 
 model <- lm(scrat ~ times_mc, data = mc_pk)
 
@@ -120,10 +125,10 @@ model
 
 Assume the market peaks out when stablecoin dominance reduces to 3%
 
-```{r,timing}
+```{r,timing,fig.height=8,fig.width=8}
 
 ggplot(mc_pk, aes(x=times_mc, y=scrat)) +
-  scale_x_date(limit=c(as.Date("2020-09-01"),as.Date("2021-06-01"))) +
+  scale_x_date(limit=c(as.Date("2021-07-01"),as.Date("2022-04-01"))) +
   ylim(0.025, 0.12) +
   geom_point() +
   xlab("") +
@@ -133,8 +138,16 @@ ggplot(mc_pk, aes(x=times_mc, y=scrat)) +
 
 ```
 
-This chart indicates the current bull run will start to run out of puff at the end of March.
+This chart indicates the current bull run will start to run out of dry powder at the end of March 2021.
+Keep in mind that the tragectory of the stablecoin dominance changes can change dramatically, 
+especially in a blow-off top when crypto valuations become rapidly overheated.
+This indicator is not meant to be used in isolation in calling a top. 
+Other supporting indicators could be NUPL, Pi Cycle Top Indicator, 200 Week Moving Average Heatmap and the power law chart. 
+These are linked below:
 
+* https://www.lookintobitcoin.com/charts/
+
+* https://stats.buybitcoinworldwide.com/long-term-power-law/
 
 ## Session information
 
