@@ -17,6 +17,9 @@ Rscript -e "rmarkdown::render('ma_trading.Rmd')" && \
 Rscript -e "rmarkdown::render('ma_trading_eth.Rmd')" && \
   scp -P 21098 ma_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
+Rscript -e "rmarkdown::render('ma_trading_ethbtc.Rmd')" && \
+  scp -P 21098 ma_trading_ethbtc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+
 Rscript -e "rmarkdown::render('ma_trading_weekly.Rmd')" && \
   scp -P 21098 ma_trading_weekly.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
