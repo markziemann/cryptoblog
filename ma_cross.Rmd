@@ -25,7 +25,7 @@ LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
 Trading off simple moving averages (SMAs), exponenial moving averages (EMAs) and crosses between these 
 lines are popular methods for timing entry and exit of positions.
 In this blog post I will be back-testing simple moving averages to find the one which performed the best for
-BTC's proce history.
+BTC's price history.
 
 This page is designed to be updated daily - today's date is shown below.
 
