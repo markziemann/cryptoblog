@@ -190,8 +190,7 @@ Sys.sleep(15*60)
 ## DMI BTC
 
 Directional movement indicator is a highly profitable approach to identify trend changes.
-DMI using a 25 day interval gives returns 4x better than the 43D SMA approach.
-
+DMI using a 26 day interval gives returns 4x better than the 43D SMA approach.
 
 ```{r,dmi_btc,fig.height=10,fig.width=8}
 
