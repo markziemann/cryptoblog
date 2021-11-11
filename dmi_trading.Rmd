@@ -1,41 +1,63 @@
 ---
-title: "Trading based on Directional Movement Index (DMI)"
-author: "Mark Ziemann"
+title: "Trading BTC based on Directional Movement Index (DMI)"
+author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
   html_document:
     toc: true
+    toc_float: true
+    code_folding: hide
+    fig_width: 7
+    fig_height: 7
 theme: cosmo
 ---
 
+Source: https://github.com/markziemann/cryptoblog/blob/main/dmi_trading.Rmd
+
+If you find this resource useful, consider a small tip.
+
+BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+
+LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
+
 ## Intro
 
-Trading off moving averages, exponenial moving averages and crosses between these is a popular method for timing entry and exit of positions.
-In this blog post I will be trilaing simple moving averages to find the one which performs the best.
+There are many indicators of market momentum, one of them is the directional movement 
+indicator (DMI). 
+For this post, I'll be using a simple implementation of the DMI, by buying when the positive
+momentum is greater than the negative momentum indicator. 
+Then sell when the negative indicator is larger than the positive indicator.
+What I am examining here is different intervals for the calculation of the DMI, typically 
+14 day is used, however I will be seeing whether other intervals perform better.
+
+This page is designed to be updated daily - today's date is shown below.
 
 ```{r,lib}
 
+suppressPackageStartupMessages({
 library("jsonlite")
 library("tidyverse")
 library("runner")
 library("quantmod")
 library("TTR")
 library("vioplot")
+})
+
+Sys.Date()
 
 ```
 
+Reminder: this is not financial advice.
+
 ## Get data
 
-Obtaining BTC historical data (daily).
+Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
-
 download.file(URL,destfile="btcdat.txt")
-
 btcdat <- fromJSON("btcdat.txt")
 price <- btcdat$data$quotes
 price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
@@ -46,6 +68,11 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 
 ## Calculate hodl returns
 
+It's important to calculate the returns for simply holding the asset rather than actively trading.
+
+The number shown here is the fold return on investment.
+BTC has appreciated a lot since 2013!
+
 ```{r,hodl}
 
 myend <- price[c(1,nrow(price)),4][2] 
@@ -55,11 +82,10 @@ hodl
 
 ```
 
-## Basic look at the indicator
+## Basic look at the DMI indicator
 
-Default n = 14.
-
-Default MA = Default Welles Wilder EMA
+Here we can see the DMI over the past 730 days, using the default interval of 14d.
+The default moving average algorithm is the Welles Wilder EMA.
 
 ```{r,dmi1,fig.height=10,fig.width=8}
 
@@ -82,10 +108,12 @@ par(mfrow=c(1,1))
 
 ## DMI trading function
 
-Assuming 0.1% trading fee, as per binance current rate.
+Here is functions for trading based on DMI crosses, buying when positive momentum indicator 
+goes above the negative momentum indicator line, and sell when it falls below.
 
-```{r,sma}
+All trades are executed at the end of the daily session (UTC midnight).
 
+```{r,dmi_func}
 
 dmi <- function(price,n,fee) {
   dmi.adx <- ADX(price[,c("high","low","close")],n=n)
@@ -116,8 +144,12 @@ dmi <- function(price,n,fee) {
 
 ```
 
-
 ## Backtesting
+
+Now let's go back in time to test the performance of the DMI indicator using different 
+intervals from 4 days to 200 days.
+
+Let's assume a 0.1% trading fee, as per binance current rate.
 
 ```{r,backtest}
 
@@ -217,6 +249,7 @@ trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +
 nrow(trades)
 trades
 prod(trades$diff)
+prod(trades$diff)/hodl
 
 
 HEADER=paste(best_n,"DMI")
@@ -266,6 +299,7 @@ trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +
 nrow(trades)
 trades
 prod(trades$diff)
+prod(trades$diff)/hodl
 
 
 HEADER=paste(best_n,"DMI")
@@ -315,6 +349,7 @@ trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +
 nrow(trades)
 trades
 prod(trades$diff)
+prod(trades$diff)/hodl
 
 
 HEADER=paste(best_n,"DMI")
@@ -364,6 +399,7 @@ trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +
 nrow(trades)
 trades
 prod(trades$diff)
+prod(trades$diff)/hodl
 
 
 HEADER=paste(best_n,"DMI")
