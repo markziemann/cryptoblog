@@ -35,12 +35,13 @@ This page is designed to be updated daily - today's date is shown below.
 ```{r,lib}
 
 suppressPackageStartupMessages({
-library("jsonlite")
-library("tidyverse")
-library("runner")
-library("quantmod")
-library("TTR")
-library("vioplot")
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
 })
 
 Sys.Date()
@@ -151,77 +152,74 @@ intervals from 4 days to 200 days.
 
 Let's assume a 0.1% trading fee, as per binance current rate.
 
+Here is a table of results.
+
 ```{r,backtest}
 
 fee=0.001
-
-myrange <- 3:200
+myrange <- 4:200
 res <- t(sapply(myrange,function(n) { dmi(price,n,fee) } ))
 rownames(res) <- myrange
 colnames(res) <- c("returns","trades")
 res <-  as.data.frame(res)
-
 res$mean <- res$returns^(1/res$trades)
-
-head(res[order(-res$mean),],50)
-#%>% kbl() %>%  kable_paper("hover", full_width = F)
-
-head(res[order(-res$returns),],50)
-#%>% kbl() %>%  kable_paper("hover", full_width = F)
-
-res2 <- subset(res,trades<200)
-
-head(res2[order(-res2$returns),],50)
-#%>% kbl() %>%  kable_paper("hover", full_width = F)
+res <- cbind(rownames(res),res,stringsAsFactors=FALSE)
+colnames(res)[1] <- "period"
+res %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
 ## Plots
 
+Let's examine some of the trends in the data with some charts.
+
 ```{r,plots,fig.height=8,fig.width=8}
 
-plot(res[,2],res[,1],log="y", cex=2, pch=19,col="gray",
+plot(res$trades,res$returns,log="y", cex=2, pch=19,col="gray",
   xlab="num trades",ylab="fold returns")
-text(res[,2],res[,1],labels=rownames(res),cex=1.5)
+text(res$trades,res$returns,labels=res$period,cex=1.5)
 abline(h=hodl,col="red")
 grid()
 
-res2 <- c(0,0,res[,1])
 
-plot(res2,pch=19,xlab="n interval (days)",ylab="fold return",main="DMI")
+plot(res$period,res$returns,pch=19,xlab="n interval (days)",ylab="fold return",main="DMI")
 abline(h=hodl,col="red")
 grid()
 
-plot(res2+1,pch=19,xlim=c(1,50),xlab="n interval (days)",ylab="fold return",
+plot(res$period,res$returns,pch=19,xlim=c(1,50),xlab="n interval (days)",ylab="fold return",
   main="DMI",log="y")
 abline(h=hodl,col="red")
 grid()
 
 plot(res$mean,res$returns,xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
-text(res$mean,res$returns , cex=, labels=rownames(res))
+text(res$mean,res$returns , cex=1, labels=res$period)
 abline(h=hodl,col="red")
 
 plot(res$mean,res$returns,log="y",xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
-text(res$mean,res$returns , cex=, labels=rownames(res))
+text(res$mean,res$returns , cex=1, labels=res$period)
 abline(h=hodl,col="red")
 
 plot(res$mean,res$returns,log="y",xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray",
   ylim=c(100,1E4))
 grid()
-text(res$mean,res$returns , cex=, labels=rownames(res))
+text(res$mean,res$returns , cex=1, labels=res$period)
 abline(h=hodl,col="red")
 
 
 ```
 
-## Optimisation
+## 129 day DMI
+
+The 129 day interval gives a high probability of high returns but occurs rarely.
+
+Below is a table of the trades made.
 
 ```{r,best_sma1,fig.width=10,fig.height=8}
 
 best_n = 129
-best_n
+message(paste("Selected DMI period:",best_n))
 
 dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
 price2 <- price
@@ -246,11 +244,11 @@ if( nrow(buy) != nrow(sell) ) {
 }
 trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-nrow(trades)
-trades
-prod(trades$diff)
-prod(trades$diff)/hodl
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
+trades %>% kbl() %>%  kable_styling()
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -266,12 +264,14 @@ par(mfrow=c(1,1))
 
 ```
 
-## Optimisation
+## 72 day DMI
+
+The 72 day interval gives a significantly higher overall return, but the mean return on trades is lower than the 129 day.
 
 ```{r,best_sma2,fig.width=10,fig.height=8}
 
 best_n = 72
-best_n
+message(paste("Selected DMI period:",best_n))
 
 dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
 price2 <- price
@@ -296,11 +296,11 @@ if( nrow(buy) != nrow(sell) ) {
 }
 trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-nrow(trades)
-trades
-prod(trades$diff)
-prod(trades$diff)/hodl
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
+trades %>% kbl() %>%  kable_styling()
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -316,12 +316,15 @@ par(mfrow=c(1,1))
 
 ```
 
-## Optimisation
+## 6 day DMI
+
+This indicator gives a very high return, but trades are executed very frequently.
+This requires a lot of work for manual execution, and may not be sustainable.
 
 ```{r,best_sma3,fig.width=10,fig.height=8}
 
 best_n = 6
-best_n
+message(paste("Selected DMI period:",best_n))
 
 dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
 price2 <- price
@@ -346,11 +349,11 @@ if( nrow(buy) != nrow(sell) ) {
 }
 trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-nrow(trades)
-trades
-prod(trades$diff)
-prod(trades$diff)/hodl
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
+trades %>% kbl() %>%  kable_styling()
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -366,12 +369,14 @@ par(mfrow=c(1,1))
 
 ```
 
-## Optimisation
+## 26 day DMI
+
+This is good indicator because the frequency is lower, but the gains are still very good.
 
 ```{r,best_sma4,fig.width=10,fig.height=8}
 
-best_n = 26
-best_n
+best_n = 26 
+message(paste("Selected DMI period:",best_n))
 
 dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
 price2 <- price
@@ -396,11 +401,11 @@ if( nrow(buy) != nrow(sell) ) {
 }
 trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-nrow(trades)
-trades
-prod(trades$diff)
-prod(trades$diff)/hodl
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
+trades %>% kbl() %>%  kable_styling()
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -419,6 +424,8 @@ par(mfrow=c(1,1))
 
 ## Effect of fees
 
+It is important to factor in the effect of fees because higher exchange fees will erode profits.
+
 ```{r,fees,fig.width=8,fig.height=7}
 
 fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
@@ -434,6 +441,8 @@ grid()
 
 ## Trades by year
 
+It is good to see whether the strategy gives consistent returns over the years.
+
 ```{r,yearly}
 
 years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
@@ -448,13 +457,19 @@ abline(h=1,col="red",lty=2)
 
 ```
 
-
-
-
 ## Conclusion
 
-Hodling BTC over this period gave a 378 fold return.
-Here we are looking at using the DMI as a buy/sell indicator.
+For the DMI, adjusting the interval length reveals a trade-off.
+Shorter timeframes give very high returns, however require frequent trades, every few days.
+This may not be sustainable in the long term if trades are executed manually.
+Longer timeframes give a lower return overall, but the signals have a lower false positive rate.
+Personally, this is why I consider the 26 day interval the "best".
+The 26-day DMI gave returns 21x the hodl ROI, which is significantly better than the moving average 
+strategies which yielded returns around 3-6x the hodl ROI.
+
+If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
+These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
+Subscribing to alerts costs 0.0005 BTC per year.
 
 ## Session information
 
