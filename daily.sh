@@ -26,5 +26,11 @@ Rscript -e "rmarkdown::render('ma_trading_weekly_eth.Rmd')" && \
 Rscript -e "rmarkdown::render('ma_cross.Rmd')" && \
   scp -P 21098 ma_cross.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
+Rscript -e "rmarkdown::render('ma_cross_eth.Rmd')" && \
+  scp -P 21098 ma_cross_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+
+Rscript -e "rmarkdown::render('dmi_trading.Rmd')" && \
+  scp -P 21098 dmi_trading.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+
 Rscript -e "rmarkdown::render('stablecoincap.Rmd')" && \
   scp -P 21098 stablecoincap.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
