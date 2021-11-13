@@ -109,7 +109,7 @@ par(mfrow=c(1,1))
 
 ## DMI trading function
 
-Here is functions for trading based on DMI crosses, buying when positive momentum indicator 
+Here is the function for trading based on DMI crosses, buying when positive momentum indicator 
 goes above the negative momentum indicator line, and sell when it falls below.
 
 All trades are executed at the end of the daily session (UTC midnight).
