@@ -8,6 +8,8 @@ Rscript -e "rmarkdown::render('alerts.Rmd')" && \
 scp -P 21098 alerts.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 cp alerts.html crypto
 
+sleep 15m
+
 Rscript -e "rmarkdown::render('coins.Rmd')"
 cp coins.html crypto
 

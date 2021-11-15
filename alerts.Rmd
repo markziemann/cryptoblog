@@ -14,12 +14,6 @@ theme: cosmo
 
 Source: https://github.com/markziemann/cryptoblog/blob/main/alerts.Rmd
 
-If you find this resource useful, consider a small tip.
-
-BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
-
-LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
-
 ## Intro
 
 In the backtesting analysis, I have established three different strategies for timing entry/exits.
@@ -42,6 +36,14 @@ If you would like to receive these signals in real-time, you can subscribe for 0
 If you need some help to design your own trading signals, I am happy to help for a fee.
 email me at mark.ziemann{αt}gmail.com for any enquiries.
 
+If you find this resource useful, consider a small tip.
+
+BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+
+LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
+
+Reminder: this analysis is not financial advice.
+
 ```{r,lib}
 
 suppressPackageStartupMessages({
@@ -58,40 +60,38 @@ TESTING = FALSE
 
 ```
 
-## Get BTC data
+## Get BTC price data
 
-Obtaining BTC price data (daily) for the last 200 days.
+Obtaining BTC price data (daily) for the last 300 days.
 
-```{r,btc1}
+```{r,btc_data1}
 
-datebefore <- Sys.Date()-200
+datebefore <- Sys.Date()-300
 mydate <- Sys.Date()
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=",datebefore,"&time_end=",Sys.Date(),sep="")
 download.file(URL,destfile="btcdat.txt")
 btcdat <- fromJSON("btcdat.txt")
 price <- btcdat$data$quotes
-price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
-price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
 Now gather houly price data for the last 23 hours.
 
-```{r,btc2}
+```{r,btc_data2}
 
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=hourly&time_period=hourly&time_start=",Sys.Date()-1,"&time_end=",Sys.Date(),sep="")
 download.file(URL,destfile="btcdat.txt")
 btcdat <- fromJSON("btcdat.txt")
 price2 <- btcdat$data$quotes
-price2 <- data.frame(price2$time_close, price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
+price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price2) <- c("date","high","low","close")
-price2$date <- sapply(strsplit(as.character(price2$date),"T"),"[[",1)
 tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 high <- max(price2[,2])
-low <- min(price2[,3])
+low <-  min(price2[,3])
 close <- price2[nrow(price2),4]
 
 df <- data.frame(date=Sys.Date(),high=high,low=low,close=close,stringsAsFactors=FALSE)
@@ -104,17 +104,19 @@ if ( TESTING == TRUE) {
 
 ```
 
-## BTC on the 43 MA
+## BTC SMA indicator
 
 Now to determine whether BTC has crossed the 43-day SMA.
 
 ```{r, btc_sma}
 
-price$ma <- SMA(Cl(price),n=43)
-price$signal <- price$close > price$ma
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
-today_signal <- price[nrow(price),"signal"]
-previous_signal <- price[(nrow(price)-1),"signal"]
+price2 <- price
+
+price2$ma <- SMA(Cl(price2),n=43)
+price2$signal <- price2$close > price2$ma
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
     btc_signal="BUY"
@@ -132,39 +134,39 @@ message(paste("BTC SMA signal:",btc_signal))
 
 ```{r, btc_sma_plot,fig.height=8,fig.width=8}
 
-plot(price$close~as.Date(price$date),type="l",
+plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="BTC w 43D MA")
 grid()
-lines(price$ma~ as.Date(price$date) ,col="red")
+lines(price2$ma~ as.Date(price2$date) ,col="red")
 
 ```
 
 Send a push notification.
 
-```{r,btcpush}
+```{r,btc_sma_push}
 
 if ( btc_signal != "NONE") {
   MYNOTE <- paste("The BTC 43D MA signal is", btc_signal, 
-    ". Visit https://blinder.cc/crypto/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
 ```
 
-## DMI BTC
+## BTC DMI indicator
 
 Directional movement indicator is a highly profitable approach to identify trend changes.
 DMI using a 26 day interval gives returns 4x better than the 43D SMA approach.
 
-```{r,dmi_btc,fig.height=10,fig.width=8}
+```{r,btc_dmi,fig.height=10,fig.width=8}
 
 dmi.adx <- ADX(price[,c("high","low","close")],n=26)
-price <- cbind(price,dmi.adx)
-price$signal <- dmi.adx[,1] > dmi.adx[,2]
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+price2 <- cbind(price,dmi.adx)
+price2$signal <- dmi.adx[,1] > dmi.adx[,2]
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
-today_signal <- price[nrow(price),"signal"]
-previous_signal <- price[(nrow(price)-1),"signal"]
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
     btc_signal="DMI BUY"
@@ -180,47 +182,122 @@ message(paste("BTC DMI signal:",btc_signal))
 
 ```
 
-```{r,dmi_btc_plot,fig.height=10,fig.width=8}
+```{r,btc_dmi_plot,fig.height=10,fig.width=8}
 
-price <- as.data.frame(price)
+price2 <- as.data.frame(price2)
 par(mfrow=c(2,1))
-plot(price$close~as.Date(price$date),type="l",
+plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="BTC USD price")
 grid()
-plot(price$DIp~as.Date(price$date),type="l", col="blue",
+plot(price2$DIp~as.Date(price2$date),type="l", col="blue",
   xlab="Date",ylab="price (USD)",main="BTC 26d DMI")
 grid()
-lines(price$DIn ~ as.Date(price$date) ,col="red")
+lines(price2$DIn ~ as.Date(price2$date) ,col="red")
 
 ```
 
 Send a push notification.
 
-```{r,btcpush2}
+```{r,btc_dmi_push}
 
 if ( btc_signal != "NONE") {
   MYNOTE <- paste("BTC is flashing a ", btc_signal,
-   ". Visit https://blinder.cc/crypto/alerts.html for the details")
+   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
 ```
 
-## Get ETH data
+## BTC TSI indicator
+
+Optimised values:
+
+n1=99, n2=14, n.sig=5
+
+```{r,btc_tsi,fig.height=10,fig.width=8}
+
+TSI <- function(x, n.first = 25, n.second = 13, n.signal = 7) {
+  #True Strength Indicator
+  #https://school.stockcharts.com/doku.php?id=technical_indicators:true_strength_index
+  x <- try.xts(x, error = as.matrix)
+  pc <- x - lag.xts(x, na.pad = T) #force lag.xts to get na padding
+  dspc <- EMA(EMA(pc, n = n.first), n = n.second)
+  dsapc <- EMA(EMA(abs(pc), n = n.first), n = n.second)
+
+  tsi <- 100 * (dspc/dsapc)
+  signal <- EMA(tsi, n = n.signal)
+  r <- cbind(tsi, signal)
+  r <- reclass(r, x)
+  if (!is.null(dim(r))) colnames(r) <- c("tsi", "signal")
+  return(r)
+}
+
+tsi <- TSI(price$close , n.first = 99, n.second = 14, n.signal = 5 )
+colnames(tsi) <- c("tsi","sig")
+
+price2 <- cbind(price,tsi)
+price2$signal <- tsi[,1] > tsi[,2]
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="TSI BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="TSI SELL"
+  }
+} else {
+  btc_signal <- "NONE"
+}
+
+message(paste("BTC TSI signal:",btc_signal))
+
+```
+
+```{r,btc_tsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tsi[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="TSI",main="TSI")
+lines(as.Date(price2$date), tsi[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+Send a push notification.
+
+```{r,btc_tsi_push}
+
+if ( btc_signal != "NONE") {
+  MYNOTE <- paste("BTC is flashing a ", btc_signal,
+   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
+
+```
+
+## Get ETH price data
 
 Obtaining ETH historical data (daily).
 
 ```{r,eth1}
 
-datebefore <- Sys.Date()-200
+datebefore <- Sys.Date()-300
 mydate <- Sys.Date()
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=",datebefore,"&time_end=",Sys.Date(),sep="")
 download.file(URL,destfile="ethdat.txt")
 ethdat <- fromJSON("ethdat.txt")
 price <- ethdat$data$quotes
-price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+price <- data.frame( as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
-price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
@@ -233,9 +310,8 @@ URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?
 download.file(URL,destfile="ethdat.txt")
 ethdat <- fromJSON("ethdat.txt")
 price2 <- ethdat$data$quotes
-price2 <- data.frame(price2$time_close, price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
+price2 <- data.frame( as.Date(price2$time_close)  , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price2) <- c("date","high","low","close")
-price2$date <- sapply(strsplit(as.character(price2$date),"T"),"[[",1)
 tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 high <- max(price2[,2])
@@ -252,17 +328,19 @@ if ( TESTING == TRUE) {
 
 ```
 
-## ETH on the 34 MA
+## ETH SMA indicator
 
 Now to determine whether ETH has crossed the 34-day SMA.
 
 ```{r, eth_sma}
 
-price$ma <- SMA(Cl(price),n=34)
-price$signal <- price$close > price$ma
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
-today_signal <- price[nrow(price),"signal"]
-previous_signal <- price[(nrow(price)-1),"signal"]
+price2 <- price
+
+price2$ma <- SMA(Cl(price2),n=34)
+price2$signal <- price2$close > price2$ma
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
     eth_signal="BUY"
@@ -280,38 +358,38 @@ message(paste("ETH SMA signal:",eth_signal))
 
 ```{r, eth_sma_plot,fig.height=8,fig.width=8}
 
-plot(price$close~as.Date(price$date),type="l",
+plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="ETH w 34D MA")
 grid()
-lines(price$ma~ as.Date(price$date) ,col="red")
+lines(price2$ma~ as.Date(price2$date) ,col="red")
 
 ```
 
 Send a push notification.
 
-```{r,ethpush}
+```{r,eth_sma_push}
 
 if ( eth_signal != "NONE") {
   MYNOTE <- paste("The ETH 34D MA signal is", eth_signal,
-   ". Visit https://blinder.cc/crypto/alerts.html for the details")
+   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
 ```
 
-## DMI ETH
+## ETH DMI
 
 For ETH, the 19 day interval DMI gave a good return.
 
-```{r,dmi_eth,fig.height=10,fig.width=8}
+```{r,eth_dmi,fig.height=10,fig.width=8}
 
 dmi.adx <- ADX(price[,c("high","low","close")],n=19)
-price <- cbind(price,dmi.adx)
-price$signal <- dmi.adx[,1] > dmi.adx[,2]
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+price2 <- cbind(price,dmi.adx)
+price2$signal <- dmi.adx[,1] > dmi.adx[,2]
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
-today_signal <- price[nrow(price),"signal"]
-previous_signal <- price[(nrow(price)-1),"signal"]
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
     eth_signal="DMI BUY"
@@ -323,31 +401,90 @@ if (today_signal != previous_signal ) {
   eth_signal <- "NONE"
 }
 
-message(paste("ETH SMA signal:",eth_signal))
+message(paste("ETH DMI signal:",eth_signal))
 
 ```
 
 ```{r, eth_dmi_plot,fig.height=10,fig.width=8}
 
-price <- as.data.frame(price)
 par(mfrow=c(2,1))
-plot(price$close~as.Date(price$date),type="l",
+plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="ETH USD price")
 grid()
-plot(price$DIp~as.Date(price$date),type="l", col="blue",
+plot(price2$DIp~as.Date(price2$date),type="l", col="blue",
   xlab="Date",ylab="price (USD)",main="ETH 19d DMI")
 grid()
-lines(price$DIn ~ as.Date(price$date) ,col="red")
+lines(price2$DIn ~ as.Date(price2$date) ,col="red")
 
 ```
 
 Send a push notification.
 
-```{r,ethpush2}
+```{r,eth_dmi_push}
 
 if ( eth_signal != "NONE") {
   MYNOTE <- paste("ETH is flashing a ", eth_signal,
-   ". Visit https://blinder.cc/crypto/alerts.html for the details")
+   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
+
+```
+
+## ETH TSI indicator
+
+Optimised values:
+
+n1=99, n2=3, n.sig=13
+
+```{r,eth_tsi,fig.height=10,fig.width=8}
+
+tsi <- TSI(price$close , n.first = 99, n.second = 3, n.signal = 13 )
+colnames(tsi) <- c("tsi","sig")
+
+price2 <- cbind(price,tsi)
+price2$signal <- tsi[,1] > tsi[,2]
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="TSI BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="TSI SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+message(paste("ETH TSI signal:",eth_signal))
+
+```
+
+```{r,eth_tsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tsi[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="TSI",main="TSI")
+lines(as.Date(price2$date), tsi[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+Send a push notification.
+
+```{r,eth_tsi_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste("ETH is flashing a ", eth_signal,
+   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
