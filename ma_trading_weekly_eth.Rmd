@@ -375,6 +375,7 @@ abline(h=1,col="red",lty=2)
 The best SMA was on the 5 week interval, and the returns were approx 1.5x better than simply hodling.
 The best EMA was also on the 5 wk, and returns were 1.75x better than hodling.
 The weekly MA strategy appears to be better with ETH as compared to BTC, simply because ETH is a younger asset and therefore more volatile.
+One must be cutious though, because most of the MA intervals tested here gave returns lower than simply hodling.
 
 These weekly MA strategies might be useful if you don't want to be checking charts every day, but the returns shown here were much 
 lower than for the ETH daily MA strategy.
