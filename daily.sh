@@ -48,3 +48,6 @@ Rscript -e "rmarkdown::render('tsi_trading_eth.Rmd')" && \
 
 Rscript -e "rmarkdown::render('stablecoincap.Rmd')" && \
   scp -P 21098 stablecoincap.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+
+Rscript -e "rmarkdown::render('rsi_watch.Rmd')" && \
+  scp -P 21098 rsi_watch.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
