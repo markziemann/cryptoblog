@@ -22,10 +22,13 @@ Click on the hyperlinks below to see how these signals were identified.
 1. Simple moving averages: <a href="https://mdz-analytics.com/crypto/ma_trading.html">BTC</a> 43 day; 
 <a href="https://mdz-analytics.com/crypto/ma_trading_eth.html">ETH</a> 34 day.
 
-2. Directional movement index (DMI): <a href="https://mdz-analytics.com/crypto/dmi_trading.html">BTC</a> 26 day;
+2. Moving average crosses: <a href="https://mdz-analytics.com/crypto/ma_cross.html">BTC</a> 12/21 day SMA and;
+<a href="https://mdz-analytics.com/crypto/ma_cross_eth.html">ETH</a> 5/27 day.
+
+3. Directional movement index (DMI): <a href="https://mdz-analytics.com/crypto/dmi_trading.html">BTC</a> 26 day;
 <a href="https://mdz-analytics.com/crypto/dmi_trading_eth.html">ETH</a> 19 day.
 
-3. True strength index (TSI): <a href="https://mdz-analytics.com/crypto/tsi_trading.html">BTC</a> n1=99, n2=15, n.signal=5;
+4. True strength index (TSI): <a href="https://mdz-analytics.com/crypto/tsi_trading.html">BTC</a> n1=99, n2=15, n.signal=5;
 <a href="https://mdz-analytics.com/crypto/tsi_trading.html">ETH</a> n1=99, n2=3, n.signal=13.
 
 This script will examine the price action just before the daily close and then investigate whether these trading signals are flashing.
@@ -147,6 +150,58 @@ Send a push notification.
 
 if ( btc_signal != "NONE") {
   MYNOTE <- paste("The BTC 43D MA signal is", btc_signal, 
+    ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
+
+```
+
+## BTC SMA cross indicator
+
+The 12/21 day SMA cross is a highly profitable strategy.
+
+```{r, btc_cross}
+
+price2 <- price
+
+price2$ma1 <- SMA(Cl(price2),n=21)
+price2$ma2 <- SMA(Cl(price2),n=12)
+
+price2$signal <- price2$ma2 > price2$ma1
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="SELL"
+  }
+} else {
+btc_signal <- "NONE"
+}
+
+message(paste("BTC SMA cross signal:",btc_signal))
+
+```
+
+```{r, btc_cross_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="BTC w 12/21 day SMA cross")
+grid()
+lines(price2$ma1~ as.Date(price2$date) ,col="red")
+lines(price2$ma2~ as.Date(price2$date) ,col="blue")
+
+```
+
+Send a push notification.
+
+```{r,btc_cross_push}
+
+if ( btc_signal != "NONE") {
+  MYNOTE <- paste("The BTC 12/21 day SMA cross signal is", btc_signal,
     ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
@@ -372,6 +427,58 @@ Send a push notification.
 if ( eth_signal != "NONE") {
   MYNOTE <- paste("The ETH 34D MA signal is", eth_signal,
    ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
+
+```
+
+## ETH SMA cross indicator
+
+The 5/27 day SMA cross is a highly profitable strategy.
+
+```{r, eth_cross}
+
+price2 <- price
+
+price2$ma1 <- SMA(Cl(price2),n=27)
+price2$ma2 <- SMA(Cl(price2),n=5)
+
+price2$signal <- price2$ma2 > price2$ma1
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+eth_signal <- "NONE"
+}
+
+message(paste("ETH SMA cross signal:",eth_signal))
+
+```
+
+```{r, eth_cross_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH w 5/27 day SMA cross")
+grid()
+lines(price2$ma1~ as.Date(price2$date) ,col="red")
+lines(price2$ma2~ as.Date(price2$date) ,col="blue")
+
+```
+
+Send a push notification.
+
+```{r,eth_cross_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste("The ETH 5/27 day SMA cross signal is", eth_signal,
+    ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 

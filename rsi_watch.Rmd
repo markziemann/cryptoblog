@@ -1,5 +1,5 @@
 ---
-title: "Watching the weekly RSI"
+title: "Watching the weekly RSI for BTC and ETH"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -10,7 +10,7 @@ output:
 theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading_weekly.Rmd
+Source: https://github.com/markziemann/cryptoblog/blob/main/rsi_watch.Rmd
 
 If you find this resource useful, consider a small tip.
 
@@ -20,8 +20,8 @@ LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
 
 ## Intro
 
-In this blog post I will be watching the weekly, biweekly and monthly RSI which can be used to spot 
-good buying or selling opportunities.
+In this blog post I will be watching the weekly, biweekly and monthly RSI for BTC and ETH which can be 
+used to spot good buying or selling opportunities.
 
 ```{r,lib}
 
@@ -40,11 +40,11 @@ suppressPackageStartupMessages({
 
 Reminder: this is not financial advice.
 
-## Get data
+## Get BTC data
 
 Obtaining BTC historical data (daily).
 
-```{r,getdata}
+```{r,getbtc}
 
 mydate <- Sys.Date()-1
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=weekly&time_start=2013-06-01&time_end=",mydate,sep="")
@@ -63,7 +63,7 @@ These can be used to spot market cycle tops.
 
 Firstly to the weekly RSI.
 
-```{r,rsi1,fig.height=10,fig.width=8}
+```{r,rsi1btc,fig.height=10,fig.width=8}
 
 price$rsi <- RSI(price$Close,n=14)
 
@@ -84,7 +84,7 @@ abline(h=30,col="black")
 
 Biweekly RSI.
 
-```{r,rsi2,fig.height=10,fig.width=8}
+```{r,rsi2btc,fig.height=10,fig.width=8}
 
 if ( nrow(price) %% 2 == 0 ) {
   idx <- seq(2,nrow(price),2)
@@ -113,7 +113,7 @@ abline(h=30,col="black")
 
 ## Get monthly data
 
-```{r,getdata2}
+```{r,getdata2btc}
 
 mydate <- Sys.Date()-1
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=monthly&time_start=2013-06-01&time_end=",mydate,sep="")
@@ -130,7 +130,116 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 
 These can be used to spot market cycle tops.
 
-```{r,rsi3,fig.height=10,fig.width=8}
+```{r,rsi3btc,fig.height=10,fig.width=8}
+
+price$rsi <- RSI(price$Close,n=14)
+
+tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
+
+par(mfrow=c(2,1))
+plot(price$Close ~ as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price$rsi ~ as.Date(price$date),type="l",col="blue",
+  xlab="Date",ylab="RSI",ylim=c(20,100),main="monthly RSI")
+grid()
+abline(h=90,col="red")
+abline(h=50,col="black")
+
+```
+
+## Get ETH data
+
+Obtaining ETH historical data (daily).
+
+```{r,getdataeth}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=weekly&time_start=2015-08-01&time_end=",mydate,sep="")
+download.file(URL,destfile="ethdat.txt")
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","Close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+## RSI on weekly and biweekly
+
+These can be used to spot market cycle tops.
+
+Firstly to the weekly RSI.
+
+```{r,rsi1eth,fig.height=10,fig.width=8}
+
+price$rsi <- RSI(price$Close,n=14)
+
+tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
+
+par(mfrow=c(2,1))
+plot(price$Close ~ as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price$rsi ~ as.Date(price$date),type="l",col="blue",
+  xlab="Date",ylab="RSI",ylim=c(20,100),main="weekly RSI")
+grid()
+abline(h=90,col="red")
+abline(h=30,col="black")
+
+```
+
+Biweekly RSI.
+
+```{r,rsi2eth,fig.height=10,fig.width=8}
+
+if ( nrow(price) %% 2 == 0 ) {
+  idx <- seq(2,nrow(price),2)
+} else {
+  idx <- seq(1,nrow(price),2)
+}
+
+price <- price[idx,]
+
+price$rsi <- RSI(price$Close,n=14)
+
+tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+par(mfrow=c(2,1))
+plot(price$Close ~ as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price$rsi ~ as.Date(price$date),type="l",col="blue",
+  xlab="Date",ylab="RSI",ylim=c(20,100),main="biweekly RSI")
+grid()
+abline(h=90,col="red")
+abline(h=30,col="black")
+
+```
+
+## Get monthly data
+
+```{r,getdata2eth}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=monthly&time_start=2015-08-01&time_end=",mydate,sep="")
+download.file(URL,destfile="ethdat.txt")
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","Close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+## RSI on the monthly
+
+These can be used to spot market cycle tops.
+
+```{r,rsi3eth,fig.height=10,fig.width=8}
 
 price$rsi <- RSI(price$Close,n=14)
 
