@@ -31,12 +31,13 @@ Click on the hyperlinks below to see how these signals were identified.
 4. True strength index (TSI): <a href="https://mdz-analytics.com/crypto/tsi_trading.html">BTC</a> n1=99, n2=15, n.signal=5;
 <a href="https://mdz-analytics.com/crypto/tsi_trading.html">ETH</a> n1=99, n2=3, n.signal=13.
 
-This script will examine the price action just before the daily close and then investigate whether these trading signals are flashing.
-Note that alerts for TSI are not ready yet.
-Alerts will be sent by pushbullet.
+This script will examine the price action and these trade signals just before the daily close.
+If the signal is TRUE, it is bullish and if FALSE it is bearish.
+When there is a switch from bearish to bullish it is a buy signal and when it switches from bullish to bearish it is a sell signal.
+This HTML is updated just before the daily close each day, but push notifications for any trade signals are also sent by push bullet.
 
 If you would like to receive these signals in real-time, you can subscribe for 0.0005 BTC per year.
-If you need some help to design your own trading signals, I am happy to help for a fee.
+If you need some help to design your own trading signals/strategies, I am happy to help for a fee.
 email me at mark.ziemann{αt}gmail.com for any enquiries.
 
 If you find this resource useful, consider a small tip.
