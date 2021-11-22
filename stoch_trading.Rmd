@@ -176,12 +176,9 @@ if( nrow(buy) != nrow(sell) ) {
 trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
 
-trades
-nrow(trades)
-basic_returns <- prod(trades$diff)
-basic_returns
-basic_mean <- mean(trades$diff)
-basic_mean
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
 HEADER="STOCH"
 par(mfrow=c(2,1))
@@ -206,7 +203,7 @@ nFastK = 21, nFastD = 14, nSlowD = 21, smooth=7
 sto <- stoch(HLC(price), nFastK=21 , nFastD=14 , nSlowD=21 , bounded = TRUE, smooth=7)
 price2 <- price
 price2 <- cbind(price2,sto)
-price2$higher <- price2$fastK > price2$slowD
+price2$higher <- price2$fastK > price2$fastD
 yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
@@ -265,7 +262,7 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   nFastD=as.numeric(params[i,2])
   nSlowD=as.numeric(params[i,2])
   smooth=as.numeric(params[i,3])
-  mystoch(price,nFastK,nFastD,nSlowD,smooth,fee)
+  mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
 } , mc.cores = detectCores()/2)
 res <- as.data.frame(do.call(rbind, res))
 colnames(res) <- c("returns","trades")
@@ -305,7 +302,7 @@ res5 %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 Trying a refined range of values for nfastk(32:52),nfastd/nslowd(42:82) and smooth (1:5) 
 
-```{r,backtest1}
+```{r,backtest2}
 
 fee=0.001
 
@@ -319,7 +316,7 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   nFastD=as.numeric(params[i,2])
   nSlowD=as.numeric(params[i,2])
   smooth=as.numeric(params[i,3])
-  mystoch(price,nFastK,nFastD,nSlowD,smooth,fee)
+  mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
 } , mc.cores = detectCores()/2)
 res <- as.data.frame(do.call(rbind, res))
 colnames(res) <- c("returns","trades")
@@ -343,7 +340,7 @@ res3
 
 ## Optimisation
 
-This one looks to be the best: nFastK=43, nFastD=47, smooth=1
+This one looks to be the best: nFastK=43, nSlowD/nFastD=47, smooth=1
 
 I have tested the best slowD and varying it did not make any improvement.
 
@@ -361,7 +358,7 @@ sto <- stoch(HLC(price), nFastK=best_nFastK , nFastD=best_nFastD , nSlowD=best_n
   bounded = TRUE, smooth=best_smooth)
 price2 <- price
 price2 <- cbind(price2,sto)
-price2$higher <- price2$fastK > price2$slowD
+price2$higher <- price2$fastK > price2$fastD
 yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
