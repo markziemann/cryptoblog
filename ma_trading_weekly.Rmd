@@ -12,7 +12,8 @@ theme: cosmo
 
 Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading_weekly.Rmd
 
-If you find this resource useful, consider a small tip.
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
 
 BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
 

@@ -1,5 +1,5 @@
 ---
-title: "Trading BTC based on the Stochastic indicator"
+title: "Trading ETH based on the Stochastic indicator"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -21,7 +21,7 @@ LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
 
 ## Intro
 
-Here, we're using the stochastic as a buy/sell indicator for trading BTC.
+Here, we're using the stochastic as a buy/sell indicator for trading ETH.
 
 ```{r,lib}
 
@@ -44,17 +44,17 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
+Obtaining ETH historical data (daily) from CoinMarketCap.com from August 2015 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2015-08-01&time_end=",mydate,sep="")
 
-download.file(URL,destfile="btcdat.txt")
+download.file(URL,destfile="ethdat.txt")
 
-dat <- fromJSON("btcdat.txt")
+dat <- fromJSON("ethdat.txt")
 price <- dat$data$quotes
 price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
@@ -273,8 +273,8 @@ head(res3[order(-res3$returns),],50) %>% kbl() %>%  kable_paper("hover", full_wi
 Now let's have a look at a chart of the total returns and mean ROI of all the strategies tested.
 An optimal strategy would be towards the upper right side of the chart.
 The default strategy is shown in red.
-In the second chart, I'm looking at the strategies with <200 trades since 2013.
-Any strategy with mean ROI > 1.1 is considered good. 
+In the second chart, I'm looking at the strategies with <200 trades since 2015.
+Any strategy with mean ROI > 1.15 is considered good. 
 
 ```{r,plots1,fig.height=8,fig.width=8}
 
@@ -290,24 +290,25 @@ grid()
 
 ```
 
-Here's the table of results for the strategies with ROI of >10,000X and mean trade ROI of 110%.
+Here's the table of results for the strategies with ROI of >10,000X and mean trade ROI of 115%.
 
 ```{r,res4}
 
-res5 <- subset(res2,returns > 1E5 & mean > 1.10 )
-res5 %>% kbl() %>%  kable_paper("hover", full_width = F)
+res5 <- subset(res2,returns > 1E5 & mean > 1.15 )
+res5 <- res5[order(-res5$returns),]
+head(res5,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
 Now that I know which ranges of values work well, I will zoom in and do a more comprehensive
-backtesting for the following values nfastk(32:52),nfastd/nslowd(42:82) and smooth (1:5).
+backtesting for the following values nfastk(12:47),nfastd/nslowd(12:72) and smooth (1:5).
 
 ```{r,backtest2}
 
 fee=0.001
 
-nFastK <- seq(32,52,1)
-nFastD <- seq(42,52,1)
+nFastK <- seq(12,47,1)
+nFastD <- seq(12,72,1)
 smooth <- seq(1,5,1)
 params <- expand.grid(nFastK,nFastD,smooth)
 colnames(params) <- c("nFastK","nFastD","smooth")
@@ -330,16 +331,15 @@ Here are the highest returning strategies with fewer than 200 trades.
 
 ```{r,res6}
 
-res3 <- subset(res2,trades<200)
+res3 <- subset(res2,trades<200 & mean>1.15)
 res3 <- res3[order(-res3$returns),]
-
 head(res3,10) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
 ## Optimisation
 
-This one looks to be the best: nFastK=43, nSlowD/nFastD=47, smooth=1
+This one looks to be the best: nFastK=46, nSlowD/nFastD=25, smooth=1
 
 I have tested the best slowD and varying it did not make any improvement.
 
@@ -439,8 +439,8 @@ abline(h=1,col="red",lty=2)
 
 ## Conclusion
 
-The stochastic gave some nice returns with ROI 1000x over hodl, which is better than the 43D moving 
-average (3.8x), DMI (24.4x) and TSI (151x).
+The stochastic gave some nice returns with ROI 26,000x over hodl, which is better than the 34D moving 
+average (18x), DMI (74x) and TSI (822x).
 Of all the momentum indicators I've tested, this one looks superior.
 
 ## Session information

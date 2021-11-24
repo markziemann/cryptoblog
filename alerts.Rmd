@@ -40,7 +40,8 @@ If you would like to receive these signals in real-time, you can subscribe for 0
 If you need some help to design your own trading signals/strategies, I am happy to help for a fee.
 email me at mark.ziemann{αt}gmail.com for any enquiries/suggestions/feedback.
 
-If you find this resource useful, consider a small tip.
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
 
 BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
 
