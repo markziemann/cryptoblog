@@ -416,6 +416,8 @@ mtext("higher time frame")
 abline(h=hodl,col="red")
 grid()
 
+```
+
 ## Trades by year
 
 It is good to see whether the strategy gives consistent returns over the years.
