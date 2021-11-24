@@ -16,20 +16,23 @@ Source: https://github.com/markziemann/cryptoblog/blob/main/alerts.Rmd
 
 ## Intro
 
-In the backtesting analysis, I have established four different profitable strategies for timing entry/exits.
+In the backtesting analysis, I have established five different profitable strategies for timing entry/exits.
 Click on the hyperlinks below to see how these signals were identified.
 
-1. Simple moving averages: <a href="https://mdz-analytics.com/crypto/ma_trading.html">BTC</a> 43 day; 
-<a href="https://mdz-analytics.com/crypto/ma_trading_eth.html">ETH</a> 34 day.
+1. Simple moving averages: [BTC](https://mdz-analytics.com/crypto/ma_trading.html) 43 day; 
+[ETH](https://mdz-analytics.com/crypto/ma_trading_eth.html) 34 day.
 
-2. Moving average crosses: <a href="https://mdz-analytics.com/crypto/ma_cross.html">BTC</a> 12/21 day SMA and;
+2. Moving average crosses: [BTC](https://mdz-analytics.com/crypto/ma_cross.html) 12/21 day SMA and;
 <a href="https://mdz-analytics.com/crypto/ma_cross_eth.html">ETH</a> 5/27 day.
 
-3. Directional movement index (DMI): <a href="https://mdz-analytics.com/crypto/dmi_trading.html">BTC</a> 26 day;
-<a href="https://mdz-analytics.com/crypto/dmi_trading_eth.html">ETH</a> 19 day.
+3. Directional movement index (DMI): [BTC](https://mdz-analytics.com/crypto/dmi_trading.html) 26 day;
+[ETH](https://mdz-analytics.com/crypto/dmi_trading_eth.html) 19 day.
 
-4. True strength index (TSI): <a href="https://mdz-analytics.com/crypto/tsi_trading.html">BTC</a> n1=99, n2=15, n.signal=5;
-<a href="https://mdz-analytics.com/crypto/tsi_trading.html">ETH</a> n1=99, n2=3, n.signal=13.
+4. True strength index (TSI): [BTC](href="https://mdz-analytics.com/crypto/tsi_trading.html) n1=99, n2=15, n.signal=5;
+[ETH](https://mdz-analytics.com/crypto/tsi_trading_eth.html) n1=99, n2=3, n.signal=13.
+
+5. Stochastic oscillator (stoch): [BTC](href="https://mdz-analytics.com/crypto/stoch_trading.html) nFastK=43, nFastD=47, smooth=1;
+[ETH](https://mdz-analytics.com/crypto/stoch_trading_eth.html) nFastK=46, nFastD=25, smooth=1.
 
 This script will examine the price action and these trade signals just before the daily close.
 If the signal is TRUE, it is bullish and if FALSE it is bearish.
@@ -341,6 +344,67 @@ if ( btc_signal != "NONE") {
 
 ```
 
+## BTC stochastic oscillator indicator
+
+Optimised values:
+
+nFastk = 43, nFastD = 47, smooth = 1
+
+```{r,btc_stoch,fig.height=10,fig.width=8}
+
+sto <- stoch(HLC(price), nFastK=43 , nFastD=47 , nSlowD=47 , 
+  bounded = TRUE, smooth=1)
+
+price2 <- cbind(price,sto)
+price2$signal <- price2$fastK > price2$fastD
+
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="stoch BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="stoch SELL"
+  }
+} else {
+  btc_signal <- "NONE"
+}
+
+message(paste("BTC stoch signal:",btc_signal))
+
+```
+
+```{r,btc_stoch_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$fastK ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="stochastic oscillator")
+lines(as.Date(price2$date), price2$fastD  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+Send a push notification.
+
+```{r,btc_stoch_push}
+
+if ( btc_signal != "NONE") {
+  MYNOTE <- paste("BTC is flashing a ", btc_signal,
+   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
+
+```
+
 ## Get ETH price data
 
 Obtaining ETH historical data (daily).
@@ -590,6 +654,67 @@ par(mfrow=c(1,1))
 Send a push notification.
 
 ```{r,eth_tsi_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste("ETH is flashing a ", eth_signal,
+   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
+
+```
+
+## ETH stochastic oscillator indicator
+
+Optimised values:
+
+nFastk = 46, nFastD = 25, smooth = 1
+
+```{r,eth_stoch,fig.height=10,fig.width=8}
+
+sto <- stoch(HLC(price), nFastK=46 , nFastD=25 , nSlowD=25 ,
+  bounded = TRUE, smooth=1)
+
+price2 <- cbind(price,sto)
+price2$signal <- price2$fastK > price2$fastD
+
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="stoch BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="stoch SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+message(paste("ETH stoch signal:",eth_signal))
+
+```
+
+```{r,eth_stoch_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$fastK ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="stochastic oscillator")
+lines(as.Date(price2$date), price2$fastD  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+Send a push notification.
+
+```{r,eth_stoch_push}
 
 if ( eth_signal != "NONE") {
   MYNOTE <- paste("ETH is flashing a ", eth_signal,
