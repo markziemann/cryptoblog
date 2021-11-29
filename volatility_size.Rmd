@@ -40,8 +40,6 @@ suppressPackageStartupMessages({
   library(anytime)
 })
 
-Sys.Date()
-
 ```
 
 Reminder: this is not financial advice.
@@ -91,25 +89,50 @@ summary(mylm)
 
 abline(mylm,col="red",lwd=2)
 
+```
 
-plot(weekly$Date,weekly$vix,ylim=c(0,50))
-
-mylm <- lm(weekly$vix ~ weekly$Date)
-
-summary(mylm)
-
-abline(mylm,col="red",lwd=2)
+Now try log regression
 
 
-# log not working
-plot(log(weekly$Date),weekly$vix,ylim=c(0,50))
+```{r,logreg1}
 
-mylm <- lm(weekly$vix ~ log(weekly$Date))
+model <- lm(weekly$vix ~ log(as.numeric(weekly$Date)))
 
-summary(mylm)
+summary(model)
 
-abline(mylm,col="red",lwd=2)
+plot(weekly$Date,weekly$vix,xlim=c(weekly$Date[1],weekly$Date[nrow(weekly)]+1000))
 
+# generate points
+x <- seq(from=as.numeric(weekly$Date)[1],
+  to=as.numeric(weekly$Date)[nrow(weekly)]+1000,
+  length.out=nrow(weekly) )
+
+y <- predict(model,newdata=list(x=x), interval="confidence")
+
+matlines(x,y, lwd=2)
+
+```
+
+With a trimmed y axis.
+
+```{r,logreg2}
+
+model <- lm(weekly$vix ~ log(as.numeric(weekly$Date)))
+
+summary(model)
+
+plot(weekly$Date,weekly$vix,
+  xlim=c(weekly$Date[1],weekly$Date[nrow(weekly)]+1000),
+  ylim=c(0,50)  )
+
+# generate points
+x <- seq(from=as.numeric(weekly$Date)[1],
+  to=as.numeric(weekly$Date)[nrow(weekly)]+1000,
+  length.out=nrow(weekly) )
+
+y <- predict(model,newdata=list(x=x), interval="confidence")
+
+matlines(x,y, lwd=2)
 
 ```
 
