@@ -1,0 +1,361 @@
+---
+title: "Cryptocurrency learning resources"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    fig_width: 7
+    fig_height: 7
+theme: cosmo
+---
+
+Source: https://github.com/markziemann/cryptoblog/blob/main/learning_resources.Rmd
+
+This document is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+
+LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
+
+## Preface
+
+The world of cryptocurrency can be an intimidating place, with frequent negative
+stories in the media, and misunderstandings extremely common in the general population.
+What I will do with this page is provide as much high quality learning resources as
+possible so you are able to come to your own conclusion about whether you want to 
+get involved or not. Reminder: this is not financial advice. Do your own research and
+if you invest in a cryptocurrency, understand you can lose everything.
+We will begin with a short description of what bitcoin is and then follow that up with
+more resources you can use to extend your knowledge.
+This isn't meant to be an extensive or comprehensive encylopedia of information,
+rather the bare mimimum you need to begin to learn on you own how to manage your 
+crypto portfolio.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+
+```
+
+## The basics of cryptocurrency (Bitcoin)
+
+Bitcoin was the first and remains the most important cryptocurrency.
+It was developed by an anonymous developer or developers called Satoshi 
+Nakamoto and the whitepaper describing the technical details underlying the 
+Bitcoin software was released in 2008.
+In 2009 the bitcoin network started, presumably by Satoshi running the Bitcoin
+node software.
+In doing so, the first block of the blockchain was laid and over time many other
+folks joined the network by running the software, growing the network further.
+
+Being a currency, it allows participants to transact bitcoin (BTC) without
+requiring the permission of a bank or other third party.
+As Bitcoin is a decentralised network consisting of nodes and miners, there is
+no central point of failure, which is important if it is to be resilient against
+attacks from governments and other adversaries.
+
+So what is a blockchain anyway?
+In simple terms it is just a list of all the transactions that have taken place
+in the past.
+The Bitcoin network is maintained by nodes who each have a copy of the 
+blockchain and can therefore confirm the balances of each bitcoin holder.
+
+The process of confirming transactions is a complicated one because it needs to
+mitigate the possibility of participants trying to double spend their fund.
+Also, there is the problem of many nodes of the network needing to agree on the
+contents of a block.
+This is a major problem which has plagued decentralised systems for a long while
+and has been termed the "Byzantine Generals Problem".
+
+The way that this was solved was to develop a system called mining, in which
+a group of potential transactions are bundled into a block and then miners apply
+their CPU time to "solve" the cryptographic SHA256 checksum (hash) of the block,
+so that the hash starts with a certain number of zeros.
+For a miner to find the solution hash is relatively difficult so it is unlikely 
+to be found simultaneously by two miners.
+Once the solution is found, it is broadcast to the network, where it can be 
+confirmed easily by nodes and the network can come to a consensus.
+This process of block confirmation occurs approximately every 10 minutes and the 
+successful miner receives a block subsidy of 6.25 BTC but this subsidy is cut 
+in half approximately every four years.
+This has the effect of making BTC more scarce over time.
+Mining is also the process by which BTC are minted into existence.
+As of today, about 18 M of the total 21 M BTC have been mined.
+
+In addition to the block subsidy, miners collect transaction fees which 
+transactors use to prioritise their transactions over others.
+It is possible to set a tranaction fee of zero, but those transactions will only 
+be settled once the number of transactions in the queue falls to very low
+levels (this occurs only rarely).
+
+In the short term, reduction of the block subsidy leads to lower supply of BTC
+being traded by miners on exchanges and this results in short term scarcity and
+price "pumps" which gain massive momentum and resemble stock market bubbles, 
+complete with spectacular price appreciation "bull runs" followed by crushing 
+"bear markets" with drawdowns of 80 to 90% as seen in 2014/2015 and 2018/2019.
+
+One of the main points which makes bitcoin attractive to investors is the fact 
+that the number of BTC that will ever exist is hard coded into the protocol.
+There will never be more than 21 M BTC in existence. 
+In this way, BTC is seen as "hard" money, which cannot be devalued by a 
+government or central bank.
+It is perceived by some as a hedge against future inflation, somewhat like gold
+for the traditional investor, however there are some differences to gold that
+need to be mentioned:
+
+1. Gold has a tangible form, which has some industrial use, for example as 
+jewellery or as a good conductor. Bitcoin doesn't have a material form which
+may be considered a drawback but might also be considered a positive as 
+explained below.
+
+2. As BTC is immaterial, the only way to prove you own the bitcoin is to
+possess the cryptographic keys to the "wallet" holding the BTC. This makes
+confiscating BTC difficult (for example if the private keys exist only in the
+memory of the owner).
+
+3. Being immaterial, it enables BTC to be sent quickly. Whether the transaction
+is small or large, the fee paid for the transaction is the same and takes the
+same time to be confirmed.
+Imagine sending $1 B worth of gold around the world in 1 hour, it simply 
+wouldn't be possible. 
+
+4. Gold is inflationary compared to BTC.
+Indeed there is only a small amount of gold that is in existence in its refined
+form as bullion or jewellery, but there are new geological deposits being found  
+every year, which means there is more flow of gold coming on to the market.
+As technology improves, more deposits will be identified on land, in the sea bed
+and maybe from asteroids or other moons or planets, who knows.
+Meanwhile BTC will remain capped at 21 M.
+In addition, unfortunate or careless bitcoiners lose their private keys and 
+therefore access to their coins, meaning the actual supply of coins is less than
+this and may even shrink over time.
+
+So bitcoin is like digital gold, but it's properties make it better in many
+respects.
+
+Will bitcoin replace local fiat currencies any time soon?
+Probably not, Gresham's law indicates that "hard" money will be driven out of
+circulation by "soft" money that can be easily printed by banks.
+It makes more sense to hodl (save) bitcoin into the rather than use it for
+purchases.
+Cast your mind back to the first commercial bitcoin transaction, 10,000 BTC for
+a pizza would be worth something like $500 M at today's rates.
+
+Therefore BTC will find itself to be a way for savers to preserve their 
+purchasing power over long time frames, say decades.
+This simply cannot be achieved by currently in traditional finance, with term
+deposit rates accruing interest below the consumer price index.
+While BTC appears to be a good instrument for savers, it does experience massive 
+swings in price, so investors may experience volatile swings in the portfolio 
+value, which isn't for everyone.
+Of course you can hodl through the severe bear markets, but if you are prepared 
+with a strategy for navigating downturns and minimising your losses, the rewards
+cn be really huge. 
+(I will write a separate article on strategies for that.)
+
+It is interesting to see El Salvador recently declare bitcoin as legal tender and 
+incorporate it as a legitimate part of its economy.
+This is in large part due to a lack of it's own national currency and reliance on the
+US dollar as the local currency.
+For a long time people have said that bitcoin won't be used in a day to day sense 
+because the network can only process about 3 transactions per section and in times of
+demand the transaction fees can escalate to over $20 which is impractical.
+However the El Salvador adoption of bitcoin was enabled by the lightning network.
+This is a "layer 2" system which allows for tranactions to occur off-chain.
+Lightning transactions incur only tiny fees of a few cents, which allows for interesting
+applications like microtransactions, tipping and streaming money.
+The development of the lightning network and other layer 2 solutions reduce the demand
+for on-chain transactions and reduce the transaction fees for everyone.
+
+## Altcoins
+
+Since Bitcoin was described there have been thousands of other cryptocurrencies 
+created.
+Some of these have features such as enhanced privacy, transaction speed, or smart 
+contract capabilities which give them some unique benefits over Bitcoin.
+Some of these currencies are demonstrations of real-world innovations and will fill
+important niches. 
+Other coins were created as jokes, or memes and have no real benefits (think DOGE),
+while other coin projects were outright scams.
+
+Many people coming into the space are attracted to altcoins because they feel they
+missed the boat in investing in bitcoin, and would rather get in early with a smaller 
+project which has a higher upside potential.
+It is partially true that altcoins have higher potential gains (especially the 
+low-caps), however you need to understand that the risk is higher with them as well.
+Just take a look at the top 10 altcoins in 2017, and where they are now.
+Search for cryptos like LTC, DASH, XVG, XRP.
+Some of those projects suffered catastrophic losses in excess of 95%.
+Some of those coins have just recovered their previous all time high, while others 
+remain beaten down, while BTC is well above the 2017 high (approx 3x).
+Why is that?
+Couple reasons, firstly even though bitcoin is volatile, it is considered a safer bet 
+than altcoins.
+Secondly, Bitcoin enjoys a larger community of developers, who can add new features to
+the network, develop new wallets and integration into the existing financial system.
+Bitcoin is also able to integrate features from other projects.
+Remember that the concept of "layer 2", small transactions with extremely low fees 
+using the lightning network was first enabled on Litecoin, before it was applied to
+Bitcoin.
+
+I'm not saying that altcoins are all a bad investment, just that the risks are higher.
+Even though a project could be fundamentally valuable doesn't mean it will perform 
+well. 
+As the market is driven more by emotions than fundamentals it will continue to be
+unpredictable.
+One piece of advice I can give is to see what projects are getting software developers
+involved.
+Clearly the Ethereum network is a focus for cutting edge applications such as defi and 
+non-fungible tokens (NFTs) which will innovate banking, finance and other aspects of
+our life, but keep in mind that Ethereum is undergoing major upgrades such as moving
+to proof-of-stake, along with upgrades to enable more transactions which have a chance 
+of failing.
+Aside from this, Ethereum is a really interesting network because it invites others to
+build applications on top of it and use the Ethereum network.
+For example the cryptos Chainlink (LINK) and Synthetix (SNX) are tokens on the Ethereum
+system.
+If you have an Ethereum wallet like Metamask, you can keep not only ETH, but also LINK,
+SNX, other ERC-20 tokens and even NFTs.
+If you transact tokens or enter into smart contracts on the ETH network, there are gas
+fees which need to be paid in order to prioritise it sufficiently so it is executed in
+a timely way.
+Interestingly, transaction fees on the ethereum network currently are 5-10X higher than
+for Bitcoin, which is an indication of how well the Ethereum network has been able to
+on-board many other projects, but these extremely high fees are a deterrent to 
+newcomers and have led to the popularity of competitors such as Binance smart chain,
+Solana, Polkadot, Avalanche and many others.
+As the competition for supremecy is so fierce, it is likely that there will be big 
+winners and losers.
+It is possible that any of these competitors to Ethereum could overtake it, but in my 
+opinion this is unlikely as Ethereum has the biggest critical mass of developers.
+If these upgrades roll out as planned into ETH2.0, then Ethereum throughput will expand 
+dramatically, gas fees will crash and Ethereum competitor networks will fall 
+significantly behind.
+
+From this, you should appreciate that Ethereum is in strong competition with other 
+smart contract chains and it will likely end up as winner-take-all.
+On the other hand, there are no serious store-of-value competitors to bitcoin.
+In my humble opinion, bitcoin is in a class of it own and should be the bedrock of any
+investment portfolio.
+
+
+## Links to further resources
+
+With all that general stuff out of the way, I'm going to share some of my favourite 
+learning resources and links which have been important for me.
+
+### Bitcoin.org
+
+[Bitcoin.org](https://bitcoin.org/en/) is where it began.
+Learn more about Bitcoin, read the whitepaper, get a wallet, secure your keys,
+run a node, learn about new developments.
+
+### Andreas Antonopolous
+
+Famous for his books 
+[Internet of money](https://www.amazon.com.au/Internet-Money-Andreas-M-Antonopoulos-ebook/dp/B01L9WM0H8)
+and [Mastering Bitcoin](https://github.com/bitcoinbook/bitcoinbook),
+Andreas has grown to become a leader in cryptocurrency advocacy and education.
+Follow him on Twitter and watch his YouTube videos.
+
+### Txstreet
+
+[TxStreet](https://txstreet.com/) is a visualiser of congestion of the top two crypto
+networks and a fun way to check transaction fees.
+
+### How mining works
+
+I skimmed over a lot of detail so these might be useful:
+
+* [Mining bitcoin with pencil and paper](http://www.righto.com/2014/09/mining-bitcoin-with-pencil-and-paper.html)
+
+* [The green case for bitcoin](https://www.spectator.co.uk/article/the-green-case-for-bitcoin)
+
+### Securing your coins
+
+A reasonably good guide for wallet security can be found [here](https://cryptopotato.com/9-must-tips-securing-crypto-wallet/).
+I will write a future post on this topic.
+
+## Lending and borrowing
+
+Celsius, Ledn, Nexo, Blockfi and other centralised players will allow you to deposit
+your crypto and accumulate interest.
+This incurrs some risk, but is a strategy to passively grow an investment.
+These players may also allow you to take out a fiat loan, using crypto as collateral.
+Decentralised protocols (eg: [Compound Finance](https://compound.finance/)) also exist
+and offer borrowing and lending services but some with lower KYC/AML regulations.
+
+## Market indicators
+
+* [Look into bitcoin](https://www.lookintobitcoin.com/)
+has a ton of interesting charts by Phillip Swift and his team which focus on market
+cycle indicators which is useful as a guide for knowing when to dial up and down
+the risk exposure.
+
+* [Bitcoin long term power law chart](https://stats.buybitcoinworldwide.com/long-term-power-law/)
+is perhaps the most important chart in crypto. 
+The https://stats.buybitcoinworldwide.com/ site also has a ton of other interesting
+charts. 
+
+* [Willy Woo](https://charts.woobull.com/bitcoin-price-models/) has several 
+interesting bitcoin charts looking at on-chain and price action.
+
+* [Rainbow Chart](https://www.blockchaincenter.net/bitcoin-rainbow-chart/)
+Another regression model of bitcoin price.
+
+* [PlanB blog posts on Medium](https://medium.com/@100trillionUSD)
+Here's where the gold trader-cum-crypto quant has posted some of their work
+including the famous stock-to-flow bitcoin price prediction model.
+
+## Trading indicators and strategy
+
+* [Investopedia](https://www.investopedia.com/) is a gold mine of information
+about chart indicators, price signals and fundamentals of stock and crypto trading.
+
+* [Wall St. Cheat Sheet: Psychology of a market cycle](https://ritholtz.com/2010/06/psychology-cheat-sheet/)
+
+## YouTubers
+
+Best folks to follow on YouTube are [Crypto Anup](https://www.youtube.com/channel/UCY7zYMsiIAA_sP1mY--I23Q),
+ and [Crypto Newton](https://www.youtube.com/channel/UC4aEpoFQgCUpSBm7sQr0GBw).
+I also follow Crypto Kirby for the indicators he uses, The Moon for trade signals,
+and MMCrypto to guage the overall market sentiment. 
+I also watch a bit of Keiser Report to see the alternate financial reporting from an OG
+bitcoiner.
+
+## Market data
+
+Here are some useful market data resources:
+
+* https://www.investing.com/crypto/bitcoin/historical-data
+
+* https://www.cryptodatadownload.com/data/
+
+* https://99bitcoins.com/bitcoin/historical-price/
+
+* https://coinmarketcap.com/api/documentation/v1/
+
+* https://www.coingecko.com/en/api
+ 
+## Miscellaneous
+
+* [The Bitcoin Dashboard](https://bitcoin.clarkmoody.com/dashboard/)
+
+* [Blockstream Explorer](https://blockstream.info/)
+
+## Feedback and suggestions
+
+mark.ziemann[at]gmail.com
