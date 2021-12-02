@@ -7,7 +7,7 @@ output:
     toc: true
     toc_float: true
     code_folding: hide
-    fig_width: 7
+    fig_width: 10
     fig_height: 7
 theme: cosmo
 ---
@@ -51,11 +51,7 @@ Data are from https://www.investing.com/indices/investing.com-btc-usd-historical
 
 The data is in CSV format and the dates need to be cleaned a bit.
 
-```{r,getdata}
-
-daily <- read.csv("BitcoinHistoricalData.csv")
-daily <- daily[nrow(daily):1,]
-daily <- apply(daily,2,function(x) { gsub(",","",x) } )
+```{r,historicaldata}
 
 weekly <- read.csv("BitcoinHistoricalData_weekly.csv")
 weekly <- weekly[nrow(weekly):1,]
@@ -70,6 +66,27 @@ weekly$Low <- as.numeric(weekly$Low)
 
 weekly$Date <- anydate(weekly$Date)
 
+weekly <- weekly[,c("Date","High","Low","Open")]
+weekly <- weekly[grep("2021",weekly$Date,invert=TRUE),]
+
+```
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=weekly&time_start=2021-01-01&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat_weekly.txt")
+btcdat <- fromJSON("btcdat_weekly.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$open,stringsAsFactors=FALSE)
+colnames(price) <- c("Date","High","Low","Open")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+
+price$Date <- anydate(price$Date)
+
+weekly <- rbind(weekly,price)
+
 ```
 
 ## Volatility on the weekly
@@ -80,7 +97,8 @@ Plotting the weekly trading range as a volatility metric.
 
 weekly$vix <- ( weekly$High - weekly$Low ) / weekly$Open * 100
 
-plot(weekly$Date,weekly$vix)
+plot(weekly$Date,weekly$vix,
+ xlab="", ylab="VIX", main="weekly trading range / opening price" )
 
 mylm <- lm(weekly$vix ~ weekly$Date)
 
@@ -97,7 +115,8 @@ Now try log regression
 
 model <- lm(weekly$vix ~ log(as.numeric(weekly$Date)))
 
-plot(weekly$Date,weekly$vix,xlim=c(weekly$Date[1],weekly$Date[nrow(weekly)]+1000))
+plot(weekly$Date,weekly$vix,xlim=c(weekly$Date[1],weekly$Date[nrow(weekly)]+1000),
+ xlab="", ylab="VIX", main="weekly trading range / opening price" )
 
 # generate points
 x <- seq(from=as.numeric(weekly$Date)[1],
@@ -116,15 +135,14 @@ With a trimmed y axis.
 
 ```{r,logreg2}
 
-model <- lm(weekly$vix ~ log(as.numeric(weekly$Date)))
-
-summary(model)
-
 plot(weekly$Date,weekly$vix,
   xlim=c(weekly$Date[1],weekly$Date[nrow(weekly)]+1000),
-  ylim=c(0,50)  )
+  ylim=c(0,50) ,
+  xlab="", ylab="VIX", main="weekly trading range / opening price" )
+grid()
 
-# generate points
+
+# generate frecast points
 x <- seq(from=as.numeric(weekly$Date)[1],
   to=as.numeric(weekly$Date)[nrow(weekly)]+1000,
   length.out=nrow(weekly) )
@@ -137,6 +155,23 @@ matlines(x,y, lwd=2)
 
 It is quite interesting that the logarithmic regression yielded a more or less linear curve,
 indicating that volatility is decreasing in a constant fashion.
+
+Also interesting to see the increasing volatility at the the peak bubble years incl 2013, 2017, 2020, and lower volatility in 2016 and in 2021 
+which could be possible described as reaccumulation phases with historically low volatility.
+
+```{r,logreg3}
+
+plot(weekly$Date,weekly$vix,
+  xlim=c(weekly$Date[1],weekly$Date[nrow(weekly)]+1000),
+  ylim=c(0,50) ,col="gray", pch=19,
+  xlab="", ylab="VIX", main="weekly trading range / opening price" )
+grid()
+mtext("red line = 20 wk moving average")
+lines(SMA(weekly$vix,n=20) ~ weekly$Date ,col="red",lwd=3)
+
+```
+
+The chart definitely shows that Q3/Q4 2021 have printed very low volatility, is this a precursor to a bull run, just like 2016?
 
 ## Session information
 
