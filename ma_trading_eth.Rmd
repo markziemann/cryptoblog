@@ -214,11 +214,15 @@ grid()
 text(res_sma$mean,res_sma$returns , cex=1, labels=rownames(res_sma))
 abline(h=hodl,col="red")
 
+head(res_sma[order(-res_sma$mean),],20) %>% kbl(caption="Highest ROI SMA strategy") %>%  kable_styling()
+
 plot(res_ema$mean,res_ema$returns, main="ETH daily EMA",
   xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_ema$mean,res_ema$returns , cex=1, labels=rownames(res_ema))
 abline(h=hodl,col="red")
+
+head(res_ema[order(-res_ema$mean),],20) %>% kbl(caption="Highest ROI EMA strategy") %>%  kable_styling()
 
 ```
 
