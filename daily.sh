@@ -51,3 +51,8 @@ Rscript -e "rmarkdown::render('stablecoincap.Rmd')" && \
 
 Rscript -e "rmarkdown::render('rsi_watch.Rmd')" && \
   scp -P 21098 rsi_watch.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+
+Rscript -e "rmarkdown::render('volatility_size.Rmd')" && \
+  scp -P 21098 volatility_size.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+
+
