@@ -53,11 +53,11 @@ The data is in CSV format and the dates need to be cleaned a bit.
 
 ```{r,historicaldata}
 
-weekly <- read.csv("BitcoinHistoricalData_weekly.csv")
+weekly <- read.csv("BitcoinHistoricalData_weekly.csv",stringsAsFactors=FALSE)
 weekly <- weekly[nrow(weekly):1,]
 weekly <- apply(weekly,2,function(x) { gsub(",","",x) } )
 
-weekly <- as.data.frame(weekly)
+weekly <- as.data.frame(weekly,stringsAsFactors=FALSE)
 
 weekly$Price <- as.numeric(weekly$Price)
 weekly$Open <- as.numeric(weekly$Open)
