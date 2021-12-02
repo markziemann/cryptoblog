@@ -194,7 +194,7 @@ colnames(res_sma) <- c("MA1","MA2","returns","trades")
 res_sma$mean <- res_sma$returns^(1/res_sma$trades)
 
 best_sma <- res_sma[order(-res_sma$mean),]
-best_sma %>% kbl(caption="Best ROI SMA strategies") %>%  kable_styling()
+head(best_sma,20) %>% kbl(caption="Best ROI SMA strategies") %>%  kable_styling()
 best_sma <- head(res_sma[order(-res_sma$returns),],20)
 best_sma %>% kbl(caption="Highest returns SMA strategies") %>%  kable_styling()
 
@@ -235,7 +235,7 @@ colnames(res_ema) <- c("MA1","MA2","returns","trades")
 res_ema$mean <- res_ema$returns^(1/res_ema$trades)
 
 best_ema <- res_ema[order(-res_ema$mean),]    
-best_ema %>% kbl(caption="Best ROI EMA strategies") %>%  kable_styling()
+head(best_ema,20) %>% kbl(caption="Best ROI EMA strategies") %>%  kable_styling()
 best_ema <- head(res_ema[order(-res_ema$returns),],20)
 best_ema %>% kbl(caption="Highest returns EMA strategies") %>%  kable_styling()
 
