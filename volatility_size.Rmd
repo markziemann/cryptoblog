@@ -46,9 +46,8 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-We will be simplifying things by working only with the market cap of the top two stablecoins Tether (USDT) and USD Coin (USDC) against cryptocurrencies Bitcoin (BTC) and Ethereum (ETH).
-
-Data from https://www.investing.com/indices/investing.com-btc-usd-historical-data
+Here I will be analysing the weekly trading range as a proxy for volatility.
+Data are from https://www.investing.com/indices/investing.com-btc-usd-historical-data
 
 The data is in CSV format and the dates need to be cleaned a bit.
 
@@ -85,11 +84,11 @@ plot(weekly$Date,weekly$vix)
 
 mylm <- lm(weekly$vix ~ weekly$Date)
 
-summary(mylm)
-
 abline(mylm,col="red",lwd=2)
 
 ```
+
+Hmm, this looks okay but we expect volatility to taper off, not just linearly go to zero.
 
 Now try log regression
 
@@ -97,8 +96,6 @@ Now try log regression
 ```{r,logreg1}
 
 model <- lm(weekly$vix ~ log(as.numeric(weekly$Date)))
-
-summary(model)
 
 plot(weekly$Date,weekly$vix,xlim=c(weekly$Date[1],weekly$Date[nrow(weekly)]+1000))
 
@@ -110,6 +107,8 @@ x <- seq(from=as.numeric(weekly$Date)[1],
 y <- predict(model,newdata=list(x=x), interval="confidence")
 
 matlines(x,y, lwd=2)
+
+summary(model)
 
 ```
 
@@ -135,6 +134,9 @@ y <- predict(model,newdata=list(x=x), interval="confidence")
 matlines(x,y, lwd=2)
 
 ```
+
+It is quite interesting that the logarithmic regression yielded a more or less linear curve,
+indicating that volatility is decreasing in a constant fashion.
 
 ## Session information
 
