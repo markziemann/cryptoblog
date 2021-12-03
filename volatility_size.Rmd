@@ -12,7 +12,7 @@ output:
 theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/dmi_trading.Rmd
+Source: https://github.com/markziemann/cryptoblog/blob/main/volatility_size.Rmd
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
