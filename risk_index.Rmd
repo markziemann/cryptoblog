@@ -232,8 +232,6 @@ tail(daily,10) %>% kbl() %>% kable_paper("hover", full_width = F)
 
 ```
 
-As you can see, according to this definition, 
-
 This is just the data and indicators based on the 2021 peak, it may not turn out like this in future.
 As the old saying goes, "past performance does not predict future results", however the market does seem to have repeating
 boom and bust cycles.
