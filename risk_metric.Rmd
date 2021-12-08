@@ -1,0 +1,211 @@
+---
+title: "Establishing a BTC risk metric"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    fig_width: 10
+    fig_height: 10
+theme: cosmo
+---
+
+Source: https://github.com/markziemann/cryptoblog/blob/main/risk_metric.Rmd
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+
+LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
+
+## Intro
+
+Prominent YouTuber [Benjamin Cowan](https://www.youtube.com/channel/UCRvqjQPSeaWn-uEx-w0XOIg) 
+regularly discusses the BTC risk metric on his channel.
+It is based on a ratio between a relatively short moving average (50 day) and a longer one (50 week),
+although people implement this in different ways.
+
+A strategy used by some Bitcoiners is to accumulate when the risk metric is low and sell 
+when the risk metric is high.
+
+For some background information read [here](https://www.reddit.com/r/Bitcoin/comments/mgr5kq/im_searching_for_the_glorious_risk_metric_formula/).
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+  library("anytime")
+  library("forecast")
+})
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Here I will be analysing the weekly trading range as a proxy for volatility.
+Historical data pre 2021 are from https://www.investing.com/indices/investing.com-btc-usd-historical-data
+while the recent data are from http://coinmarketcap.com/
+
+This document is designed to be updated daily.
+
+```{r,historicaldata}
+
+daily <- read.csv("BitcoinHistoricalData_daily.csv",stringsAsFactors=FALSE)
+daily <- daily[nrow(daily):1,]
+daily <- apply(daily,2,function(x) { gsub(",","",x) } )
+
+daily <- as.data.frame(daily,stringsAsFactors=FALSE)
+
+daily$Price <- as.numeric(daily$Price)
+daily$Open <- as.numeric(daily$Open)
+daily$High <- as.numeric(daily$High)
+daily$Low <- as.numeric(daily$Low)
+
+daily$Date <- anydate(daily$Date)
+
+daily <- daily[,c("Date","High","Low","Open","Price")]
+colnames(daily) <- c("Date","High","Low","Open","Close")
+daily <- daily[grep("2021",daily$Date,invert=TRUE),]
+
+```
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2021-01-01&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat_daily.txt")
+btcdat <- fromJSON("btcdat_daily.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$open, price$quote$USD$close, stringsAsFactors=FALSE)
+colnames(price) <- c("Date","High","Low","Open","Close")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+
+price$Date <- anydate(price$Date)
+
+daily <- rbind(daily,price)
+
+```
+
+## Calculate moving averages, ratio and risk index
+
+The first step is to calculate the 50d and 50w MAs as well as the ratio.
+
+The MA ratio oscillates but the peaks are getting lower over time.
+
+The upper line probably follows a logarithmic decay model but I will cheat and use a linear approximation.
+
+The key dates I'm using as the tops are:
+
+2013-04-10 266.00
+
+2013-12-04 1237.6
+
+2017-12-17 19065.70
+
+The risk index can be calculated between 0 and 1 by the distance between the "floor" and what is considered the current top.
+
+```{r,ma1}
+
+daily$MA50d <- SMA(daily$Close,n=50)
+daily$MA50w <- SMA(daily$Close,n=350)
+
+daily$ratio <- daily$MA50d / daily$MA50w
+
+tail(daily) %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
+
+ratio<-daily[which(!is.na(daily$ratio)),"ratio"]
+rat_min <- min(ratio)
+
+# tops
+topdates <- as.Date(c("2013-04-10","2013-12-04","2017-12-17"))
+tops <- daily[which(daily$Date %in% topdates),]
+
+mylm <- lm(tops$ratio ~ tops$Date)
+
+coeffs <- coefficients(mylm)
+
+# generate points
+x <- seq(from=daily$Date[1],
+  to=daily$Date[nrow(daily)],
+  length.out=nrow(daily) )
+
+y <- predict(mylm,newdata=list(x=x), interval="confidence")
+
+today_topval <- coeffs[1] + coeffs[2]*as.numeric(Sys.Date())
+
+daily$topvals <- coeffs[1] + coeffs[2]*as.numeric(daily$Date)
+
+daily$floor <- rat_min
+
+daily$risk_index <- ( daily$ratio - daily$floor ) / daily$topvals
+
+daily$risk_index <- (daily$ratio - daily$floor) / (daily$topvals - daily$floor)
+
+```
+
+## Charts
+
+Now that everything is calculated, plot the results.
+
+```{r,plot1}
+
+plot(daily$Date,daily$Close,
+ xlab="", ylab="USD", main="BTC price" ,log="y",pch=19,cex=0.1)
+mtext("blue=50d MA, res=50w MA")
+grid()
+lines(daily$Date,daily$MA50w, col="blue",lwd=2)
+lines(daily$Date,daily$MA50d, col="red",lwd=2)
+
+plot(daily$Date,daily$ratio,ylim=c(0.4,4),
+ xlab="", ylab="ratio", main="50d MA / 50w MA" ,pch=19,cex=0.1)
+mtext("blue line=floor,red line=top")
+grid()
+abline(h=rat_min,col="blue",lwd=2)
+abline(mylm, col="red",lwd=2)
+#points(Sys.Date(),today_topval,cex=2)
+
+plot(daily$Date,daily$risk_index, ylim=c(0,1.2),
+ xlab="", ylab="Index", main="Risk index" ,pch=19,cex=0.1)
+grid()
+abline(h=1,col="red",lwd=2)
+
+```
+
+You can see that the peaks cross the red line and continue to go above it.
+Why is that you ask?
+Well the 50d MA is still a lagging indicator and the model I made is generated from the actual top days, not the day when the 50D MA peaked.
+If you wait for the index to hit 1.1, you'll likely miss the party by 50 days!
+
+Now we can see the figures for the past 10 days to see how hot/cold the market is getting.
+
+```{r,tbl1}
+
+tail(daily,10) %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
+
+```
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
