@@ -1,5 +1,5 @@
 ---
-title: "Establishing a BTC risk metric"
+title: "A BTC risk index for measuring the temperature of the market"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -12,7 +12,7 @@ output:
 theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/risk_metric.Rmd
+Source: https://github.com/markziemann/cryptoblog/blob/main/risk_index.Rmd
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
@@ -28,10 +28,14 @@ regularly discusses the BTC risk metric on his channel.
 It is based on a ratio between a relatively short moving average (50 day) and a longer one (50 week),
 although people implement this in different ways.
 
+For some background information read [here](https://www.reddit.com/r/Bitcoin/comments/mgr5kq/im_searching_for_the_glorious_risk_metric_formula/).
+
 A strategy used by some Bitcoiners is to accumulate when the risk metric is low and sell 
 when the risk metric is high.
 
-For some background information read [here](https://www.reddit.com/r/Bitcoin/comments/mgr5kq/im_searching_for_the_glorious_risk_metric_formula/).
+Here I'm going to calculate these moving averages and use them to calculate my own risk index.
+
+This document is designed to be updated daily, so revisit whenever you need.
 
 ```{r,lib}
 
@@ -53,11 +57,8 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Here I will be analysing the weekly trading range as a proxy for volatility.
 Historical data pre 2021 are from https://www.investing.com/indices/investing.com-btc-usd-historical-data
 while the recent data are from http://coinmarketcap.com/
-
-This document is designed to be updated daily.
 
 ```{r,historicaldata}
 
@@ -185,20 +186,66 @@ abline(h=1,col="red",lwd=2)
 
 ```
 
-You can see that the peaks cross the red line and continue to go above it.
-Why is that you ask?
-Well the 50d MA is still a lagging indicator and the model I made is generated from the actual top days, not the day when the 50D MA peaked.
-If you wait for the index to hit 1.1, you'll likely miss the party by 50 days!
+## Indicator performance in 2021
+
+Let's take a look at how this indicator performed in 2021.
+
+It is impossible to precisely time the market top, and based on this chart it would be best to scale out gradually when the index
+exceeds 1.05.
+
+If we had to pick a single day to dump, that would be the day when the index dips below 1.05 after a strong rally.
+This date is indicated on the chart below
+
+```{r,2021test}
+
+daily2021 <- daily[grep("2021",daily$Date),]
+daily2021 <- daily2021[which(daily2021$risk_index>0.95),]
+peak <- daily2021[tail(which(daily2021$risk_index>1.05),1)+1,]
+
+
+par(mfrow=c(2,1))
+plot(daily2021$Date,daily2021$Close,type="l",xlab="",ylab="USD",main="2021 peak price")
+grid()
+abline(v=peak$Date,lty=2)
+
+plot(daily2021$Date,daily2021$risk_index,type="l",xlab="",ylab="Index",main="BTC risk")
+grid()
+abline(v=peak$Date,lty=2)
+
+```
+
+Here is the data for that day.
+
+```{r,2021peak}
+
+peak
+
+```
+
+## Current BTC risk index
 
 Now we can see the figures for the past 10 days to see how hot/cold the market is getting.
 
 ```{r,tbl1}
 
-tail(daily,10) %>%
-  kbl() %>%
-  kable_paper("hover", full_width = F)
+tail(daily,10) %>% kbl() %>% kable_paper("hover", full_width = F)
 
 ```
+
+As you can see, according to this definition, 
+
+This is just the data and indicators based on the 2021 peak, it may not turn out like this in future.
+As the old saying goes, "past performance does not predict future results", however the market does seem to have repeating
+boom and bust cycles.
+
+This is just one indicator and should not be used in isolation.
+There are other indicators of market tops I've listed below:
+
+* https://charts.woobull.com/
+
+* https://www.lookintobitcoin.com/charts/
+
+* https://stats.buybitcoinworldwide.com/long-term-power-law/
 
 ## Session information
 
