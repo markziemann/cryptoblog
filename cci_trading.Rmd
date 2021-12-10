@@ -1,0 +1,151 @@
+---
+title: "Trading based on RSI"
+author: "Mark Ziemann"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+theme: cosmo
+---
+
+## Intro
+
+In this blog post I will be trilaing using RSI for entry and exit.
+
+```{r,lib}
+
+library("jsonlite")
+library("tidyverse")
+library("runner")
+library("quantmod")
+library("TTR")
+library("vioplot")
+library("parallel")
+
+knitr::opts_chunk$set(fig.width=8, fig.height=8) 
+
+```
+
+## Get data
+
+Obtaining BTC historical data (daily).
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat.txt")
+btcdat <- fromJSON("btcdat.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$high,price$quote$USD$low,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(price$date,"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),2][2] 
+mystart <- price[c(1,nrow(price)),2][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## RSI analysis
+
+The idea here is to enter after CCI goes above -100 and exit when CCI goes below +100
+
+```{r,cci}
+
+n=20
+c=0.015
+cci <- CCI(price[,c("high","low","close")], n = 20, c = 0.015 )
+
+par(mfrow=c(2,1))
+plot(price$close~ as.Date(price$date),type="l",log="y",xlab="",ylab="USD price")
+grid()
+plot(cci ~ as.Date(price$date),type="l",xlab="",ylab="CCI")
+grid()
+abline(h=-100,col="red")
+abline(h=+100,col="red")
+
+```
+
+
+```{r,cci}
+
+ccifun <- function(price,entry=-100,exit=100,n=20,fee=0.001) {
+  cci <- CCI(price[,c("high","low","close")], n = n, c = 0.015 )
+  cciy <- c(NA,cci)[1:nrow(price)]
+  price2 <- data.frame(price,cci,cciy,stringsAsFactors=FALSE)
+  price2$sell <- as.numeric( price2$cci < exit & price2$cciy > exit )
+  price2$buy <- as.numeric( price2$cci > entry & price2$cciy < entry )
+  price2 <- subset(price2, buy == 1 | sell == 1)
+  price2$y <- c(NA,price2$buy)[1:nrow(price2)]
+  price2 <- price2[which(price2$buy != price2$y),]
+
+  if (nrow(price2)>0) {
+    buy <- subset(price2,buy==1)[c(1,2)]
+    colnames(buy) <- c("buy_date","buy_price")
+    sell <- subset(price2,sell==1)[c(1,2)]
+    colnames(sell) <- c("sell_date","sell_price")
+    if( nrow(buy) != nrow(sell) ) {
+      MIN=min(nrow(buy),nrow(sell))
+      buy <- buy[1:MIN,]
+      sell <- sell[1:MIN,]
+    }
+    trades <- cbind(buy,sell)
+    trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+    return(c(prod(trades$diff),nrow(trades)))
+  } else {
+    return(c(1,0))
+  }
+}
+
+
+```
+
+## Backtesting
+
+FEES: Assuming 0.1% trading fee, as per binance current rate.
+
+```{r,backtest}
+
+fee=0.001
+n=20
+
+ccifun(price, entry=-100,  exit=100, n=20)
+
+mymx <- expand.grid(seq(-200,0,5),seq(0,200,5),10:20)
+
+mylist <- as.list(as.data.frame(t(mymx)))
+
+cci_res <- mclapply(X=mylist,mc.cores=4,FUN=function(x) { 
+  ccifun(price,entry=x[1],exit=x[2],n=x[3],fee=0.001)
+})
+
+mymx$res <- unlist(res_rsi_sig)
+
+mymx <- mymx[which(!is.na(mymx$res)),]
+
+head(mymx[order(-mymx$res),],30)
+
+```
+
+## Conclusion
+
+RSI doesn't appear to be very good on its own.
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
