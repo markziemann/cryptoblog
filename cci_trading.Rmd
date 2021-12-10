@@ -113,7 +113,7 @@ ccifun <- function(price,entry=-100,exit=100,n=20,fee=0.001) {
 
 FEES: Assuming 0.1% trading fee, as per binance current rate.
 
-```{r,backtest}
+```{r,backtest1}
 
 fee=0.001
 n=20
@@ -128,17 +128,40 @@ cci_res <- mclapply(X=mylist,mc.cores=4,FUN=function(x) {
   ccifun(price,entry=x[1],exit=x[2],n=x[3],fee=0.001)
 })
 
-mymx$res <- unlist(res_rsi_sig)
+cci_res <- do.call(rbind,cci_res)
 
-mymx <- mymx[which(!is.na(mymx$res)),]
+cci_res <- cbind(mymx,cci_res)
+colnames(cci_res) <- c("entry","exit","n","returns","trades")
 
-head(mymx[order(-mymx$res),],30)
+head(cci_res[order(-cci_res[,"returns"]),],20)
 
 ```
 
+
+```{r,backtest2}
+
+mymx <- expand.grid(seq(-20,10,1),seq(0,25,1),5:50)
+
+mylist <- as.list(as.data.frame(t(mymx)))
+
+cci_res2 <- mclapply(X=mylist,mc.cores=4,FUN=function(x) {
+  ccifun(price,entry=x[1],exit=x[2],n=x[3],fee=0.001)
+})
+
+cci_res2 <- do.call(rbind,cci_res2)
+
+cci_res2 <- cbind(mymx,cci_res2)
+colnames(cci_res2) <- c("entry","exit","n","returns","trades")
+
+head(cci_res2[order(-cci_res2[,"returns"]),],20)
+
+```
+
+
 ## Conclusion
 
-RSI doesn't appear to be very good on its own.
+This could potentially be an interesting strategy.
+More investigation warranted.
 
 ## Session information
 
