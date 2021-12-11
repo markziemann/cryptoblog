@@ -1,34 +1,54 @@
 ---
-title: "Trading based on RSI"
-author: "Mark Ziemann"
+title: "Trading BTC based on CCI"
+author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
   html_document:
     toc: true
+    toc_float: true
+    code_folding: hide
+    fig_width: 7
+    fig_height: 7
 theme: cosmo
 ---
 
+Source: https://github.com/markziemann/cryptoblog/blob/main/cci_trading.Rmd
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+
+LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
+
 ## Intro
 
-In this blog post I will be trilaing using RSI for entry and exit.
+In this blog post I will be trilaing CCI commodity channel index for entry and exits for BTC.
+
+Traditionally traders used this to identify buy signals when the index goes above the -100 level and exit when it goes below the +100 level.
 
 ```{r,lib}
 
-library("jsonlite")
-library("tidyverse")
-library("runner")
-library("quantmod")
-library("TTR")
-library("vioplot")
-library("parallel")
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("parallel")
+  library("kableExtra")
+})
 
 knitr::opts_chunk$set(fig.width=8, fig.height=8) 
 
 ```
 
+Reminder: this is not financial advice.
+
 ## Get data
 
-Obtaining BTC historical data (daily).
+Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
 
 ```{r,getdata}
 
@@ -46,6 +66,11 @@ price$date <- sapply(strsplit(price$date,"T"),"[[",1)
 
 ## Calculate hodl returns
 
+It's important to calculate the returns for simply holding the asset rather than actively trading.
+
+The number shown here is the fold return on investment.
+BTC has appreciated a lot since 2013!
+
 ```{r,hodl}
 
 myend <- price[c(1,nrow(price)),2][2] 
@@ -55,11 +80,11 @@ hodl
 
 ```
 
-## RSI analysis
+## CCI chart analysis
 
-The idea here is to enter after CCI goes above -100 and exit when CCI goes below +100
+The textbook application is to enter after CCI goes above -100 and exit when CCI goes below +100
 
-```{r,cci}
+```{r,cci1}
 
 n=20
 c=0.015
@@ -75,8 +100,9 @@ abline(h=+100,col="red")
 
 ```
 
+Here is the function for CCI, where we'll change the entry and exit level.
 
-```{r,cci}
+```{r,cci2}
 
 ccifun <- function(price,entry=-100,exit=100,n=20,fee=0.001) {
   cci <- CCI(price[,c("high","low","close")], n = n, c = 0.015 )
@@ -111,7 +137,18 @@ ccifun <- function(price,entry=-100,exit=100,n=20,fee=0.001) {
 
 ## Backtesting
 
-FEES: Assuming 0.1% trading fee, as per binance current rate.
+Now let's go back in time to test the performance of the DMI indicator using different
+parameters:
+
+* entry at -200:0
+
+* exit at 0:+200
+
+* n=10:20
+
+Let's assume a 0.1% trading fee, as per binance current rate.
+
+Here is a table of results.
 
 ```{r,backtest1}
 
@@ -120,7 +157,7 @@ n=20
 
 ccifun(price, entry=-100,  exit=100, n=20)
 
-mymx <- expand.grid(seq(-200,0,5),seq(0,200,5),10:20)
+mymx <- expand.grid(seq(-100,0,5),seq(0,100,5),seq(5,50,3))
 
 mylist <- as.list(as.data.frame(t(mymx)))
 
@@ -129,14 +166,17 @@ cci_res <- mclapply(X=mylist,mc.cores=4,FUN=function(x) {
 })
 
 cci_res <- do.call(rbind,cci_res)
-
 cci_res <- cbind(mymx,cci_res)
 colnames(cci_res) <- c("entry","exit","n","returns","trades")
+cci_res2$mean <- cci_res2$returns^(1/cci_res2$trades)
 
-head(cci_res[order(-cci_res[,"returns"]),],20)
+head(cci_res[order(-cci_res[,"returns"]),],20) %>%
+  kbl(caption="Highest returns CCI strategies") %>%
+  kable_styling()
 
 ```
 
+Now do a "fine" parameter sweep in a narrow range.
 
 ```{r,backtest2}
 
@@ -144,24 +184,113 @@ mymx <- expand.grid(seq(-20,10,1),seq(0,25,1),5:50)
 
 mylist <- as.list(as.data.frame(t(mymx)))
 
-cci_res2 <- mclapply(X=mylist,mc.cores=4,FUN=function(x) {
+cci_res2 <- mclapply(X=mylist,mc.cores=2,FUN=function(x) {
   ccifun(price,entry=x[1],exit=x[2],n=x[3],fee=0.001)
 })
 
 cci_res2 <- do.call(rbind,cci_res2)
-
 cci_res2 <- cbind(mymx,cci_res2)
 colnames(cci_res2) <- c("entry","exit","n","returns","trades")
+cci_res2$mean <- cci_res2$returns^(1/cci_res2$trades)
 
-head(cci_res2[order(-cci_res2[,"returns"]),],20)
+head(cci_res2[order(-cci_res2[,"returns"]),],20) %>% 
+  kbl(caption="Highest returns CCI strategies") %>%
+  kable_styling()
+
+cci_res3 <- subset(cci_res2, trades < 200 )
+head(cci_res3[order(-cci_res3[,"returns"]),],20) %>%
+  kbl(caption="Highest returns CCI strategies with 200 trades or less") %>%
+  kable_styling()
+
+head(cci_res3[order(-cci_res3[,"mean"]),],20) %>%
+  kbl(caption="Highest mean ROI CCI strategies") %>%
+  kable_styling()
 
 ```
 
+## Optimised strategy
 
+Entry: 1
+
+Exit: 10
+
+n=19
+
+```{r,opti1}
+
+n=19
+entry=1
+exit=10
+
+cci <- CCI(price[,c("high","low","close")], n = n, c = 0.015 )
+cciy <- c(NA,cci)[1:nrow(price)]
+price2 <- data.frame(price,cci,cciy,stringsAsFactors=FALSE)
+price2$sell <- as.numeric( price2$cci < exit & price2$cciy > exit )
+price2$buy <- as.numeric( price2$cci > entry & price2$cciy < entry )
+price2 <- subset(price2, buy == 1 | sell == 1)
+price2$y <- c(NA,price2$buy)[1:nrow(price2)]
+price2 <- price2[which(price2$buy != price2$y),]
+
+buy <- subset(price2,buy==1)[c(1,2)]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,sell==1)[c(1,2)]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+trades %>%
+  kbl(caption="Trades for the optimised strategy") %>%
+  kable_styling()
+
+```
+
+## Effect of fees
+
+It is important to factor in the effect of fees because higher exchange fees will erode profits.
+
+```{r,fees,fig.width=8,fig.height=7}
+
+fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
+
+res_fees <- sapply(fee_levels,function(x) { ccifun(price, entry=1,  exit=10, n=19, fee=x) } )
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext(HEADER)
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Trades by year
+
+It is good to see whether the strategy gives consistent returns over the years.
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
+yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+vioplot(yearly)
+yr <- sapply(yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+```
 ## Conclusion
 
 This could potentially be an interesting strategy.
-More investigation warranted.
+There were sure a lot of false signals.
+And the returns are still a bit lower than the TSI approach while still better than the DMI approach.
 
 ## Session information
 
