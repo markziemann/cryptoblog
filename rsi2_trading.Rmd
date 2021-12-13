@@ -249,14 +249,28 @@ abline(h=hodl,col="red")
 
 ```
 
+Based on this we can do some filtering for mean>1.4 and returns>1e5.
+
+
+```{r,filt2}
+
+top <- subset(res,mean>1.14&returns>1e5)
+top <- top[order(-top$returns),]
+top %>%
+  kbl(caption="optimal strategies with high mean ROI and high returns") %>%
+  kable_paper("hover", full_width = F)
+
+
+```
+
 ## Best RSI
 
 This is good indicator because mean gains are >1.1 and number of trades is less than 200.
 
 ```{r,best,fig.width=10,fig.height=8}
 
-best_n1 = res2[1,1]
-best_n2 = res2[1,2]
+best_n1 = top[1,1]
+best_n2 = top[1,2]
  
 message(paste("Selected DMI period:",best_n1,best_n2))
 
@@ -337,6 +351,31 @@ yr <- sapply(yearly,prod)
 barplot(yr)
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
+
+```
+
+## Recent action
+
+Recent action of the indicator.
+
+```{r,update}
+
+n=100
+price <- tail(price,n)
+rsi1 <- tail(rsi1,n)
+rsi2 <- tail(rsi2,n)
+
+HEADER=paste("n1:",best_n1,"n2:",best_n2)
+par(mfrow=c(2,1))
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(rsi1 ~ as.Date(price$date),type="l",col="blue",
+  xlab="Date",ylab="RSI",main=HEADER)
+lines(as.Date(price$date), rsi2  , col="red"  )
+grid()
+par(mfrow=c(1,1))
 
 ```
 
