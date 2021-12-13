@@ -4,6 +4,13 @@
 	<meta charset="UTF-8"/>
         <link rel ="stylesheet" href="BMFW.css">
 	<title>MDZ Analytics</title>
+
+<style>
+table, th, td {
+  border:1px solid black;
+}
+</style>
+
     </head>
     <body>
 	<h1>MDZ Analytics</h1>
@@ -33,6 +40,46 @@ These indicators were refined with comprehensive backtesting as detailed in the 
 
         </ul>
 
+        <p>Current state of the indicators as at MYTIME
+        </p>
+
+<table>
+  <tr>
+    <th>Indicator</th>
+    <th>BTC</th>
+    <th>ETH</th>
+  </tr>
+  <tr>
+    <td>SMA daily</td>
+    <td>BTC_SMA_DAILY</td>
+    <td>ETH_SMA_DAILY</td>
+  </tr>
+  <tr>
+    <td>SMA weekly</td>
+    <td>BTC_SMA_DAILY</td>
+    <td>ETH_SMA_DAILY</td>
+  </tr>
+  <tr>
+    <td>DMI daily</td>
+    <td>BTC_DMI_DAILY</td>
+    <td>ETH_DMI_DAILY</td>
+  </tr>
+  <tr>
+    <td>TSI daily</td>
+    <td>BTC_TSI_DAILY</td>
+    <td>ETH_TSI_DAILY</td>
+  </tr>
+  <tr>
+    <td>Stochastic daily</td>
+    <td>BTC_STOCH_DAILY</td>
+    <td>ETH_STOCH_DAILY</td>
+  </tr>
+  <tr>
+    <td>Double RSI daily</td>
+    <td>BTC_RSI_DAILY</td>
+    <td>ETH_RSI_DAILY</td>
+  </tr>
+</table>
 	<hr>
 
         <h3>Moving averages</h3>
@@ -113,6 +160,22 @@ In the following analysis, I test different stochastic intervals and parameters 
                 <li> <a href="crypto/stoch_trading.html">Stochastic oscillator strategy for bitcoin (daily)</a> </li>
 
                 <li> <a href="crypto/stoch_trading_eth.html">Stochastic oscillator strategy for ether (daily)</a> </li>
+
+        </ul>
+
+        <hr>
+
+        <h3>Double RSI</h3>
+
+        <p> The <a href="https://www.trendfollowingsystem.com/double-rsi-trading-system/">Double RSI</a> is a specific application of the relative strength indicator involving a short term and a longer term RSI line. 
+When the short term line breaks above the long term line it is bullish and vice-versa.
+In the following analysis, I test different periods for RSI calculation to see which strategy work best for BTC and ETH.
+        </p>
+
+        <ul>
+                <li> <a href="crypto/rsi2_trading.html">Double RSI strategy for bitcoin (daily)</a> </li>
+
+                <li> <a href="crypto/rsi2_trading_eth.html">Double RSI strategy for ether (daily)</a> </li>
 
         </ul>
 
