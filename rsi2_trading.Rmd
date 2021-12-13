@@ -361,9 +361,8 @@ Recent action of the indicator.
 ```{r,update}
 
 n=100
+price <- cbind(price,rsi1,rsi2)
 price <- tail(price,n)
-rsi1 <- tail(rsi1,n)
-rsi2 <- tail(rsi2,n)
 
 HEADER=paste("n1:",best_n1,"n2:",best_n2)
 par(mfrow=c(2,1))
@@ -371,11 +370,15 @@ plot(price$close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main="USD price")
 grid()
 
-plot(rsi1 ~ as.Date(price$date),type="l",col="blue",
+plot(price$rsi1 ~ as.Date(price$date),type="l",col="blue",
   xlab="Date",ylab="RSI",main=HEADER)
-lines(as.Date(price$date), rsi2  , col="red"  )
+lines(as.Date(price$date), price$rsi2  , col="red"  )
 grid()
-par(mfrow=c(1,1))
+
+tail(price ,20) %>%
+  kbl(caption="Last 20 days") %>%
+  kable_paper("hover", full_width = F)
+
 
 ```
 
