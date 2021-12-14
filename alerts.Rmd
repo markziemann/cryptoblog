@@ -23,15 +23,15 @@ Click on the hyperlinks below to see how these signals were identified.
 [ETH](https://mdz-analytics.com/crypto/ma_trading_eth.html) 34 day.
 
 2. Moving average crosses: [BTC](https://mdz-analytics.com/crypto/ma_cross.html) 12/21 day SMA and;
-<a href="https://mdz-analytics.com/crypto/ma_cross_eth.html">ETH</a> 5/27 day.
+[ETH](https://mdz-analytics.com/crypto/ma_cross_eth.html) 5/27 day.
 
 3. Directional movement index (DMI): [BTC](https://mdz-analytics.com/crypto/dmi_trading.html) 26 day;
 [ETH](https://mdz-analytics.com/crypto/dmi_trading_eth.html) 19 day.
 
-4. True strength index (TSI): [BTC](href="https://mdz-analytics.com/crypto/tsi_trading.html) n1=99, n2=15, n.signal=5;
+4. True strength index (TSI): [BTC](https://mdz-analytics.com/crypto/tsi_trading.html) n1=99, n2=15, n.signal=5;
 [ETH](https://mdz-analytics.com/crypto/tsi_trading_eth.html) n1=99, n2=3, n.signal=13.
 
-5. Stochastic oscillator (stoch): [BTC](href="https://mdz-analytics.com/crypto/stoch_trading.html) nFastK=43, nFastD=47, smooth=1;
+5. Stochastic oscillator (stoch): [BTC](https://mdz-analytics.com/crypto/stoch_trading.html) nFastK=43, nFastD=47, smooth=1;
 [ETH](https://mdz-analytics.com/crypto/stoch_trading_eth.html) nFastK=46, nFastD=25, smooth=1.
 
 This script will examine the price action and these trade signals just before the daily close.
