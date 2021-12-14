@@ -34,6 +34,9 @@ Click on the hyperlinks below to see how these signals were identified.
 5. Stochastic oscillator (stoch): [BTC](https://mdz-analytics.com/crypto/stoch_trading.html) nFastK=43, nFastD=47, smooth=1;
 [ETH](https://mdz-analytics.com/crypto/stoch_trading_eth.html) nFastK=46, nFastD=25, smooth=1.
 
+6. Double RSI: [BTC](https://mdz-analytics.com/crypto/rsi2trading.html) n1=55, n2=95;
+[ETH](https://mdz-analytics.com/crypto/rsi2_trading_eth.html) n1=67,n2=72.
+
 This script will examine the price action and these trade signals just before the daily close.
 If the signal is TRUE, it is bullish and if FALSE it is bearish.
 When there is a switch from bearish to bullish it is a buy signal and when it switches from bullish to bearish it is a sell signal.
@@ -67,7 +70,6 @@ suppressPackageStartupMessages({
 TESTING = FALSE
 
 ```
-
 
 ```{r,time}
 
