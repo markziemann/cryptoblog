@@ -6,7 +6,10 @@ cd $MYDIR
 
 Rscript -e "rmarkdown::render('alerts.Rmd')" && \
 scp -P 21098 alerts.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
-cp alerts.html crypto
+
+scp -P 21098 index1.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/index.html
+
+scp -P 21098
 
 sleep 15m
 
