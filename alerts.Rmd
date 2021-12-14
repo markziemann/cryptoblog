@@ -69,7 +69,7 @@ TESTING = FALSE
 ```
 
 
-```{r,time
+```{r,time}
 
 system("DATE=$(date -u) ; sed \"s/MYTIME/${DATE}/\" index0.html > index1.html")
 
@@ -444,6 +444,75 @@ if ( btc_signal != "NONE") {
 
 ```
 
+## BTC double RSI indicator
+
+Optimised values:
+
+n1 = 55, n2 = 95
+
+```{r,btc_rsi1,fig.height=10,fig.width=8}
+
+rsi1 <- RSI(price$close,n=55,maType=EMA)
+rsi2 <- RSI(price$close,n=95,maType=EMA)
+
+price2 <- cbind(price,rsi1,rsi2)
+price2$signal <- price2$rsi1 > price2$rsi2
+
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="RSI2 BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="RSI2 SELL"
+  }
+} else {
+  btc_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_RSI_DAILY/BULLISH/' index1.html")
+ system("sed -i 's/BTC_RSI_COL/green/' index1.html")
+} else {
+ system("sed -i 's/BTC_RSI_DAILY/BEARISH/' index1.html")
+ system("sed -i 's/BTC_RSI_COL/red/' index1.html")
+}
+
+message(paste("BTC RSI signal:",btc_signal))
+
+```
+
+```{r,btc_rsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1 ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="double RSI 55/95d")
+lines(as.Date(price2$date), price2$rsi2  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+Send a push notification.
+
+```{r,btc_rsi_push}
+
+if ( btc_signal != "NONE") {
+  MYNOTE <- paste("BTC is flashing a ", btc_signal,
+   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
+
+```
+
 ## Get ETH price data
 
 Obtaining ETH historical data (daily).
@@ -786,6 +855,75 @@ par(mfrow=c(1,1))
 Send a push notification.
 
 ```{r,eth_stoch_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste("ETH is flashing a ", eth_signal,
+   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
+
+```
+
+## ETH double RSI indicator
+
+Optimised values:
+
+n1 = 67, n2 = 72
+
+```{r,eth_rsi1,fig.height=10,fig.width=8}
+
+rsi1 <- RSI(price$close,n=67,maType=EMA)
+rsi2 <- RSI(price$close,n=72,maType=EMA)
+
+price2 <- cbind(price,rsi1,rsi2)
+price2$signal <- price2$rsi1 > price2$rsi2 
+
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="RSI2 BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="RSI2 SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/ETH_RSI_DAILY/BULLISH/' index1.html")
+ system("sed -i 's/ETH_RSI_COL/green/' index1.html")
+} else {
+ system("sed -i 's/ETH_RSI_DAILY/BEARISH/' index1.html")
+ system("sed -i 's/ETH_RSI_COL/red/' index1.html")
+}
+
+message(paste("ETH RSI signal:",eth_signal))
+
+```
+
+```{r,eth_rsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1 ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="double RSI 55/95d")
+lines(as.Date(price2$date), price2$rsi2  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+Send a push notification.
+
+```{r,eth_rsi_push}
 
 if ( eth_signal != "NONE") {
   MYNOTE <- paste("ETH is flashing a ", eth_signal,
