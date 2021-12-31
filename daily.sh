@@ -53,6 +53,12 @@ Rscript -e "rmarkdown::render('rsi2_trading.Rmd')" && \
 Rscript -e "rmarkdown::render('rsi2_trading_eth.Rmd')" && \
   scp -P 21098 rsi2_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
+Rscript -e "rmarkdown::render('stoch_trading.Rmd')" && \
+  scp -P 21098 stoch_trading.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+
+Rscript -e "rmarkdown::render('stoch_trading_eth.Rmd')" && \
+  scp -P 21098 stoch_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+
 Rscript -e "rmarkdown::render('stablecoincap.Rmd')" && \
   scp -P 21098 stablecoincap.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
