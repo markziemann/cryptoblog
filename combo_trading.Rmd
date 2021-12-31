@@ -1,0 +1,329 @@
+---
+title: "Trading BTC based on combinations of indicators"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    fig_width: 7
+    fig_height: 7
+theme: cosmo
+---
+
+Source: https://github.com/markziemann/cryptoblog/blob/main/combo_trading.Rmd
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+
+LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
+
+## Intro
+
+There are many indicators of market momentum, one of them is the true strength index (TSI).
+The TSI involves two momentum indicators one with a short duration and another with a long duration.
+In this backtesting, when the short duration line breaks through the long duration line, it makes a buy
+signal and when it breaks below, sell.
+What I am examining here is different intervals for the calculation of the two TSI lines as well as the
+signal interval.
+
+The standard values used are:
+
+* n.first=25
+
+* n.second=13
+
+* n.signal=7
+
+however I will be seeing whether other intervals perform better.
+
+This page is designed to be updated daily - today's date is shown below.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+  library("parallel")
+  library("dplyr")
+})
+
+Sys.Date()
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat.txt")
+btcdat <- fromJSON("btcdat.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+It's important to calculate the returns for simply holding the asset rather than actively trading.
+
+The number shown here is the fold return on investment.
+BTC has appreciated a lot since 2013!
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),4][2] 
+mystart <- price[c(1,nrow(price)),4][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## TSI strategy
+
+Here I use the optimised values for n1, n2 and n.signal and we can have a look at all the trades 
+executed over the years.
+
+```{r,best1,fig.width=10,fig.height=8}
+
+best_n1 = 99
+best_n2 = 15
+best_ns = 5
+fee=0.001
+
+message(paste("Selected n1 period:",best_n1))
+message(paste("Selected n2 period:",best_n2))
+message(paste("Selected n.signal period:",best_ns))
+
+tsi <- TSI(price$close , n.first = best_n1, n.second = best_n2, n.signal = best_ns )
+price2 <- price
+price2 <- cbind(price2,tsi)
+price2$higher <- price2$tsi > price2$signal
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+trades %>% kbl() %>%  kable_styling()
+
+HEADER="TSI"
+par(mfrow=c(2,1))
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tsi[,1] ~ as.Date(price$date),type="l",col="blue",
+  xlab="Date",ylab="TSI",main="TSI")
+lines(as.Date(price$date), tsi[,2]  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+```
+
+
+## DMI Strategy
+
+Optimised value is 26.
+
+```{r,best_sma4,fig.width=10,fig.height=8}
+
+best_n = 26
+message(paste("Selected DMI period:",best_n))
+
+dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
+price2 <- price
+price2 <- cbind(price2,dmi.adx)
+price2$higher <- price2$DIp > price2$DIn
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+trades %>% kbl() %>%  kable_styling()
+
+HEADER=paste(best_n,"DMI")
+par(mfrow=c(2,1))
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(dmi.adx[,1] ~ as.Date(price$date),type="l",col="blue",
+  xlab="Date",ylab="DMI",main="DMI",ylim=c(0,60))
+lines(as.Date(price$date), dmi.adx[,2]  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+```
+
+## Combination strategy
+
+Combination - both need to be bullish to buy.
+
+```{r,combo1,fig.width=10,fig.height=8}
+
+price2 <- price
+
+best_n1 = 99
+best_n2 = 15
+best_ns = 5
+fee=0.001
+tsi <- TSI(price$close , n.first = best_n1, n.second = best_n2, n.signal = best_ns )
+tsi_sig <- tsi[,"tsi"] > tsi[,"signal"]
+
+best_n = 26
+dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
+dmi_sig <-dmi.adx[,"DIp"] > dmi.adx[,"DIn"]
+
+ind <- data.frame(tsi_sig,dmi_sig)
+ind$sum <- rowSums(ind)
+price2 <- cbind(price2,ind)
+yesterday <- ind$sum
+yesterday <- c(NA,yesterday)
+price2$yesterday <- yesterday[1:(length(yesterday)-1)]
+price2 <- subset(price2,sum != 1)
+
+price2 <- subset(price2, ( sum == 0 & yesterday >0 ) | ( sum == 2 & yesterday <2 ) )
+v <- price2$sum
+v <- which(v!=lag(v,default=1))
+price2 <- price2[v,]
+
+buy <- subset(price2,sum==2)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,sum==0)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+trades %>% kbl() %>%  kable_styling()
+
+HEADER=paste(best_n,"DMI")
+par(mfrow=c(2,1))
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(dmi.adx[,1] ~ as.Date(price$date),type="l",col="blue",
+  xlab="Date",ylab="DMI",main="DMI",ylim=c(0,60))
+lines(as.Date(price$date), dmi.adx[,2]  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+```
+
+
+
+
+
+## Effect of fees
+
+It is important to factor in the effect of fees because higher exchange fees will erode profits.
+
+```{r,fees,fig.width=8,fig.height=7}
+
+fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
+
+res_fees <- sapply(fee_levels,function(x) {
+  mytsi(price,n1=best_n1,n2=best_n2,ns=best_ns,fee=x)
+} )
+
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Trades by year
+
+It is good to see whether the strategy gives consistent returns over the years.
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
+yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+vioplot(yearly)
+
+yr <- sapply(yearly,prod)
+barplot(yr,ylab="fold return per year")
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+```
+
+## Conclusion
+
+There are many approaches to momentum trading.
+Here using the TSI we have a strategy which scored 139x hodl returns which is superior to the best directional movement indicator
+(21x hodl) and best moving average strategy (3.4x hodl) with roughly the same number of trades.
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
