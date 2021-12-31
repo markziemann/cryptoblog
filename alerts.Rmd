@@ -99,7 +99,7 @@ Now gather hourly price data for the last 23 hours.
 
 ```{r,btc_data2}
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=hourly&time_period=hourly&time_start=",Sys.Date(),"&time_end=",Sys.Date()+1,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=hourly&time_period=hourly&time_start=",Sys.Date()-1,"&time_end=",Sys.Date(),sep="")
 download.file(URL,destfile="btcdat.txt")
 btcdat <- fromJSON("btcdat.txt")
 price2 <- btcdat$data$quotes
@@ -537,7 +537,7 @@ Now gather hourly price data for the last 23 hours.
 
 ```{r,eth2}
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=hourly&time_period=hourly&time_start=",Sys.Date(),"&time_end=",Sys.Date()+1,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=hourly&time_period=hourly&time_start=",Sys.Date()-1,"&time_end=",Sys.Date(),sep="")
 download.file(URL,destfile="ethdat.txt")
 ethdat <- fromJSON("ethdat.txt")
 price2 <- ethdat$data$quotes
@@ -915,7 +915,7 @@ plot(price2$close ~ as.Date(price2$date),type="l",log="y",
 grid()
 
 plot(price2$rsi1 ~ as.Date(price2$date),type="l",col="blue",
-  xlab="Date",ylab="index",main="double RSI 55/95d")
+  xlab="Date",ylab="index",main="double RSI 67/72d")
 lines(as.Date(price2$date), price2$rsi2  , col="red"  )
 grid()
 
