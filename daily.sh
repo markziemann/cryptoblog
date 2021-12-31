@@ -9,8 +9,6 @@ scp -P 21098 alerts.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/c
 
 scp -P 21098 index1.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/index.html
 
-scp -P 21098
-
 sleep 15m
 
 Rscript -e "rmarkdown::render('coins.Rmd')"
@@ -48,6 +46,12 @@ Rscript -e "rmarkdown::render('tsi_trading.Rmd')" && \
 
 Rscript -e "rmarkdown::render('tsi_trading_eth.Rmd')" && \
   scp -P 21098 tsi_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+
+Rscript -e "rmarkdown::render('rsi2_trading.Rmd')" && \
+  scp -P 21098 rsi2_trading.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+
+Rscript -e "rmarkdown::render('rsi2_trading_eth.Rmd')" && \
+  scp -P 21098 rsi2_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('stablecoincap.Rmd')" && \
   scp -P 21098 stablecoincap.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto

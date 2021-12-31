@@ -1,6 +1,6 @@
 ---
-title: "Trading BTC based on weekly MA and EMAs"
-author: "Mark Ziemann https://mdz-analytics.com"
+title: "Trading BTC based on MA and EMA crosses"
+author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -10,10 +10,9 @@ output:
 theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading_weekly.Rmd
+Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading.Rmd
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
-but if you find it useful, consider a small tip.
+If you find this resource useful, consider a small tip.
 
 BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
 
@@ -23,10 +22,10 @@ LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
 
 Trading off simple moving averages (SMA), exponenial moving averages (EMA) and crosses between these is 
 a popular method for timing entry and exit of positions.
-In this blog post I will be exploring MA strategies on the weekly timeframe to find the ones which 
+In this blog post I will be exploring MA strategies on the daily timeframe to find the ones which 
 perform best.
 
-This page is designed to be updated weekly - today's date is shown below.
+This page is designed to be updated daily - today's date is shown below.
 
 ```{r,lib}
 
@@ -48,13 +47,13 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining BTC historical data (weekly) from CoinMarketCap.com from June 2013 to present.
+Obtaining BTC historical data (4 hourly) from CoinMarketCap.com from July 2017 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=weekly&time_start=2013-06-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=4h&time_period=hourly&time_start=2017-06-01&time_end=",mydate,sep="")
 
 download.file(URL,destfile="btcdat.txt")
 
@@ -62,7 +61,7 @@ dat <- fromJSON("btcdat.txt")
 price <- dat$data$quotes
 price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","close")
-price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+#price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 
 ```
 
@@ -85,7 +84,7 @@ hodl
 ## Moving average function
 
 Here are the functions for trading based on SMA and EMAs, buying when the price breaks through the
-MA line and sell when it falls below the MA line. All trades are executed at the end of the weekly session (UTC midnight).
+MA line and sell when it falls below the MA line. All trades are executed at the end of the daily session (UTC midnight).
 
 ```{r,functions}
 
@@ -147,7 +146,7 @@ return(c(prod(trades$diff),nrow(trades)))
 
 ## Backtesting
 
-Let's look back in time and trial SMA and EMA strategies with an interval from 3 to 200 weeks.
+Let's look back in time and trial SMA and EMA strategies with an interval from 3 to 1000 periods.
 
 Let's assume a 0.1% trading fee, as per binance current rate.
 
@@ -156,7 +155,7 @@ Let's assume a 0.1% trading fee, as per binance current rate.
 
 fee=0.001
 
-myrange <- 2:20
+myrange <- 3:500
 
 res <- sapply(myrange,function(n) { sma(price,n,fee) } )
 colnames(res) <- myrange
@@ -183,12 +182,22 @@ Now let's look at which of these approaches works best.
 ```{r,plots1,fig.height=8,fig.width=8}
 
 plot(x=myrange, y=res_sma$returns, pch=19,
-  xlab="moving average interval (weeks)",ylab="fold return",main="BTC weekly SMA")
+  xlab="moving average interval (4h)",ylab="fold return",main="BTC daily SMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(x=myrange,y=res_sma$returns, pch=19,
+  xlim=c(1,200),xlab="moving average interval (4h)",ylab="fold return",main="BTC daily SMA")
 abline(h=hodl,col="red")
 grid()
 
 plot(x=myrange,y=res_ema$returns, pch=19,
-  xlab="moving average interval (weeks)",ylab="fold return",main="BTC weekly EMA")
+  xlab="moving average interval (4h)",ylab="fold return",main="BTC daily EMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(x=myrange,y=res_ema$returns, pch=19,
+  xlim=c(1,200),xlab="moving average interval (4h)",ylab="fold return",main="BTC daily EMA")
 abline(h=hodl,col="red")
 grid()
 
@@ -199,13 +208,13 @@ Could it mean that there are a lot of trades each with very small gains?
 
 ```{r,plots2,fig.height=8,fig.width=8}
 
-plot(res_sma$mean,res_sma$returns, main="BTC weekly SMA",
+plot(res_sma$mean,res_sma$returns, main="BTC daily SMA",
   xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_sma$mean,res_sma$returns , cex=1, labels=rownames(res_sma))
 abline(h=hodl,col="red")
 
-plot(res_ema$mean,res_ema$returns, main="BTC weekly EMA",
+plot(res_ema$mean,res_ema$returns, main="BTC daily EMA",
   xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_ema$mean,res_ema$returns , cex=1, labels=rownames(res_ema))
@@ -214,16 +223,17 @@ abline(h=hodl,col="red")
 ```
 
 Now we'll have a look at how many trades are required for these approaches.
+Ideally we don't want to be making trades every few days.
 
 ```{r,plots3,fig.height=8,fig.width=8}
 
-plot(res_sma$trades,res_sma$returns, main="BTC weekly SMA",
+plot(res_sma$trades,res_sma$returns, main="BTC daily SMA",
   xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_sma$trades,res_sma$returns , cex=1, labels=rownames(res_sma))
 abline(h=hodl,col="red")
 
-plot(res_ema$trades,res_ema$returns, main="BTC weekly EMA",
+plot(res_ema$trades,res_ema$returns, main="BTC daily EMA",
   xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_ema$trades,res_ema$returns , cex=1, labels=rownames(res_ema))
@@ -269,7 +279,7 @@ sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trad
 message(paste("Total ROI:",prod(sma_trades$diff)))
 message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
 sma_trades  %>% kbl() %>%  kable_styling()
-SMA_HEADER=paste(best_sma,"week moving average")
+SMA_HEADER=paste(best_sma,"day moving average")
 plot(price$close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=SMA_HEADER)
 grid()
@@ -312,7 +322,7 @@ message(paste("Number of trades:",nrow(ema_trades)))
 message(paste("Total ROI:",prod(ema_trades$diff)))
 message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
 sma_trades  %>% kbl() %>%  kable_styling()
-EMA_HEADER=paste(best_ema,"week exponential moving average")
+EMA_HEADER=paste(best_ema,"day exponential moving average")
 plot(price$close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=EMA_HEADER)
 grid()
@@ -352,19 +362,19 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
 sma_trades$year <- sapply(strsplit(sma_trades[,3],"-"),"[[",1)
 sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,5] } )
-vioplot(sma_yearly,ylab="trade ROI distribution",main="BTC weekly SMA strategy")
+vioplot(sma_yearly,ylab="trade ROI distribution",main="BTC daily SMA strategy")
 
 yr <- sapply(sma_yearly,prod)
-barplot(yr,ylab="yearly fold returns",main="BTC weekly SMA strategy")
+barplot(yr,ylab="yearly fold returns",main="BTC daily SMA strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
 ema_trades$year <- sapply(strsplit(ema_trades[,3],"-"),"[[",1)
 ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,5] } )
-vioplot(ema_yearly,ylab="trade ROI distribution",main="BTC weekly EMA strategy")
+vioplot(ema_yearly,ylab="trade ROI distribution",main="BTC daily EMA strategy")
 
 yr <- sapply(ema_yearly,prod)
-barplot(yr,ylab="yearly fold returns",main="BTC weekly EMA strategy")
+barplot(yr,ylab="yearly fold returns",main="BTC daily EMA strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
@@ -372,13 +382,20 @@ abline(h=1,col="red",lty=2)
 
 ## Conclusion
 
-The best SMA was on the 6 week interval, and the returns were approx 2.7x better than simply hodling.
-The best EMA was also on the 6 wk, but returns were lower than the 6 wk SMA.
-These weekly MA strategies might be useful if you don't want to be checking charts every day.
-Indeed the retrns on the weekly chart appear only a bit lower than the daily MA strategy.
+The best SMAs were 11 and 43 days, and the returns were approx 3x better than simply hodling.
+The best EMAs was 7 and 14 days.
+Based on minimising the number of trades for only a small reduction of returns, it appears 
+the 43d SMA is preferred.
+Another reason why I like the 43 day is that the range from 40-44 are all giving good 
+returns, this gives more confidence to this range as being profitable in future.
+The fee rate strongly affects the fold return, so it is definitely worthwhile to seek 
+exchanges with lower fees.
+Profitability varies strongly by year with bull market most profitable and bear market least 
+profitable, meaning it is probably a good idea to sit funds in fiat for 12 months following
+ a cycle top.
 
 If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
-These alerts are sent at 30 mins before the close of the weekly session and will assist you in sticking to your desired strategy.
+These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
 Subscribing to alerts costs 0.0005 BTC per year.
 
 ## Session information

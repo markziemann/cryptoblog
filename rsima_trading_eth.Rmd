@@ -27,20 +27,20 @@ knitr::opts_chunk$set(fig.width=8, fig.height=8)
 
 ## Get data
 
-Obtaining BTC historical data (daily).
+Obtaining ETH historical data (daily).
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
 
-if ( ! file.exists("btcdat.txt") ) {
-  download.file(URL,destfile="btcdat.txt")
+if ( ! file.exists("ethdat.txt") ) {
+  download.file(URL,destfile="ethdat.txt")
 }
 
-btcdat <- fromJSON("btcdat.txt")
-price <- btcdat$data$quotes
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
 price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","close")
 price$date <- sapply(strsplit(price$date,"T"),"[[",1)
@@ -105,8 +105,8 @@ abline(h=70,col="red")
 
 ```{r,rsisma}
 
-btcdat <- fromJSON("btcdat.txt")
-price <- btcdat$data$quotes
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
 price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","close")
 price$date <- sapply(strsplit(price$date,"T"),"[[",1)
@@ -526,7 +526,7 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 sma_trades <- best_sma_14_trades
 sma_trades$year <- sapply(strsplit(sma_trades[,3],"-"),"[[",1)
 sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,5] } )
-vioplot(sma_yearly)
+#vioplot(sma_yearly)
 
 yr <- sapply(sma_yearly,prod)
 barplot(yr)
@@ -536,7 +536,7 @@ abline(h=1,col="red",lty=2)
 ema_trades <- best_ema_14_trades
 ema_trades$year <- sapply(strsplit(ema_trades[,3],"-"),"[[",1)
 ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,5] } )
-vioplot(ema_yearly)
+#vioplot(ema_yearly)
 
 yr <- sapply(ema_yearly,prod)
 barplot(yr)
@@ -548,7 +548,7 @@ abline(h=1,col="red",lty=2)
 
 ## Conclusion
 
-Hodling BTC over this period gave a 378 fold return.
+Hodling ETH over this period gave a 378 fold return.
 The best simple moving average was 18 days, which gave a 1366 fold return (with fees at 0.1%).
 The best exponential moving average was 16 days, which gave a return of 1680 fold.
 The fee rate strongly affects the fold return, so it is definitely worthwhile to seek lower price exchanges.

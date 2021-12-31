@@ -80,7 +80,8 @@ Slightly too fast.
 ```{r,sto1,fig.height=10,fig.width=8}
 
 price2 <- tail(price,200)
-sto <- stoch(HLC(price2), nFastK = 14, nFastD = 3, nSlowD = 3, bounded = TRUE, smooth=1)
+sto <- stoch(RSI(price2$close,n=14), nFastK = 14, nFastD = 3, nSlowD = 3, 
+  bounded = TRUE, smooth=1)
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -88,13 +89,13 @@ plot(price2$close ~ as.Date(price2$date),type="l",log="y",
 grid()
 
 plot(sto[,1] ~ as.Date(price2$date),type="l",col="blue",
-  xlab="Date",ylab="stoch",main="stoch fast")
+  xlab="Date",ylab="stochRSI",main="stoch fast")
 lines(as.Date(price2$date), sto[,2]  , col="red"  )
 grid()
 
 fee = 0.001
 
-sto <- stoch(HLC(price), nFastK=14 , nFastD=3 , nSlowD=3 , bounded = TRUE, smooth=1)
+sto <- stoch(RSI(price$close,n=14), nFastK=14 , nFastD=3 , nSlowD=3 , bounded = TRUE, smooth=1)
 price2 <- price
 price2 <- cbind(price2,sto)
 price2$higher <- price2$fastK > price2$fastD
@@ -132,7 +133,7 @@ Now with the slower settings.
 ```{r,sto2,fig.height=10,fig.width=8}
 
 price2 <- tail(price,200)
-sto <- stoch(HLC(price2), nFastK = 21, nFastD = 14, nSlowD = 21, bounded = TRUE, smooth=7)
+sto <- stoch(RSI(price2$close,n=14), nFastK = 21, nFastD = 14, nSlowD = 21, bounded = TRUE, smooth=7)
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -140,13 +141,13 @@ plot(price2$close ~ as.Date(price2$date),type="l",log="y",
 grid()
 
 plot(sto[,1] ~ as.Date(price2$date),type="l",col="blue",
-  xlab="Date",ylab="stoch",main="stoch slow")
+  xlab="Date",ylab="stochRSI",main="stoch slow")
 lines(as.Date(price2$date), sto[,2]  , col="red"  )
 grid()
 
 par(mfrow=c(1,1))
 
-sto <- stoch(HLC(price), nFastK=21 , nFastD=14 , nSlowD=21 , bounded = TRUE, smooth=7)
+sto <- stoch(RSI(price$close,n=14), nFastK=21 , nFastD=14 , nSlowD=21 , bounded = TRUE, smooth=7)
 price2 <- price
 price2 <- cbind(price2,sto)
 price2$higher <- price2$fastK > price2$fastD
@@ -176,15 +177,16 @@ message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
 ```
 
-## Stoch trading function
+## Stoch RSI trading function
 
 Assuming 0.1% trading fee, as per binance current rate.
 
 
 ```{r,stofunc1}
 
-mystoch <- function(price,nFastK=14,nFastD=3,nSlowD=3,smooth=1,fee) {
-  sto <- stoch(HLC(price), nFastK , nFastD , nSlowD , bounded = TRUE, smooth=smooth)
+mystoch <- function(price,nrsi=14,nFastK=14,nFastD=3,nSlowD=3,smooth=1,fee) {
+  sto <- stoch(RSI(price$close,nrsi), nFastK , nFastD , nSlowD , 
+    bounded = TRUE, smooth=smooth)
   price2 <- price
   price2 <- cbind(price2,sto)
   price2$higher <- price2$fastK > price2$fastD
@@ -222,8 +224,8 @@ The slowD will be set to the same as fast D.
 
 fee=0.001
 
-nFastK <- seq(2,50,5)
-nFastD <- seq(2,80,5)
+nFastK <- seq(5,50,5)
+nFastD <- seq(5,80,5)
 smooth <- seq(1,80,5)
 params <- expand.grid(nFastK,nFastD,smooth)
 colnames(params) <- c("nFastK","nFastD","smooth")
@@ -234,7 +236,7 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   smooth=as.numeric(params[i,3])
   mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
 } , mc.cores = detectCores()/2)
-res <- as.data.frame(do.call(rbind, res))
+res <- as.data.frame(do.call(rbind, res),stringsAsFactors=FALSE)
 colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
 res2$returnspertrade <- res2$returns/res2$trades
@@ -318,7 +320,7 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   smooth=as.numeric(params[i,3])
   mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
 } , mc.cores = detectCores()/2)
-res <- as.data.frame(do.call(rbind, res))
+res <- as.data.frame(do.call(rbind, res),stringsAsFactors=FALSE)
 colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
 res2$returnspertrade <- res2$returns/res2$trades
@@ -355,7 +357,7 @@ message(paste("Best nFastK:",best_nFastK))
 message(paste("Best nFastD:",best_nFastD))
 message(paste("Best smooth:",best_smooth))
 
-sto <- stoch(HLC(price), nFastK=best_nFastK , nFastD=best_nFastD , nSlowD=best_nFastD , 
+sto <- stoch(RSI(price$close,n=14), nFastK=best_nFastK , nFastD=best_nFastD , nSlowD=best_nFastD , 
   bounded = TRUE, smooth=best_smooth)
 price2 <- price
 price2 <- cbind(price2,sto)

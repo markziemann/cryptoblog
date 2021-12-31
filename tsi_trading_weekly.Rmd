@@ -1,5 +1,5 @@
 ---
-title: "Trading ETH based on True Strength Index (TSI)"
+title: "Trading BTC based on the weekly True Strength Index (TSI)"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -12,10 +12,9 @@ output:
 theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/tsi_trading_eth.Rmd
+Source: https://github.com/markziemann/cryptoblog/blob/main/tsi_trading.Rmd
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
-but if you find it useful, consider a small tip.
+If you find this resource useful, consider a small tip.
 
 BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
 
@@ -63,15 +62,15 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining ETH historical data (daily) from CoinMarketCap.com from August 2015 to present.
+Obtaining BTC historical data (weekly) from CoinMarketCap.com from June 2013 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2015-08-01&time_end=",mydate,sep="")
-download.file(URL,destfile="ethdat.txt")
-dat <- fromJSON("ethdat.txt")
-price <- dat$data$quotes
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=weekly&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat.txt")
+btcdat <- fromJSON("btcdat.txt")
+price <- btcdat$data$quotes
 price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
@@ -83,7 +82,7 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 It's important to calculate the returns for simply holding the asset rather than actively trading.
 
 The number shown here is the fold return on investment.
-ETH has appreciated a lot since 2015!
+BTC has appreciated a lot since 2013!
 
 ```{r,hodl}
 
@@ -96,7 +95,7 @@ hodl
 
 ## Basic look at the TSI indicator
 
-Here we can see the TSI over the past 730 days, using the default settings.
+Here we can see the TSI over the past 100 weeks, using the default settings.
 
 ```{r,tsi1,fig.height=10,fig.width=8}
 
@@ -119,7 +118,7 @@ TSI <- function(x, n.first = 25, n.second = 13, n.signal = 7) {
 addTSI <- newTA(TSI, preFUN = Cl, col = c("blue", "red"))
 
 par(mfrow=c(2,1))
-price2 <- tail(price,730)
+price2 <- tail(price,100)
 
 tsi <- TSI(price2$close , n.first = 25, n.second = 13, n.signal = 7 )
 
@@ -142,7 +141,7 @@ par(mfrow=c(1,1))
 Here is the function for trading based on TSI indicator, buying when short interval indicator
 goes above the longer interval line, and sell when it falls below.
 
-All trades are executed at the end of the daily session (UTC midnight).
+All trades are executed at the end of the weekly session (UTC midnight).
 
 ```{r,tsifunc1}
 
@@ -177,14 +176,14 @@ mytsi <- function(price,n1,n2,ns,fee) {
 
 ## Backtesting
 
-Now let's go back in time to test the performance of the different interval strategies on the daily
+Now let's go back in time to test the performance of the different interval strategies on the weekly
 timeframe, here are the ranges tested:
 
-* n1: from 10 to 107 days
+* n1: from 5 to 20 weeks
 
-* n2: from 3 to 25 days
+* n2: from 2 to 10 weeks
 
-* n_signal: from 3 to 20 days
+* n_signal: from 2 to 5 weeks
 
 Let's assume a 0.1% exchange fee, as per binance current rate.
 
@@ -195,9 +194,9 @@ performance metrics.
 
 fee=0.001
 
-n1r <- seq(10,107,1)
-n2r <- seq(3,25,1)
-nsr <- seq(3,20,1)
+n1r <- seq(5,70,1)
+n2r <- seq(2,25,1)
+nsr <- seq(2,20,1)
 params <- expand.grid(n1r,n2r,nsr)
 colnames(params) <- c("n1","n2","nsignal")
 params <- params[which( params$n1 > params$n2) ,]
@@ -366,7 +365,7 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
 yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
 yearly <- yearly[which(lapply(yearly,length)>0)]
-vioplot(yearly)
+#vioplot(yearly)
 
 yr <- sapply(yearly,prod)
 barplot(yr,ylab="fold return per year")
@@ -378,8 +377,8 @@ abline(h=1,col="red",lty=2)
 ## Conclusion
 
 There are many approaches to momentum trading.
-Here using the TSI we have a strategy which scored 822x hodl returns which is superior to the best directional movement indicator
-(187x hodl) and best moving average strategy (19x hodl), albeit with more trades.
+Here using the TSI we have a strategy which scored 139x hodl returns which is superior to the best directional movement indicator
+(21x hodl) and best moving average strategy (3.4x hodl) with roughly the same number of trades.
 
 ## Session information
 

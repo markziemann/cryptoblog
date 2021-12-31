@@ -204,7 +204,7 @@ abline(h=hodl,col="red")
 
 ## SMA Ensembl
 
-```{r,ensembl1}
+```{r,ensembl_sma,fig.height=10,fig.width=10}
 
 res_sma$ln <- log(res_sma$mean)
 price2 <- price[200:nrow(price),]
@@ -230,124 +230,40 @@ grid()
 
 ```
 
-## SMA sig
+## GRS
 
-Apply a slow moving average to the signal to indicate entry/exits.
+```{r,ens,fig.height=10,fig.width=10}
 
-```{r,sig_sma1}
-
-sig_sma <- function(price,n,fee) {
-ma <- SMA(price$sig,n=n)
-price2 <- price
-price2$ma <- ma
-price2$higher <- price2$sig > price2$ma
-yesterday <- price2$higher
-yesterday <- c(NA,yesterday)
-yesterday <- yesterday[1:(length(yesterday)-1)]
-price2$yesterday <- yesterday
-price2$trade <- price2$higher - price2$yesterday
-price2 <- price2[which(price2$trade!=0),]
-if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c(1,2)]
-colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c(1,2)]
-colnames(sell) <- c("sell_date","sell_price")
-if( nrow(buy) != nrow(sell) ) {
-  MIN=min(nrow(buy),nrow(sell))
-  buy <- buy[1:MIN,]
-  sell <- sell[1:MIN,]
-}
-trades <- cbind(buy,sell)
-trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-return(c(prod(trades$diff),nrow(trades)))
-}
-
-```
-
-# Backtest Signal SMA
-
-```{r,backtest_sig1}
-
-res <- t(sapply(3:200, function(n) { sig_sma(price2,n,fee) }  ))
-res <- as.data.frame(res)
-colnames(res) <- c("returns","trades")
-rownames(res) <- 3:200
-res$mean <- res$returns^(1/res$trades)
-res_sig_sma <- res
-res
-
-sma(price2,43,0.001)
-
-```
-
-## SMA Plots
-
-```{r,plots1}
-
-plot(x=myrange, y=res$returns, pch=19,
-  xlab="moving average interval (days)",ylab="fold return",main="SMA")
-abline(h=hodl2,col="red")
-grid()
-
-plot(x=myrange,y=res$returns, pch=19,
-  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="SMA")
-abline(h=hodl2,col="red")
-grid()
-
-plot(res$mean,res$returns, main="SMA",
-  xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
-grid()
-text(res$mean,res$returns , cex=1, labels=rownames(res_sma))
-abline(h=hodl2,col="red")
-
-plot(res$trades,res$returns, main="SMA",
-  xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
-grid()
-text(res$trades,res$returns , cex=1, labels=rownames(res_sma))
-abline(h=hodl2,col="red")
-
-```
-
-## EMA Ensembl
-
-```{r,ensembl1}
-
-res_ema$ln <- log(res_ema$mean)
-price2 <- price[200:nrow(price),]
-mas <- sapply(3:200,function(n) {EMA(price$Close,n) } )
-mas2 <- mas[200:nrow(mas),]
-hodl2 <- price2[nrow(price2),2] / price2[1,2]
-
-price2$sig <- sapply(1:nrow(price2),function(d) {
-  p=price2[d,2]
-  x <- as.numeric(p>mas2[d,])
-  y <- sum(x * res_ema$ln)
-  return(y)
-} )
+mamx <- sapply(3:200,function(x) { SMA(price$Close,n=x) } )
+colnames(mamx) <- 3:200
+mamx2 <- apply(mamx,2,  function(x) { price$Close > x } )
+mamx2 <- apply(mamx2,2,  function(x) { as.numeric(x) } )
+mamx2 <- (mamx2*2)-1
+grs <- t(apply(mamx2,1,function(x) { x * res_sma$ln } ) )
+grs_rs <- rowSums(grs)
 
 par(mfrow=c(2,1))
-plot(price2$Close~as.Date(price2$date),type="l",log="y",
+plot(price$Close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main="USD price")
 grid()
 
-plot(price2$sig~as.Date(price2$date),type="l",
-  xlab="Date",ylab="sig",main="EMA signal")
+plot(rowSums(grs) ~as.Date(price$date),type="l",
+  xlab="Date",ylab="sig",main="SMA signal")
 grid()
+
 
 ```
 
-## EMA sig
-
-Apply a slow moving average to the signal to indicate entry/exits.
+Trading signal 
 
 ```{r,sig_ema1}
 
-sig_ema <- function(price,n,fee) {
-ma <- EMA(price$sig,n=n)
+entry=0
+exit=0
+
+sig_sma <- function(price,grs_rs,entry=0,exit=0,fee=0.001) {
 price2 <- price
-price2$ma <- ma
-price2$higher <- price2$sig > price2$ma
+price2$higher <- grs_rs > 0
 yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]

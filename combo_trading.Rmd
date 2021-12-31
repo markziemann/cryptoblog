@@ -271,10 +271,6 @@ par(mfrow=c(1,1))
 
 ```
 
-
-
-
-
 ## Effect of fees
 
 It is important to factor in the effect of fees because higher exchange fees will erode profits.

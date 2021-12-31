@@ -44,7 +44,7 @@ if ( ! file.exists("btcdat.txt") ) {
 btcdat <- fromJSON("btcdat.txt")
 price <- btcdat$data$quotes
 price <- data.frame(price$time_close,price$quote$USD$close)
-colnames(price) <- c("date","Close")
+colnames(price) <- c("date","close")
 price$date <- sapply(strsplit(price$date,"T"),"[[",1)
 
 ```
@@ -72,7 +72,7 @@ sma <- function(price,n,fee,margin) {
 ma <- SMA(Cl(price),n=n) * ( 1 + margin )
 price2 <- price
 price2$ma <- ma
-price2$higher <- price2$Close > price2$ma
+price2$higher <- price2$close > price2$ma
 yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
@@ -83,9 +83,9 @@ price2$trade <- apply(price2,1,function(x) {
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c(1,2)]
+buy <- subset(price2,trade==1)[,c("date","close")]
 colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c(1,2)]
+sell <- subset(price2,trade==-1)[,c("date","close")]
 colnames(sell) <- c("sell_date","sell_price")
 if( nrow(buy) != nrow(sell) ) {
   MIN=min(nrow(buy),nrow(sell))
@@ -109,7 +109,7 @@ ema <- function(price, n, fee, margin ) {
 ma <- EMA(Cl(price),n=n) * (1 + margin)
 price2 <- price
 price2$ma <- ma
-price2$higher <- price2$Close > price2$ma
+price2$higher <- price2$close > price2$ma
 yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
@@ -120,9 +120,9 @@ price2$trade <- apply(price2,1,function(x) {
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c(1,2)]
+buy <- subset(price2,trade==1)[,c("date","close")]
 colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c(1,2)]
+sell <- subset(price2,trade==-1)[,c("date","close")]
 colnames(sell) <- c("sell_date","sell_price")
 if( nrow(buy) != nrow(sell) ) {
   MIN=min(nrow(buy),nrow(sell))
@@ -223,7 +223,7 @@ grid()
 ma <- SMA(Cl(price),n=as.numeric(sma_INT)) * ( 1 + as.numeric(sma_MARG ) )
 price2 <- price
 price2$ma <- ma
-price2$higher <- price2$Close > price2$ma
+price2$higher <- price2$close > price2$ma
 yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
@@ -234,9 +234,9 @@ price2$trade <- apply(price2,1,function(x) {
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c(1,2)]  
+buy <- subset(price2,trade==1)[,c("date","close")]  
 colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c(1,2)]
+sell <- subset(price2,trade==-1)[,c("date","close")]
 colnames(sell) <- c("sell_date","sell_price")
 if( nrow(buy) != nrow(sell) ) {
   MIN=min(nrow(buy),nrow(sell))
@@ -250,7 +250,7 @@ sma_trades
 prod(sma_trades$diff)
 SMA_HEADER=paste(sma_INT,"day moving average.", sma_MARG , "margin")
 
-plot(price$Close~as.Date(price$date),type="l",log="y",
+plot(price$close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=SMA_HEADER)
 grid()
 lines(ma~ as.Date(price$date) ,col="red")
@@ -264,7 +264,7 @@ best_ema
 ma <- EMA(Cl(price),n=as.numeric(ema_INT)) * ( 1 + as.numeric(ema_MARG ) )
 price2 <- price
 price2$ma <- ma
-price2$higher <- price2$Close > price2$ma
+price2$higher <- price2$close > price2$ma
 yesterday <- price2$higher
 yesterday <- c(NA,yesterday)
 yesterday <- yesterday[1:(length(yesterday)-1)]
@@ -275,9 +275,9 @@ price2$trade <- apply(price2,1,function(x) {
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c(1,2)]
+buy <- subset(price2,trade==1)[,c("date","close")]
 colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c(1,2)]
+sell <- subset(price2,trade==-1)[,c("date","close")]
 colnames(sell) <- c("sell_date","sell_price")
 if( nrow(buy) != nrow(sell) ) {
   MIN=min(nrow(buy),nrow(sell))
@@ -291,7 +291,7 @@ nrow(ema_trades)
 prod(ema_trades$diff)
 EMA_HEADER=paste(ema_INT,"day exponential moving average.", ema_MARG , "margin")
 
-plot(price$Close~as.Date(price$date),type="l",log="y",
+plot(price$close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=EMA_HEADER)
 grid()
 lines(ma~ as.Date(price$date) ,col="red")

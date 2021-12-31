@@ -129,9 +129,9 @@ arn <- function(price,n,fee) {
   price2 <- price2[which(price2$trade!=0),]
   if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
   if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-  buy <- subset(price2,trade==1)[,c(1,2)]
+  buy <- subset(price2,trade==1)[,c("date","close")]
   colnames(buy) <- c("buy_date","buy_price")
-  sell <- subset(price2,trade==-1)[,c(1,2)]
+  sell <- subset(price2,trade==-1)[,c("date","close")]
   colnames(sell) <- c("sell_date","sell_price")
   if( nrow(buy) != nrow(sell) ) {
     MIN=min(nrow(buy),nrow(sell))
@@ -230,9 +230,9 @@ price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c(1,2)]
+buy <- subset(price2,trade==1)[,c("date","close")]
 colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c(1,2)]
+sell <- subset(price2,trade==-1)[,c("date","close")]
 colnames(sell) <- c("sell_date","sell_price")
 if( nrow(buy) != nrow(sell) ) {
   MIN=min(nrow(buy),nrow(sell))
@@ -282,9 +282,9 @@ price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c(1,2)]
+buy <- subset(price2,trade==1)[,c("date","close")]
 colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c(1,2)]
+sell <- subset(price2,trade==-1)[,c("date","close")]
 colnames(sell) <- c("sell_date","sell_price")
 if( nrow(buy) != nrow(sell) ) {
   MIN=min(nrow(buy),nrow(sell))
@@ -313,7 +313,7 @@ par(mfrow=c(1,1))
 
 ```
 
-## 18 day DMI
+## 18 day Aroon
 
 This is good indicator because the frequency is lower, but the gains are still very good.
 
@@ -333,9 +333,9 @@ price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
 if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
 if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c(1,2)]
+buy <- subset(price2,trade==1)[,c("date","close")]
 colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c(1,2)]
+sell <- subset(price2,trade==-1)[,c("date","close")]
 colnames(sell) <- c("sell_date","sell_price")
 if( nrow(buy) != nrow(sell) ) {
   MIN=min(nrow(buy),nrow(sell))
