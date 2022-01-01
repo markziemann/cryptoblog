@@ -266,7 +266,7 @@ returns.
 
 res3 <- subset(res2,trades<200)
 
-head(res3[order(-res3$returns),],50) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res3[order(-res3$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -294,7 +294,8 @@ Here's the table of results for the strategies with ROI of >10,000X and mean tra
 
 ```{r,res4}
 
-res5 <- subset(res2,returns > 1E5 & mean > 1.10 )
+res5 <- subset(res2,returns > 1000 & mean > 1.08 )
+res5 <- res5[order(-res5$returns),]
 res5 %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
@@ -306,9 +307,9 @@ backtesting for the following values nfastk(32:52),nfastd/nslowd(42:82) and smoo
 
 fee=0.001
 
-nFastK <- seq(32,52,1)
-nFastD <- seq(42,52,1)
-smooth <- seq(1,5,1)
+nFastK <- seq(min(res5$nFastK),max(res5$nFastK),1)
+nFastD <- seq(min(res5$nFastD),max(res5$nFastD),1)
+smooth <- seq(min(res5$smooth),max(res5$smooth),1)
 params <- expand.grid(nFastK,nFastD,smooth)
 colnames(params) <- c("nFastK","nFastD","smooth")
 res <- mclapply(X=1:nrow(params) , FUN=function(i) {
@@ -339,7 +340,7 @@ head(res3,10) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ## Optimisation
 
-This one looks to be the best: nFastK=43, nSlowD/nFastD=47, smooth=1
+This one looks to be the best: nFastK=7, nSlowD/nFastD=45, smooth=17
 
 I have tested the best slowD and varying it did not make any improvement.
 

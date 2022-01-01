@@ -1,5 +1,5 @@
 ---
-title: "Trading ETH based on the double RSI"
+title: "Trading ETH based on double RSI"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -12,7 +12,7 @@ output:
 theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/rsi2_trading.Rmd
+Source: https://github.com/markziemann/cryptoblog/blob/main/rsi2_trading_eth.Rmd
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
@@ -23,30 +23,14 @@ LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
 
 ## Intro
 
-There are many indicators of market momentum, and the most important of these 
-is the relative strength index (RSI).
+There are many indicators of market momentum, one of them is the relative strength index (RSI).
+It is often used by traders as an entry or exit signal on its own, but here we are using two 
+RSI lines, a shorter period and a longer one.
+When the short period line crosses above the longer period one it is a buy signal and when the
+short interval line passes under the longer interval line it is a sell signal.
+I will be testing different intervals for the short and long RSI lines to see which gives the best results.
 
-The RSI is a momentum indicator with a 14-day basis and oscillates between 0
-and 100, and >50 indicates an uptrend and <50 as downtrend.
-Some traders use the levels of 30 and 70 as oversold and overbought signals for entry,
-however we know that bitcoin can remain at these extreme levels for a long time,
-which would lead to missing big gains and taking big losses.
-
-Therefore the use of arbitrary levels for entry and exit leads to poor results and
-dynamic levels are optimal. 
-Spotting changes in the direction of the RSI is crucial.
-To do this, I will be using two RSI lines with different intervals, a short term 
-line and a longer term line.
-This is called the [double RSI strategy](https://www.trendfollowingsystem.com/double-rsi-trading-system/) is 
-similar in principle to the stochastic indicator, true strength index and some moving average strategies.
-The theory is that when the short term line goes above the long-term line
-it is a signal that the market could be turning positive.
-Similarly when the short-term line goes below the longer-term line it is a sign that
-the market might be turning negative.
-
-Here I will be testing different values for the intervals and find the most profitable combination.
-
-This page is designed to be updated daily.
+This page is designed to be updated daily - today's date is shown below.
 
 ```{r,lib}
 
@@ -74,9 +58,9 @@ Obtaining ETH historical data (daily) from CoinMarketCap.com from August 2015 to
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
-download.file(URL,destfile="ethdat.txt")
-dat <- fromJSON("ethdat.txt")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2015-08-01&time_end=",mydate,sep="")
+download.file(URL,destfile="dat.txt")
+dat <- fromJSON("dat.txt")
 price <- dat$data$quotes
 price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
@@ -100,12 +84,12 @@ hodl
 
 ```
 
-## Basic look at the RSI indicator
+## Basic look at the double RSI inticator
 
-Here we can see the RSI over the past 730 days, using the default interval of 14 and 28 days.
+Here we can see the RSI over the past 730 days, using the intervals of 14d and 28d.
 The default moving average algorithm is the Welles Wilder EMA.
 
-```{r,rsi1,fig.height=10,fig.width=8}
+```{r,rsi2,fig.height=10,fig.width=8}
 
 par(mfrow=c(2,1))
 price2 <- tail(price,730)
@@ -125,10 +109,10 @@ par(mfrow=c(1,1))
 
 ```
 
-## RSI2 trading function
+## Double RSI trading function
 
-Here is the function for trading based on RSI crosses, buying when positive momentum indicator 
-goes above the negative momentum indicator line, and sell when it falls below.
+Here is the function for trading based on RSI crosses, buying when the short term indicator 
+goes above the longer term line, and sell when it falls below.
 
 All trades are executed at the end of the daily session (UTC midnight).
 
@@ -166,8 +150,7 @@ rsi <- function(price,n1,n2,maType=EMA,fee=0.001) {
 
 ## Backtesting
 
-Now let's go back in time to test the performance of the RSI indicator using different 
-intervals from 4 days to 200 days.
+Now let's go back in time to test the performance of the double RSI indicator using different intervals.
 
 Let's assume a 0.1% trading fee, as per binance current rate.
 
@@ -175,7 +158,7 @@ Let's assume a 0.1% trading fee, as per binance current rate.
 
 fee=0.001
 
-params <- expand.grid(4:100,10:200)
+params <- expand.grid(4:200,10:200)
 colnames(params) <- c("n1","n2")
 params <- subset(params,n2>n1)
 dim(params)
@@ -217,7 +200,7 @@ head(res2,20) %>%
   kbl(caption="highest returning strategies with fewer than 200 trades") %>%
   kable_paper("hover", full_width = F)
 
-res2 <- subset(res2,mean>1.1)
+res2 <- subset(res2,mean>1.08)
 
 head(res2,20) %>%
   kbl(caption="highest returning strategies with fewer than 200 trades and mean ROI > 1.1") %>%
@@ -263,23 +246,22 @@ abline(h=hodl,col="red")
 
 ```
 
-Based on this we can do some filtering for mean>1.2 and returns>1e6.
+Based on this we can do some filtering for mean>1.08 and returns>2000.
 
 
 ```{r,filt2}
 
-top <- subset(res,mean>1.2&returns>1e6)
+top <- subset(res,mean>1.08 & returns>2000)
 top <- top[order(-top$returns),]
-top %>%
+head(top,20) %>%
   kbl(caption="optimal strategies with high mean ROI and high returns") %>%
   kable_paper("hover", full_width = F)
-
 
 ```
 
 ## Best RSI
 
-This is good indicator because mean gains are >1.1 and number of trades is less than 200.
+This is good indicator because mean gains are >1.08 and number of trades is less than 200.
 
 ```{r,best,fig.width=10,fig.height=8}
 
@@ -360,7 +342,6 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
 trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
 yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
-yearly <- yearly[which(lapply(yearly,length)>0)]
 vioplot(yearly)
 yr <- sapply(yearly,prod)
 barplot(yr)
@@ -399,10 +380,8 @@ tail(price ,20) %>%
 
 ## Conclusion
 
-This looks like a promising strategy, and I'm particularly interested in the strategies with mean 
-ROI>1.2 and total returns >1e6.
-
-This indicator performed better than the TSI and DMI but not better than the Stoch.
+The best double RSI strategy yielded returns ~6x hodl which is respectable.
+It is better than the SMA and DMI strategies but not as good as the TSI strategy (9x hodl).
 
 If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
 These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.

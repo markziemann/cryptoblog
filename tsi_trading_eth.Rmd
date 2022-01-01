@@ -68,7 +68,7 @@ Obtaining ETH historical data (daily) from CoinMarketCap.com from August 2015 to
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2015-08-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2015-06-01&time_end=",mydate,sep="")
 download.file(URL,destfile="ethdat.txt")
 dat <- fromJSON("ethdat.txt")
 price <- dat$data$quotes
@@ -83,7 +83,7 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 It's important to calculate the returns for simply holding the asset rather than actively trading.
 
 The number shown here is the fold return on investment.
-ETH has appreciated a lot since 2015!
+BTC has appreciated a lot since 2013!
 
 ```{r,hodl}
 
@@ -195,8 +195,8 @@ performance metrics.
 
 fee=0.001
 
-n1r <- seq(10,107,1)
-n2r <- seq(3,25,1)
+n1r <- seq(10,107,3)
+n2r <- seq(3,100,3)
 nsr <- seq(3,20,1)
 params <- expand.grid(n1r,n2r,nsr)
 colnames(params) <- c("n1","n2","nsignal")
@@ -239,6 +239,17 @@ head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_wi
 
 ```
 
+Now look at the strategies with mean ROI>1.1 and highest overall returns.
+
+```{r,backtest,res3}
+
+res3 <- subset(res2,mean>=1.1)
+res3 <- res3[order(-res3$returns),]
+head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+```
+
+
 ## Plots
 
 Another approach to selecting "good" parameters could be to begin with the default values and then
@@ -254,27 +265,72 @@ points(basic_mean,basic_returns,col="red",pch=19,cex=2)
 abline(h=hodl,col="red")
 grid()
 
-res4 <- subset(res2, returns >= basic_returns & mean >= basic_mean)
-
-plot(res4$mean , res4$returns, log="y",xlab="mean ROI", ylab="total returns")
+plot(res3$mean , res3$returns, log="y",xlab="mean ROI", ylab="total returns")
 points(basic_mean,basic_returns,col="red",pch=19,cex=2)
 abline(h=hodl,col="red")
 grid()
 
 ```
 
-Here I rank the strategies by the total returns and then rank by the mean ROI, then calculate the rank 
-sum.
+## Backtest part 2
 
-Here are the top results.
+Now a fine search of the best parameter space.
 
-```{r,ranksum,fig.height=8,fig.width=8}
+```{r,backtest2}
 
-res4$meanroirank <- rank(res4$mean)
-res4$returnsrank <- rank(res4$returns)
-res4$ranksum <- res4$meanroirank + res4$returnsrank
-res4 <- res4[order(-res4$ranksum),]
-head(res4) %>% kbl() %>%  kable_paper("hover", full_width = F)
+fee=0.001
+
+n1r <- seq(min(head(res3,20)$n1),max(head(res3,20)$n1),1)
+n2r <- seq(min(head(res3,20)$n2),max(head(res3,20)$n2),1)
+nsr <- seq(min(head(res3,20)$ns),max(head(res3,20)$ns),1)
+params <- expand.grid(n1r,n2r,nsr)
+colnames(params) <- c("n1","n2","nsignal")
+params <- params[which( params$n1 > params$n2) ,]
+
+res <- mclapply(X=1:nrow(params) , FUN=function(i) {
+  n1=as.numeric(params[i,1])
+  n2=as.numeric(params[i,2])
+  ns=as.numeric(params[i,3])
+  mytsi(price,n1=n1,n2=n2,ns=ns,fee=fee)
+} , mc.cores = detectCores())
+res <- as.data.frame(do.call(rbind, res))
+colnames(res) <- c("returns","trades")
+res2 <- cbind(params,res)
+res2$returnspertrade <- res2$returns/res2$trades
+res2$mean <- res2$returns^(1/res2$trades)
+
+basic <- mytsi(price,n1=25,n2=13,ns=7,fee=fee)
+basic_returns <- basic[1]
+basic_mean <- basic[1]^(1/basic[2])
+
+```
+
+Here are the strategies which had the highest mean return per trade.
+These opportunities don't arise often but could be potential opportunities for leveraged trades.
+
+```{r,backtest_res4}
+
+head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+```
+
+Here are the strategies which had the highest overall returns.
+This involves more frequent trading and the returns on each trade were smaller.
+This is less optimal if trades are executed manually.
+
+```{r,backtest_res5}
+
+head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+```
+
+Now look at the strategies with mean ROI>1.1 and highest overall returns.
+
+```{r,backtest,res6}
+
+res3 <- subset(res2,mean>=1.1)
+res3 <- res3[order(-res3$returns),]
+head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -285,9 +341,9 @@ executed over the years.
 
 ```{r,best1,fig.width=10,fig.height=8}
 
-best_n1 = res4[1,1]
-best_n2 = res4[1,2]
-best_ns = res4[1,3]
+best_n1 = res3[1,1]
+best_n2 = res3[1,2]
+best_ns = res3[1,3]
 
 message(paste("Selected n1 period:",best_n1))
 message(paste("Selected n2 period:",best_n2))
@@ -378,8 +434,8 @@ abline(h=1,col="red",lty=2)
 ## Conclusion
 
 There are many approaches to momentum trading.
-Here using the TSI we have a strategy which scored 822x hodl returns which is superior to the best directional movement indicator
-(187x hodl) and best moving average strategy (19x hodl), albeit with more trades.
+Here using the TSI we have a strategy which scored 9x hodl returns which worse than the best directional movement indicator (22x)
+but better than the best moving average strategy (3.4x hodl) with roughly the same number of trades.
 
 ## Session information
 
