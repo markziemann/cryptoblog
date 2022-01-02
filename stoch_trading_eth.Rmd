@@ -233,7 +233,7 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   nSlowD=as.numeric(params[i,2])
   smooth=as.numeric(params[i,3])
   mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
-} , mc.cores = detectCores()/2)
+} , mc.cores = detectCores())
 res <- as.data.frame(do.call(rbind, res))
 colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
@@ -294,9 +294,10 @@ Here's the table of results for the strategies with ROI of >10,000X and mean tra
 
 ```{r,res4}
 
-res5 <- subset(res2,returns > 1E5 & mean > 1.15 )
+res5 <- subset(res2,mean > 1.15 )
 res5 <- res5[order(-res5$returns),]
-head(res5,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+res5 <- head(res5,20)
+res5 %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -307,9 +308,9 @@ backtesting for the following values nfastk(12:47),nfastd/nslowd(12:72) and smoo
 
 fee=0.001
 
-nFastK <- seq(12,47,1)
-nFastD <- seq(12,72,1)
-smooth <- seq(1,5,1)
+nFastK <- seq(min(res5$nFastK),max(res5$nFastK),1)
+nFastD <- seq(min(res5$nFastD),max(res5$nFastD),1)
+smooth <- seq(min(res5$smooth),max(res5$smooth),1)
 params <- expand.grid(nFastK,nFastD,smooth)
 colnames(params) <- c("nFastK","nFastD","smooth")
 res <- mclapply(X=1:nrow(params) , FUN=function(i) {
@@ -318,7 +319,7 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   nSlowD=as.numeric(params[i,2])
   smooth=as.numeric(params[i,3])
   mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
-} , mc.cores = detectCores()/2)
+} , mc.cores = detectCores())
 res <- as.data.frame(do.call(rbind, res))
 colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
@@ -429,6 +430,7 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
 trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
 yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+yearly <- yearly[which(lapply(yearly,length)>0)]
 vioplot(yearly)
 yr <- sapply(yearly,prod)
 barplot(yr)

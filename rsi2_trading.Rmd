@@ -165,7 +165,7 @@ dim(params)
 
 res <- mclapply(1:nrow(params), function(x) {
   rsi(price,n1=params[x,1],n2=params[x,2],maType=EMA,fee=0.001)
-} , mc.cores=4)
+} , mc.cores=detectCores())
 res <- do.call(rbind,res)
 colnames(res) <- c("returns","trades")
 
