@@ -25,17 +25,17 @@ Click on the hyperlinks below to see how these signals were identified.
 2. Moving average crosses: [BTC](https://mdz-analytics.com/crypto/ma_cross.html) 12/21 day SMA and;
 [ETH](https://mdz-analytics.com/crypto/ma_cross_eth.html) 5/27 day.
 
-3. Directional movement index (DMI): [BTC](https://mdz-analytics.com/crypto/dmi_trading.html) 26 day;
-[ETH](https://mdz-analytics.com/crypto/dmi_trading_eth.html) 19 day.
+3. Directional movement index (DMI): [BTC](https://mdz-analytics.com/crypto/dmi_trading.html) 32 day;
+[ETH](https://mdz-analytics.com/crypto/dmi_trading_eth.html) 16 day.
 
-4. True strength index (TSI): [BTC](https://mdz-analytics.com/crypto/tsi_trading.html) n1=99, n2=15, n.signal=5;
-[ETH](https://mdz-analytics.com/crypto/tsi_trading_eth.html) n1=99, n2=3, n.signal=13.
+4. True strength index (TSI): [BTC](https://mdz-analytics.com/crypto/tsi_trading.html) n1=104, n2=15, n.signal=5;
+[ETH](https://mdz-analytics.com/crypto/tsi_trading_eth.html) n1=101, n2=7, n.signal=20.
 
 5. Stochastic oscillator (stoch): [BTC](https://mdz-analytics.com/crypto/stoch_trading.html) nFastK=43, nFastD=47, smooth=1;
 [ETH](https://mdz-analytics.com/crypto/stoch_trading_eth.html) nFastK=46, nFastD=25, smooth=1.
 
-6. Double RSI: [BTC](https://mdz-analytics.com/crypto/rsi2trading.html) n1=55, n2=95;
-[ETH](https://mdz-analytics.com/crypto/rsi2_trading_eth.html) n1=67,n2=72.
+6. Double RSI: [BTC](https://mdz-analytics.com/crypto/rsi2trading.html) n1=43, n2=112;
+[ETH](https://mdz-analytics.com/crypto/rsi2_trading_eth.html) n1=103, n2=107.
 
 This script will examine the price action and these trade signals just before the daily close.
 If the signal is TRUE, it is bullish and if FALSE it is bearish.
@@ -232,12 +232,12 @@ if ( btc_signal != "NONE") {
 
 ## BTC DMI indicator
 
-Directional movement indicator is a highly profitable approach to identify trend changes.
-DMI using a 26 day interval gives returns 4x better than the 43D SMA approach.
+Directional movement indicator is a good approach to identify trend changes.
+DMI using a 32 day interval gives returns similar to than the 43D SMA strategy.
 
 ```{r,btc_dmi,fig.height=10,fig.width=8}
 
-dmi.adx <- ADX(price[,c("high","low","close")],n=26)
+dmi.adx <- ADX(price[,c("high","low","close")],n=32)
 price2 <- cbind(price,dmi.adx)
 price2$signal <- dmi.adx[,1] > dmi.adx[,2]
 tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
@@ -275,7 +275,7 @@ plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="BTC USD price")
 grid()
 plot(price2$DIp~as.Date(price2$date),type="l", col="blue",
-  xlab="Date",ylab="price (USD)",main="BTC 26d DMI")
+  xlab="Date",ylab="price (USD)",main="BTC 32d DMI")
 grid()
 lines(price2$DIn ~ as.Date(price2$date) ,col="red")
 
@@ -297,7 +297,7 @@ if ( btc_signal != "NONE") {
 
 Optimised values:
 
-n1=99, n2=14, n.sig=5
+n1=104, n2=15, n.sig=5
 
 ```{r,btc_tsi,fig.height=10,fig.width=8}
 
@@ -317,7 +317,7 @@ TSI <- function(x, n.first = 25, n.second = 13, n.signal = 7) {
   return(r)
 }
 
-tsi <- TSI(price$close , n.first = 99, n.second = 14, n.signal = 5 )
+tsi <- TSI(price$close , n.first = 104, n.second = 15, n.signal = 5 )
 colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
@@ -381,12 +381,11 @@ if ( btc_signal != "NONE") {
 
 Optimised values:
 
-nFastk = 43, nFastD = 47, smooth = 1
+nFastk = 17, nFastD = 57, smooth = 6
 
 ```{r,btc_stoch,fig.height=10,fig.width=8}
 
-sto <- stoch(HLC(price), nFastK=43 , nFastD=47 , nSlowD=47 , 
-  bounded = TRUE, smooth=1)
+sto <- stoch(HLC(price), nFastK=17 , nFastD=57 , nSlowD=57 , bounded = TRUE, smooth=6)
 
 price2 <- cbind(price,sto)
 price2$signal <- price2$fastK > price2$fastD
@@ -450,12 +449,12 @@ if ( btc_signal != "NONE") {
 
 Optimised values:
 
-n1 = 55, n2 = 95
+n1 = 43, n2 = 112
 
 ```{r,btc_rsi1,fig.height=10,fig.width=8}
 
-rsi1 <- RSI(price$close,n=55,maType=EMA)
-rsi2 <- RSI(price$close,n=95,maType=EMA)
+rsi1 <- RSI(price$close,n=43,maType=EMA)
+rsi2 <- RSI(price$close,n=112,maType=EMA)
 
 price2 <- cbind(price,rsi1,rsi2)
 price2$signal <- price2$rsi1 > price2$rsi2
@@ -670,11 +669,11 @@ if ( eth_signal != "NONE") {
 
 ## ETH DMI
 
-For ETH, the 19 day interval DMI gave a good return.
+For ETH, the 16 day interval DMI gave a good return.
 
 ```{r,eth_dmi,fig.height=10,fig.width=8}
 
-dmi.adx <- ADX(price[,c("high","low","close")],n=19)
+dmi.adx <- ADX(price[,c("high","low","close")],n=16)
 price2 <- cbind(price,dmi.adx)
 price2$signal <- dmi.adx[,1] > dmi.adx[,2]
 tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
@@ -711,7 +710,7 @@ plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="ETH USD price")
 grid()
 plot(price2$DIp~as.Date(price2$date),type="l", col="blue",
-  xlab="Date",ylab="price (USD)",main="ETH 19d DMI")
+  xlab="Date",ylab="price (USD)",main="ETH 16d DMI")
 grid()
 lines(price2$DIn ~ as.Date(price2$date) ,col="red")
 
@@ -733,11 +732,11 @@ if ( eth_signal != "NONE") {
 
 Optimised values:
 
-n1=99, n2=3, n.sig=13
+n1=101, n2=7, n.sig=20
 
 ```{r,eth_tsi,fig.height=10,fig.width=8}
 
-tsi <- TSI(price$close , n.first = 99, n.second = 3, n.signal = 13 )
+tsi <- TSI(price$close , n.first = 101, n.second = 7, n.signal = 20 )
 colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
@@ -801,12 +800,11 @@ if ( eth_signal != "NONE") {
 
 Optimised values:
 
-nFastk = 46, nFastD = 25, smooth = 1
+nFastk = 20, nFastD = 47, smooth = 5
 
 ```{r,eth_stoch,fig.height=10,fig.width=8}
 
-sto <- stoch(HLC(price), nFastK=46 , nFastD=25 , nSlowD=25 ,
-  bounded = TRUE, smooth=1)
+sto <- stoch(HLC(price), nFastK=20 , nFastD=47 , nSlowD=47 , bounded = TRUE, smooth=5)
 
 price2 <- cbind(price,sto)
 price2$signal <- price2$fastK > price2$fastD
