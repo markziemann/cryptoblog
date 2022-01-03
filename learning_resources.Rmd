@@ -56,7 +56,7 @@ Bitcoin was the first and remains the most important cryptocurrency.
 It was developed by an anonymous developer or developers called Satoshi 
 Nakamoto and the whitepaper describing the technical details underlying the 
 Bitcoin software was released in 2008.
-In 2009 the bitcoin network started, presumably by Satoshi running the Bitcoin
+In 2009 the bitcoin network started, by Satoshi running the Bitcoin
 node software.
 In doing so, the first block of the blockchain was laid and over time many other
 folks joined the network by running the software, growing the network further.
@@ -69,15 +69,15 @@ attacks from governments and other adversaries.
 
 So what is a blockchain anyway?
 In simple terms it is just a list of all the transactions that have taken place
-in the past.
+in the past, organised into chunks or blocks.
 The Bitcoin network is maintained by nodes who each have a copy of the 
 blockchain and can therefore confirm the balances of each bitcoin holder.
 
 The process of confirming transactions is a complicated one because it needs to
-mitigate the possibility of participants trying to double spend their fund.
+mitigate the possibility of participants trying to double spend their funds.
 Also, there is the problem of many nodes of the network needing to agree on the
 contents of a block.
-This is a major problem which has plagued decentralised systems for a long while
+This is a major problem which has plagued digital cash systems for a long while
 and has been termed the "Byzantine Generals Problem".
 
 The way that this was solved was to develop a system called mining, in which
@@ -88,7 +88,7 @@ For a miner to find the solution hash is relatively difficult so it is unlikely
 to be found simultaneously by two miners.
 Once the solution is found, it is broadcast to the network, where it can be 
 confirmed easily by nodes and the network can come to a consensus.
-This process of block confirmation occurs approximately every 10 minutes and the 
+This process of block confirmation occurs on average very 10 minutes and the 
 successful miner receives a block subsidy of 6.25 BTC but this subsidy is cut 
 in half approximately every four years.
 This has the effect of making BTC more scarce over time.
@@ -102,7 +102,7 @@ be settled once the number of transactions in the queue falls to very low
 levels (this occurs only rarely).
 
 In the short term, reduction of the block subsidy leads to lower supply of BTC
-being traded by miners on exchanges and this results in short term scarcity and
+being sold by miners on exchanges and this results in short term scarcity and
 price "pumps" which gain massive momentum and resemble stock market bubbles, 
 complete with spectacular price appreciation "bull runs" followed by crushing 
 "bear markets" with drawdowns of 80 to 90% as seen in 2014/2015 and 2018/2019.
@@ -134,7 +134,7 @@ wouldn't be possible.
 
 4. Gold is inflationary compared to BTC.
 Indeed there is only a small amount of gold that is in existence in its refined
-form as bullion or jewellery, but there are new geological deposits being found  
+form as bullion or jewellery, but there are new geological deposits being found
 every year, which means there is more flow of gold coming on to the market.
 As technology improves, more deposits will be identified on land, in the sea bed
 and maybe from asteroids or other moons or planets, who knows.
@@ -163,8 +163,44 @@ swings in price, so investors may experience volatile swings in the portfolio
 value, which isn't for everyone.
 Of course you can hodl through the severe bear markets, but if you are prepared 
 with a strategy for navigating downturns and minimising your losses, the rewards
-cn be really huge. 
+are attractive.
 (I will write a separate article on strategies for that.)
+
+Some people say that cryptocurrencies are a ponzi scheme and that it is intrinsically
+worthless because it is backed by nothing.
+The valuation of bitcoin is based on it's intangible monetary properties:
+
+* durability: can be spent/transacted multiple times. 
+However coins can become lost if the privete keys are lost.
+
+* portability: it is a borderless network.
+
+* fungibility: bitcoins are indistinguishable from one another.
+
+* scarcity: limited to 21 M coins.
+
+* divisibility: each coin can be divided into 100 M units, called satoshis.
+
+* recognizability: BTC has its recognisable logo and culture.
+
+Cryptography, mining, nodes and incentives play their part in supporting Bitcoin,
+but there is nothing "backing" the value of bitcoin.
+From the 1870s to 1971 minus a few other years, the US dollar was backed by gold,
+meaning a Dollar could be redeemed for a stable unit of gold.
+Since 1971, the US Dollar is a fiat currency, meaning it no longer represents a set unit of gold.
+The reasons why the gold standard was abandoned are complicated and probably need a longer
+article, but suffice to say, that keeping the dollar pegged to gold gave the central banks 
+and governments less power to print dollars.
+Since going off the gold standard in 1971, the US dollar has lost 85% of its purchasing power 
+(as at Jan 2022).
+This has also allowed banks to offer more loans, which has had the effect of pumping asset prices,
+most notably real estate.
+M2 money has expanded dramatically in recent years in order to stimulate the economy,
+but this extra cash and extremely low interest rates have benefitted mostly the already wealthy
+and are leading to ordinary workers losing substantial purchasing power.
+
+That's right, the US Dollar is not backed by anything either, except perhaps the might of its
+millitary.
 
 It is interesting to see El Salvador recently declare bitcoin as legal tender and 
 incorporate it as a legitimate part of its economy.
@@ -179,6 +215,22 @@ Lightning transactions incur only tiny fees of a few cents, which allows for int
 applications like microtransactions, tipping and streaming money.
 The development of the lightning network and other layer 2 solutions reduce the demand
 for on-chain transactions and reduce the transaction fees for everyone.
+
+El Salvador's adoption of bitcoin is an interesting experiment will encourage other small
+countries to adopt BTC or other digital currencies.
+On the other hand, some governments have tried to regulate, ban and restrict cryptocurrencies 
+due to the possibility that they may destabilise the local currency.
+These regulations are typically focused on the pain points for digital currency, which are
+the exchanges and bank transfers to those exchanges.
+These can indeed stifle confidence in such currencies but the rusted-on supporters will still 
+keep their holdings in cold storage until regulations are improved, or will move to a more 
+permissive juristiction.
+Legistators will be able to contrast harsh and friendly stances on digital assets, it is possible that
+juristictions friendly to digital currencies will see an influx of entrepreneurs and new investment
+which will stimulate their economies in contrast to the brain drain and escape of capital from
+restrictive juristictions.
+Just like the adoption of other types of technology, countries will try to gain dominance
+by fostering blockchain entrepreneurs and recommending ownership.
 
 ## Altcoins
 
@@ -218,7 +270,7 @@ As the market is driven more by emotions than fundamentals it will continue to b
 unpredictable.
 One piece of advice I can give is to see what projects are getting software developers
 involved.
-Clearly the Ethereum network is a focus for cutting edge applications such as defi and 
+Clearly the Ethereum network is a focus for cutting edge applications such as decentralised finance (defi) and 
 non-fungible tokens (NFTs) which will innovate banking, finance and other aspects of
 our life, but keep in mind that Ethereum is undergoing major upgrades such as moving
 to proof-of-stake, along with upgrades to enable more transactions which have a chance 
@@ -250,7 +302,6 @@ smart contract chains and it will likely end up as winner-take-all.
 On the other hand, there are no serious store-of-value competitors to bitcoin.
 In my humble opinion, bitcoin is in a class of it own and should be the bedrock of any
 investment portfolio.
-
 
 ## Links to further resources
 
@@ -319,6 +370,10 @@ Another regression model of bitcoin price.
 * [PlanB blog posts on Medium](https://medium.com/@100trillionUSD)
 Here's where the gold trader-cum-crypto quant has posted some of their work
 including the famous stock-to-flow bitcoin price prediction model.
+
+* [Net unrealised profit/loss](https://academy.glassnode.com/indicators/profit-loss-unrealized/net-unrealized-profit-loss)
+Is used to measure the overall risk level of the market and identify bull market tops and 
+bear market lows.
 
 ## Trading indicators and strategy
 
