@@ -1,5 +1,5 @@
 ---
-title: "Cryptocurrency learning resources"
+title: "Crypto 101: Why bother with digital currencies?"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -34,6 +34,7 @@ more resources you can use to extend your knowledge.
 This isn't meant to be an extensive or comprehensive encylopedia of information,
 rather the bare mimimum you need to begin to learn on you own how to manage your 
 crypto portfolio.
+Also, it's a work in progress, may have typos and lack links to sources.
 
 ```{r,lib}
 
@@ -66,6 +67,12 @@ requiring the permission of a bank or other third party.
 As Bitcoin is a decentralised network consisting of nodes and miners, there is
 no central point of failure, which is important if it is to be resilient against
 attacks from governments and other adversaries.
+
+It is described as the internet of money as it is an open and global network.
+Transactions cannot be censored and are irreversible.
+Folks can open a bitcoin wallet on their computer or smart phone and begin 
+receiving and sending cash in a peer-to-peer fashion.
+These transactions get stored on a public ledger called the blockchain.
 
 So what is a blockchain anyway?
 In simple terms it is just a list of all the transactions that have taken place

@@ -204,9 +204,18 @@ if (today_signal != previous_signal ) {
 btc_signal <- "NONE"
 }
 
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_SMA_CROSS_DAILY/BULLISH/' index1.html")
+ system("sed -i 's/BTC_SMA_CROSS_COL/green/' index1.html")
+} else {
+ system("sed -i 's/BTC_SMA_CROSS_DAILY/BEARISH/' index1.html")
+ system("sed -i 's/BTC_SMA_CROSS_COL/red/' index1.html")
+}
+
 message(paste("BTC SMA cross signal:",btc_signal))
 
 ```
+
 
 ```{r, btc_cross_plot,fig.height=8,fig.width=8}
 
@@ -639,6 +648,14 @@ if (today_signal != previous_signal ) {
   }
 } else {
 eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/ETH_SMA_CROSS_DAILY/BULLISH/' index1.html")
+ system("sed -i 's/ETH_SMA_CROSS_COL/green/' index1.html")
+} else {
+ system("sed -i 's/ETH_SMA_CROSS_DAILY/BEARISH/' index1.html")
+ system("sed -i 's/ETH_SMA_CROSS_COL/red/' index1.html")
 }
 
 message(paste("ETH SMA cross signal:",eth_signal))
