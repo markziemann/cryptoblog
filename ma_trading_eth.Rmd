@@ -291,6 +291,17 @@ lines(ma~ as.Date(price$date) ,col="red")
 
 ```
 
+### SMA recent action
+
+```{r,sma_recent}
+
+plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=SMA_HEADER)
+grid()
+lines(tail(ma,200) ~ tail(as.Date(price$date),200) ,col="red")
+
+```
+
 ### Best EMA
 
 Now have a look at the best EMA option.
@@ -331,6 +342,17 @@ plot(price$close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=EMA_HEADER)
 grid()
 lines(ma~ as.Date(price$date) ,col="red")
+
+```
+
+### EMA recent action
+
+```{r,ema_recent}
+
+plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=EMA_HEADER)
+grid()
+lines(tail(ma,200) ~ tail(as.Date(price$date),200) ,col="red")
 
 ```
 
