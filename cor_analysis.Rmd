@@ -370,6 +370,7 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
 trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
 yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+yearly <- yearly[which(lapply(yearly,length)>0)]
 vioplot(yearly)
 
 yr <- sapply(yearly,prod)

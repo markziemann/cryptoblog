@@ -329,12 +329,14 @@ years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
 sma_trades$year <- sapply(strsplit(sma_trades[,3],"-"),"[[",1)
 sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,5] } )
+sma_yearly <- sma_yearly[which(lapply(sma_yearly,length)>0)]
 vioplot(sma_yearly)
 barplot(sapply(sma_yearly,prod))
 abline(h=1,col="red",lty=2)
 
 ema_trades$year <- sapply(strsplit(ema_trades[,3],"-"),"[[",1)
 ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,5] } )
+ema_yearly <- ema_yearly[which(lapply(ema_yearly,length)>0)]
 vioplot(ema_yearly)
 barplot(sapply(ema_yearly,prod))
 abline(h=1,col="red",lty=2)
