@@ -55,8 +55,8 @@ suppressPackageStartupMessages({
 
 Bitcoin was the first and remains the most important cryptocurrency.
 It was developed by an anonymous developer or developers called Satoshi 
-Nakamoto and the whitepaper describing the technical details underlying the 
-Bitcoin software was released in 2008.
+Nakamoto and the whitepaper[1](https://bitcoin.org/bitcoin.pdf) describing 
+the technical details underlying the Bitcoin software was released in 2008.
 In 2009 the bitcoin network started, by Satoshi running the Bitcoin
 node software.
 In doing so, the first block of the blockchain was laid and over time many other
@@ -68,29 +68,30 @@ As Bitcoin is a decentralised network consisting of nodes and miners, there is
 no central point of failure, which is important if it is to be resilient against
 attacks from governments and other adversaries.
 
-It is described as the internet of money as it is an open and global network.
+It is described as the internet of money [2] as it is an open and global network.
 Transactions cannot be censored and are irreversible.
-Folks can open a bitcoin wallet on their computer or smart phone and begin 
+Folks can install a bitcoin wallet on their computer or smart phone and begin 
 receiving and sending cash in a peer-to-peer fashion.
 These transactions get stored on a public ledger called the blockchain.
 
 So what is a blockchain anyway?
 In simple terms it is just a list of all the transactions that have taken place
-in the past, organised into chunks or blocks.
+in the past, organised into chunks or "blocks".
 The Bitcoin network is maintained by nodes who each have a copy of the 
 blockchain and can therefore confirm the balances of each bitcoin holder.
+As of Jan 2022, there are 14.5k bitcoin nodes online [3].
 
 The process of confirming transactions is a complicated one because it needs to
 mitigate the possibility of participants trying to double spend their funds.
 Also, there is the problem of many nodes of the network needing to agree on the
 contents of a block.
 This is a major problem which has plagued digital cash systems for a long while
-and has been termed the "Byzantine Generals Problem".
+and has been termed the "Byzantine Generals Problem" [4].
 
 The way that this was solved was to develop a system called mining, in which
 a group of potential transactions are bundled into a block and then miners apply
-their CPU time to "solve" the cryptographic SHA256 checksum (hash) of the block,
-so that the hash starts with a certain number of zeros.
+their computational energy to "solve" the cryptographic SHA256 checksum (hash) 
+of the block, so that the hash starts with a certain number of zeros [5].
 For a miner to find the solution hash is relatively difficult so it is unlikely 
 to be found simultaneously by two miners.
 Once the solution is found, it is broadcast to the network, where it can be 
@@ -100,25 +101,27 @@ successful miner receives a block subsidy of 6.25 BTC but this subsidy is cut
 in half approximately every four years.
 This has the effect of making BTC more scarce over time.
 Mining is also the process by which BTC are minted into existence.
-As of today, about 18 M of the total 21 M BTC have been mined.
+As of today, about 18 M of the total 21 M BTC have been mined [5].
 
 In addition to the block subsidy, miners collect transaction fees which 
 transactors use to prioritise their transactions over others.
 It is possible to set a tranaction fee of zero, but those transactions will only 
 be settled once the number of transactions in the queue falls to very low
 levels (this occurs only rarely).
+Currently the bitcoin median transaction fee is US$0.5 but has been known to be as 
+high as $30 [6].
 
 In the short term, reduction of the block subsidy leads to lower supply of BTC
 being sold by miners on exchanges and this results in short term scarcity and
 price "pumps" which gain massive momentum and resemble stock market bubbles, 
 complete with spectacular price appreciation "bull runs" followed by crushing 
-"bear markets" with drawdowns of 80 to 90% as seen in 2014/2015 and 2018/2019.
+"bear markets" with drawdowns of 80 to 90% as seen in 2014/2015 and 2018/2019 [7].
 
 One of the main points which makes bitcoin attractive to investors is the fact 
 that the number of BTC that will ever exist is hard coded into the protocol.
 There will never be more than 21 M BTC in existence. 
 In this way, BTC is seen as "hard" money, which cannot be devalued by a 
-government or central bank.
+government or central bank [8].
 It is perceived by some as a hedge against future inflation, somewhat like gold
 for the traditional investor, however there are some differences to gold that
 need to be mentioned:
@@ -154,15 +157,16 @@ So bitcoin is like digital gold, but it's properties make it better in many
 respects.
 
 Will bitcoin replace local fiat currencies any time soon?
-Probably not, Gresham's law indicates that "hard" money will be driven out of
+Probably not, Gresham's law [9] indicates that "hard" money will be driven out of
 circulation by "soft" money that can be easily printed by banks.
 It makes more sense to hodl (save) bitcoin into the rather than use it for
 purchases.
 Cast your mind back to the first commercial bitcoin transaction, 10,000 BTC for
-a pizza would be worth something like $500 M at today's rates.
+a pizza would be worth something like $4.6 billion at today's rates [10].
 
 Therefore BTC will find itself to be a way for savers to preserve their 
-purchasing power over long time frames, say decades.
+purchasing power over long time frames, say decades (but with a diminishing 
+rate of appreciation).
 This simply cannot be achieved by currently in traditional finance, with term
 deposit rates accruing interest below the consumer price index.
 While BTC appears to be a good instrument for savers, it does experience massive 
@@ -173,8 +177,13 @@ with a strategy for navigating downturns and minimising your losses, the rewards
 are attractive.
 (I will write a separate article on strategies for that.)
 
-Some people say that cryptocurrencies are a ponzi scheme and that it is intrinsically
-worthless because it is backed by nothing.
+Bitcoin's price appreciation appears to follow a power law, that means it fits
+a straight line when both the time and price axes are log transformed.
+See https://stats.buybitcoinworldwide.com/long-term-power-law/ and you will see
+that price appreciation is decelerating over time [11].
+
+It is a common assertion that cryptocurrencies are a ponzi scheme and that they 
+are intrinsically worthless because they are backed by nothing.
 The valuation of bitcoin is based on it's intangible monetary properties:
 
 * durability: can be spent/transacted multiple times. 
@@ -186,58 +195,66 @@ However coins can become lost if the privete keys are lost.
 
 * scarcity: limited to 21 M coins.
 
-* divisibility: each coin can be divided into 100 M units, called satoshis.
+* divisibility: each coin can be divided into 100 million units, called satoshis.
 
 * recognizability: BTC has its recognisable logo and culture.
 
 Cryptography, mining, nodes and incentives play their part in supporting Bitcoin,
 but there is nothing "backing" the value of bitcoin.
 From the 1870s to 1971 minus a few other years, the US dollar was backed by gold,
-meaning a Dollar could be redeemed for a stable unit of gold.
-Since 1971, the US Dollar is a fiat currency, meaning it no longer represents a set unit of gold.
+meaning a Dollar could be redeemed for a stable unit of gold. [12]
+Since 1971, the US Dollar is a fiat currency, meaning it no longer represents a set unit 
+of gold.
 The reasons why the gold standard was abandoned are complicated and probably need a longer
 article, but suffice to say, that keeping the dollar pegged to gold gave the central banks 
 and governments less power to print dollars.
 Since going off the gold standard in 1971, the US dollar has lost 85% of its purchasing power 
-(as at Jan 2022).
+(as at Jan 2022)[13].
 This has also allowed banks to offer more loans, which has had the effect of pumping asset prices,
 most notably real estate.
-M2 money has expanded dramatically in recent years in order to stimulate the economy,
+M2 money has expanded dramatically in recent years [14] in order to stimulate the economy,
 but this extra cash and extremely low interest rates have benefitted mostly the already wealthy
-and are leading to ordinary workers losing substantial purchasing power.
+are leading to ordinary workers losing substantial purchasing power.
 
-That's right, the US Dollar is not backed by anything either, except perhaps the might of its
-millitary.
+So if the US Dollar is not backed by gold, what is holding up the greenback's value?
+
+1. Demand for good and services from the USA and it's allies (including oil from Saudi Arabia) [15]
+
+2. Demand for USD as a highly liquid asset and likely to keep it's value better than 
+currencies of smaller nations.
+
+3. The might of its millitary to intimidate smaller countries to use USD.
 
 It is interesting to see El Salvador recently declare bitcoin as legal tender and 
-incorporate it as a legitimate part of its economy.
+incorporate it as a legitimate part of its economy [16].
 This is in large part due to a lack of it's own national currency and reliance on the
 US dollar as the local currency.
 For a long time people have said that bitcoin won't be used in a day to day sense 
 because the network can only process about 3 transactions per section and in times of
 demand the transaction fees can escalate to over $20 which is impractical.
 However the El Salvador adoption of bitcoin was enabled by the lightning network.
-This is a "layer 2" system which allows for tranactions to occur off-chain.
+This is a "layer 2" system which allows for tranactions to occur off-chain [17].
 Lightning transactions incur only tiny fees of a few cents, which allows for interesting
 applications like microtransactions, tipping and streaming money.
 The development of the lightning network and other layer 2 solutions reduce the demand
 for on-chain transactions and reduce the transaction fees for everyone.
 
-El Salvador's adoption of bitcoin is an interesting experiment will encourage other small
+El Salvador's adoption of bitcoin is an interesting experiment might encourage other small
 countries to adopt BTC or other digital currencies.
 On the other hand, some governments have tried to regulate, ban and restrict cryptocurrencies 
 due to the possibility that they may destabilise the local currency.
 These regulations are typically focused on the pain points for digital currency, which are
 the exchanges and bank transfers to those exchanges.
 These can indeed stifle confidence in such currencies but the rusted-on supporters will still 
-keep their holdings in cold storage until regulations are improved, or will move to a more 
+keep their holdings in cold storage until regulations are lifted, or they will move to a more 
 permissive juristiction.
-Legistators will be able to contrast harsh and friendly stances on digital assets, it is possible that
-juristictions friendly to digital currencies will see an influx of entrepreneurs and new investment
-which will stimulate their economies in contrast to the brain drain and escape of capital from
-restrictive juristictions.
+Legistators will be able to contrast harsh and friendly stances on digital assets, it is possible
+that juristictions friendly to digital currencies will see an influx of entrepreneurs and new 
+investment which will stimulate their economies in contrast to the brain drain and escape of 
+capital from restrictive juristictions.
 Just like the adoption of other types of technology, countries will try to gain dominance
 by fostering blockchain entrepreneurs and recommending ownership.
+Potentially, central banks will stockpile BTC in order to stabilise their own local currency.
 
 ## Altcoins
 
@@ -268,18 +285,19 @@ the network, develop new wallets and integration into the existing financial sys
 Bitcoin is also able to integrate features from other projects.
 Remember that the concept of "layer 2", small transactions with extremely low fees 
 using the lightning network was first enabled on Litecoin, before it was applied to
-Bitcoin.
+Bitcoin [17].
 
 I'm not saying that altcoins are all a bad investment, just that the risks are higher.
 Even though a project could be fundamentally valuable doesn't mean it will perform 
 well. 
 As the market is driven more by emotions than fundamentals it will continue to be
-unpredictable.
+unpredictable and volatile.
 One piece of advice I can give is to see what projects are getting software developers
 involved.
-Clearly the Ethereum network is a focus for cutting edge applications such as decentralised finance (defi) and 
-non-fungible tokens (NFTs) which will innovate banking, finance and other aspects of
-our life, but keep in mind that Ethereum is undergoing major upgrades such as moving
+Clearly the Ethereum network is a focus for cutting edge applications such as 
+decentralised finance (defi) and non-fungible tokens (NFTs) which will innovate 
+banking, finance and other aspects of our life. 
+But keep in mind that Ethereum is undergoing major upgrades such as moving
 to proof-of-stake, along with upgrades to enable more transactions which have a chance 
 of failing.
 Aside from this, Ethereum is a really interesting network because it invites others to
@@ -291,7 +309,7 @@ SNX, other ERC-20 tokens and even NFTs.
 If you transact tokens or enter into smart contracts on the ETH network, there are gas
 fees which need to be paid in order to prioritise it sufficiently so it is executed in
 a timely way.
-Interestingly, transaction fees on the ethereum network currently are 5-10X higher than
+Interestingly, transaction fees on the Ethereum network currently are 5-10X higher than
 for Bitcoin, which is an indication of how well the Ethereum network has been able to
 on-board many other projects, but these extremely high fees are a deterrent to 
 newcomers and have led to the popularity of competitors such as Binance smart chain,
@@ -305,10 +323,46 @@ dramatically, gas fees will crash and Ethereum competitor networks will fall
 significantly behind.
 
 From this, you should appreciate that Ethereum is in strong competition with other 
-smart contract chains and it will likely end up as winner-take-all.
+smart contract chains and it could end up as winner-take-all.
 On the other hand, there are no serious store-of-value competitors to bitcoin.
 In my humble opinion, bitcoin is in a class of it own and should be the bedrock of any
 investment portfolio.
+
+## References
+
+1. Nakamoto S. Bitcoin: A peer-to-peer electronic cash system. Bitcoin.org, https://bitcoin.org/bitcoin.pdf (accessed January 8, 2022).
+
+2. Antonopoulos AM. The internet of money: A collection of talks by Andreas M. antonopoulos. North Charleston, SC: Createspace Independent Publishing Platform, 2016.
+
+3. Global Bitcoin nodes distribution. Bitnodes.io, https://bitnodes.io/ (accessed January 8, 2022).
+
+4. Wikipedia contributors. Byzantine fault. Wikipedia, The Free Encyclopedia, https://en.wikipedia.org/w/index.php?title=Byzantine_fault&oldid=1063346179 (2022).
+
+5. Dashboard. Clark Moody Bitcoin, https://bitcoin.clarkmoody.com/dashboard/ (accessed January 8, 2022).
+
+6. Bitcoin Average Transaction Fee. Ycharts.com, https://ycharts.com/indicators/bitcoin_average_transaction_fee (accessed January 8, 2022).
+
+7. 100% complete bitcoin price history graph + related events 2009 - 2022. 99 Bitcoins, https://99bitcoins.com/bitcoin/historical-price/ (2016, accessed January 8, 2022).
+
+8. Williams J. Bitcoin: Hard Money You Can’t F*ck With: Why bitcoin will be the next global reserve currency. Going Parabolic Publishing, 2020.
+
+9. Wikipedia contributors. Gresham’s law. Wikipedia, The Free Encyclopedia, https://en.wikipedia.org/w/index.php?title=Gresham%27s_law&oldid=1062654574 (2021).
+
+10. Bitcoin Pizza Index. Bitcoinpizzaindex.net, https://bitcoinpizzaindex.net/ (accessed January 8, 2022).
+
+11. Bitcoin Long Term Power Law Chart. Buybitcoinworldwide.com, https://stats.buybitcoinworldwide.com/long-term-power-law/ (accessed January 8, 2022).
+
+12. Wikipedia contributors. Gold standard. Wikipedia, The Free Encyclopedia, https://en.wikipedia.org/w/index.php?title=Gold_standard&oldid=1062224553 (2021).
+
+13. Inflation rate between 1971-2022. Officialdata.org, https://www.officialdata.org/us/inflation/1971?amount=100 (accessed January 8, 2022).
+
+14. TRADING ECONOMICS. United States Money Supply M2.
+
+15. Tun ZT. How petrodollars affect the U.s. dollar. Investopedia, https://www.investopedia.com/articles/forex/072915/how-petrodollars-affect-us-dollar.asp (2021, accessed January 8, 2022).
+
+16. Wikipedia contributors. Bitcoin in El Salvador. Wikipedia, The Free Encyclopedia, https://en.wikipedia.org/w/index.php?title=Bitcoin_in_El_Salvador&oldid=1059278957 (2021).
+
+17. Wikipedia contributors. Lightning Network. Wikipedia, The Free Encyclopedia, https://en.wikipedia.org/w/index.php?title=Lightning_Network&oldid=1064396161 (2022).
 
 ## Links to further resources
 
