@@ -35,6 +35,7 @@ suppressPackageStartupMessages({
   library("vioplot")
   library("parallel")
   library("kableExtra")
+  library("anytime")
 })
 
 ```
@@ -43,18 +44,36 @@ Reminder: this is not financial advice.
 
 ## Get BTC data
 
-Obtaining BTC historical data (daily).
+Obtaining BTC historical data (weekly).
+Historical data pre 2021 are from https://www.investing.com/indices/investing.com-btc-usd-historical-data
+while the recent data are from http://coinmarketcap.com/
 
-```{r,getbtc}
+```{r,historicaldata1}
+
+weekly <- read.csv("BitcoinHistoricalData_weekly.csv",stringsAsFactors=FALSE)
+weekly <- weekly[nrow(weekly):1,]
+weekly <- apply(weekly,2,function(x) { gsub(",","",x) } )
+weekly <- as.data.frame(weekly,stringsAsFactors=FALSE)
+weekly$Close <- as.numeric(weekly$Price)
+weekly$Date <- anydate(weekly$Date)
+weekly <- weekly[,c("Date","Close")]
+weekly <- weekly[grep("2021",weekly$Date,invert=TRUE),]
+weekly <- weekly[grep("2022",weekly$Date,invert=TRUE),]
+
+```
+
+```{r,getdata1}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=weekly&time_start=2013-06-01&time_end=",mydate,sep="")
-download.file(URL,destfile="btcdat.txt")
-dat <- fromJSON("btcdat.txt")
-price <- dat$data$quotes
-price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
-colnames(price) <- c("date","Close")
-price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=weekly&time_start=2021-01-01&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat_weekly.txt")
+btcdat <- fromJSON("btcdat_weekly.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$close ,stringsAsFactors=FALSE)
+colnames(price) <- c("Date","Close")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+price <- rbind(weekly,price)
 
 ```
 
@@ -71,11 +90,11 @@ price$rsi <- RSI(price$Close,n=14)
 tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
 
 par(mfrow=c(2,1))
-plot(price$Close ~ as.Date(price$date),type="l",log="y",
+plot(price$Close ~ as.Date(price$Date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main="USD price")
 grid()
 
-plot(price$rsi ~ as.Date(price$date),type="l",col="blue",
+plot(price$rsi ~ as.Date(price$Date),type="l",col="blue",
   xlab="Date",ylab="RSI",ylim=c(20,100),main="weekly RSI")
 grid()
 abline(h=90,col="red")
@@ -100,11 +119,11 @@ price$rsi <- RSI(price$Close,n=14)
 tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 par(mfrow=c(2,1))
-plot(price$Close ~ as.Date(price$date),type="l",log="y",
+plot(price$Close ~ as.Date(price$Date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main="USD price")
 grid()
 
-plot(price$rsi ~ as.Date(price$date),type="l",col="blue",
+plot(price$rsi ~ as.Date(price$Date),type="l",col="blue",
   xlab="Date",ylab="RSI",ylim=c(20,100),main="biweekly RSI")
 grid()
 abline(h=90,col="red")
@@ -114,16 +133,42 @@ abline(h=30,col="black")
 
 ## Get monthly data
 
-```{r,getdata2btc}
+Obtaining BTC historical data (monthly).
+Historical data pre 2021 are from https://www.investing.com/indices/investing.com-btc-usd-historical-data
+while the recent data are from http://coinmarketcap.com/
+
+```{r,historicaldata2}
+
+monthly <- read.csv("BitcoinHistoricalData_monthly.csv",stringsAsFactors=FALSE)
+monthly <- monthly[nrow(monthly):1,]
+monthly <- apply(monthly,2,function(x) { gsub(",","",x) } )
+monthly <- as.data.frame(monthly,stringsAsFactors=FALSE)
+monthly$Close <- as.numeric(monthly$Price)
+
+
+y <- paste("20",sapply(strsplit(monthly$Date," "),"[[",2),sep="")
+m <- sapply(strsplit(monthly$Date," "),"[[",1)
+monthly$Date <- anydate(paste(y,m))
+
+monthly <- monthly[,c("Date","Close")]
+monthly <- monthly[grep("2021",monthly$Date,invert=TRUE),]
+monthly <- monthly[grep("2022",monthly$Date,invert=TRUE),]
+
+```
+
+```{r,getdata2}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=monthly&time_start=2013-06-01&time_end=",mydate,sep="")
-download.file(URL,destfile="btcdat.txt")
-dat <- fromJSON("btcdat.txt")
-price <- dat$data$quotes
-price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
-colnames(price) <- c("date","Close")
-price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=monthly&time_start=2020-12-01&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat_monthly.txt")
+btcdat <- fromJSON("btcdat_monthly.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$close ,stringsAsFactors=FALSE)
+colnames(price) <- c("Date","Close")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+price$Date <- anydate(price$Date)
+price <- rbind(monthly,price)
 
 ```
 
@@ -138,11 +183,11 @@ price$rsi <- RSI(price$Close,n=14)
 tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
 
 par(mfrow=c(2,1))
-plot(price$Close ~ as.Date(price$date),type="l",log="y",
+plot(price$Close ~ as.Date(price$Date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main="USD price")
 grid()
 
-plot(price$rsi ~ as.Date(price$date),type="l",col="blue",
+plot(price$rsi ~ as.Date(price$Date),type="l",col="blue",
   xlab="Date",ylab="RSI",ylim=c(20,100),main="monthly RSI")
 grid()
 abline(h=90,col="red")
