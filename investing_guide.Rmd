@@ -1,0 +1,281 @@
+---
+title: "A sane persons guide to investing in cryptocurrencies"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    fig_width: 7
+    fig_height: 7
+theme: cosmo
+---
+
+Source: https://github.com/markziemann/cryptoblog/blob/main/investing_guide.Rmd
+
+This document is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+
+LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
+
+## Preface
+
+First and foremost, this is not financial advice.
+This guide is for educational and informational purposes only.
+
+The cryptocurrency markets are volatile and money can be made and LOST quickly.
+You own the decisions you make. Big boy pants here.
+
+What I'm discussing below are the principles behind how I manage risk and take advantage of upside
+potential.
+Consider speaking to a financial advisor about your personal situation and acceptable levels of risk.
+
+This is a work in progress, so may have typos and lack links to sources.
+Feel free to get in touch by email mark.ziemann[at]gmail.com or twitter @mdziemann.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+
+```
+
+## So you've decided to get involved in the crypto market?
+
+In my earlier [blog post](https://mdz-analytics.com/crypto/learning_resources.html) I gave a general
+overview as to the benefits of bitcoin. I will rehash them here briefly:
+
+* The only truly scarce asset (with a hard cap)
+
+* Not controlled by a central authority
+
+* Cannot be censored
+
+* Truly mobile
+
+It is also worth discussing the negative points, or risks:
+
+* Highly volatile. Often when people hear about bitcoin, it is in the middle of a market euphoria 
+which is the most dangeous time to begin investing.
+
+* Markets can be manipulated. Billionaire entrepreneurs announcements can rock the market in both ways.
+Similarly, large bitcoin hodlers use their market power to cause price shifts designed to stoke the
+emotions of investors.
+For example continued selling causing downtrends which instills fear, where retail sell for reduced 
+prices to whales who accumulate.
+
+* Governments can impose some controls.
+They can regulate the way that businesses and individuals interact with cryptos, for example by banning
+mining, controlling exchanges, and banning these cryptos as a means of payment.
+
+* Most cryptos lack privacy features.
+You don't want your payees/payers to know how much you own, and you don't want this information
+getting out to the whole world.
+This is an issue that will become more important as cryptos become more embedded in our everyday lives.
+
+* Technology developments in future could render bitcoin or other cryptos obsolete.
+It could happen.
+
+Based on your study and knowledge of these these risks and benefits, you need to decide how deeply you
+want to get involved.
+
+## Use the technology BEFORE you invest in it
+
+This is such a good piece of advice.
+If you were to invest in a company that makes stuff, you would want to learn as much as you could
+about the products it makes.
+So you try the product, test it out, see what it can do.
+Compare products between companies, observe where the competitive advantage lies.
+
+Buy a tiny amount of bitcoin (or altcoin) on an exchange, transfer it to a wallet on your PC or phone.
+Use it to pay for stuff.
+Request others to pay you in bitcoin.
+
+If you are tech savvy, you can try to go a bit deeper by setting up a node.
+I've recently set up a Bitcoin node and it gives you a deeper understanding about what is going on
+under the hood.
+It gives me a better idea about what makes the Bitcoin network resilient and what challenges it faces.
+it provides a window into potential new applications, like lightning, or even apps built on top of it.
+You will also better appreciate the weaknesses, for example how difficult to set these up and keep
+them running smoothly
+
+## Tips for beginner investors
+
+Here's my top tips:
+
+1. If you decide that you will accumulate a bit of crypto, invest some time to secure your 
+funds properly.
+There are lots of good guides online, but I will give you the nutshell.
+Get a hardware wallet, learn how to use it. Load it with your seed phrase and protect it with a 
+password that you can memorise.
+You can keep a backup of your seed phrase on paper/steel in a VERY safe place, like a bank deposit box.
+Review your security procedures reguarly and upgrade them as the value of the portfolio grows.
+Consider how you will enable your loved ones to use the funds after you're dead.
+
+2. Choose an exchange which meets your needs.
+Consider security - is it reputable? 
+Is it a long running firm with a good track record?
+Consider fees for trades and withdrawals.
+Consider juristiction and regulatory issues. If you reside in a country where you can't trust the 
+government, then consider obtaining an account with an off-shore exchange in a country friendly to
+digital asset investing.
+
+3. Keep the majority of your funds off the exchange, in your hardware wallet.
+Exchanges can get hacked sometimes, so in the chance that the exchange is compromised you won't lose 
+everything.
+If your strategy involves swing trades of large sums and you want to keep funds on the exchange
+to protect against network fees and congestion, then consider accounts at more than one exchange.
+That way, a smaller fraction of funds will be lost in case of hack.
+
+4. Never invest more than you can afford to lose and keep a long term mindset.
+Bitcoin is a long term investment, if you need the funds to secure a guaranteed income, then crypto 
+probably isn't right for you.
+Have a look at the 10 year chart for BTC.
+You will see that the price undergoes wild swings in the relative short term, but over the long 
+term it does trend up.
+There are good years and bad years, but if your time horizon is four years or more, you are most 
+likely going to see the purchasing power of your portfolio grow.
+
+5. Investigate dollar cost averaging (DCA).
+The market moves in wild ways.
+Some say the market moves in a "maximum pain" pattern, inflicting maximum pain on both bears and bulls
+as the market gets overly emotional and moves become exaggerated.
+Buying a set amount at regular intervals helps to smooth out the noise of the short term moves.
+Start with really small amounts, for example: how much do you spend on streaming services each month?
+Then over time you can slowly increase the contributions as you learn more about the technology and 
+comfortable with the way the market moves.
+DCA can be set up automatically, so you can let it accumulate over time.
+
+6. Monitor your emotions.
+Do you feel euphoric when the price is going up and depressed when it's going down?
+Are you checking the market moves every hour?
+Is it preventing you from enjoying other parts of your life?
+In that case you might have too much invested in the market, and you should consider scaling out.
+A financial advisor will help you to find the right balance in your investment portfolio.
+Crypto investing is very risky, so it might not be for you.
+
+7. Keep it simple by sticking to BTC.
+People new to this space open coinmarketcap.com or other websites and get amazed by the variety of
+altcoins available and the massive gains that some achieve in a short amount of time.
+They open a trading account during a massive bull market and buy a basket of five cryptos.
+They are happy when price is going up, but when it reverses, it can be dramatic and catastrophic.
+If you are monitoring so many different assets, you are spending time securing those funds,
+considering your positions, checking indicators frequently, etc.
+It can be stressful!
+You may think this is diversificaiton, but as the market ultimately hinges on the performance of the 
+major asset, BTC, it actually weakens your position.
+Instead of looking at one chart, you're looking at five.
+Instead of having fear that BTC will dump by 50%, you have fear that the s**tcoin could dump by 80% 
+or worse!
+It is always helpful to remember that BTC is the only store-of-value crypto.
+All others are utility tokens; analogous to technology start-ups.
+As with start-ups, it is extremely competitive - the failure rate is high.
+
+8. Another small tip: denominate your investments in BTC, that way you don't feel like you're losing when 
+the market corrects.
+
+## Level up
+
+So you've accumulated for a while or you've been involved in this space so long that 
+you already know all those beginner tips?
+
+Let's dive into some more advanced stuff shall we.
+
+### Diversification done properly.
+
+You've already decided on the weighting that cryptos should have in your net worth, and have a regular
+DCA strategy, now it's time to consider different ways to hold cryptos.
+The different ways are:
+
+1. Cold storage. This should be the largest portion, which is held with the lowest risk.
+
+2. Lend it out. You can deposit funds at a centralised cryptobank like Celcius, Ledn, Nexo, etc which
+will lend out your funds and you will earn interest, paid in crypto.
+The interest rates are quite good for some of these, for example ~7% pa for BTC at 
+[Celcius](https://celsius.network/).
+Alternatively there are decentralised finance solutions (eg: Compound) although I have not used these 
+myself.
+This is a good option for those with a long term horizon, although lending out your coins does involve
+considerable risk.
+Based on this risk, you could consider lending a small part of your portfolio (max one-third).
+As the value of the account increases, you should consider dividing the funds over >1 accounts.
+
+3. Acquire some with your retirement funds.
+Depending on where you live it could be possible to stack bitcoin with your retirement savings account
+(aka: superannuation).
+
+4. Use regulated markets. There are bitcoin ETFs and other funds popping up around the place and
+these could be something that it worth looking into. 
+Especially if the purchase will be made as part of a retirement savings plan.
+Still, the fees involved with such funds are considerable and you're still trusting them (the bank)
+to secure the funds correctly.
+
+5. You can actively trade a small portion of your portfolio.
+I think we'll need a new heading for this one.
+
+### Active trading
+
+I'm sorry to say, but novice traders are more often than not going to get rekt by trying to trade 
+short term price action.
+Here's why:
+
+1. Hype
+
+2. Emotions
+
+3. Influencers
+
+How do you stop getting rekt? Get a System!
+
+You can study the historical charts and analyse levels of support and resistance.
+You can make paper trades, and work on a strategy that works for intra-day or multi-day swing strategies.
+Invariably, doing this properly is time consuming which conflicts with other things in your life.
+If you want to keep your full time job, you can't be looking at the charts constantly, you will need to
+spend time at your job, and you might miss trading opportunities because of the job, or worse, time
+spent away from the chart causes you to miss huge moves and your position goes underwater.
+If you did this with leverage, there's a chance the entire position is liquidated.
+
+My system: crunch the data with computers so I don't need to look at a chart.
+
+
+
+## References
+
+
+## Links to further resources
+
+
+## Market data
+
+Here are some useful market data resources:
+
+* https://www.investing.com/crypto/bitcoin/historical-data
+
+* https://www.cryptodatadownload.com/data/
+
+* https://99bitcoins.com/bitcoin/historical-price/
+
+* https://coinmarketcap.com/api/documentation/v1/
+
+* https://www.coingecko.com/en/api
+ 
+## Miscellaneous
+
+* [The Bitcoin Dashboard](https://bitcoin.clarkmoody.com/dashboard/)
+
+* [Blockstream Explorer](https://blockstream.info/)
+
+## Feedback and suggestions
+
+mark.ziemann[at]gmail.com
