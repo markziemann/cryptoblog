@@ -303,6 +303,35 @@ trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +
 return(c(prod(trades$diff),nrow(trades)))
 }
 
+
+T3ma <- function(price,n,fee) {
+T3 <- function(x, n=10, v=1) DEMA(DEMA(DEMA(x,n,v),n,v),n,v)
+ma <- T3(Cl(price),n=n)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(c(prod(trades$diff),nrow(trades)))
+}
+
 ```
 
 ## Backtesting
@@ -330,6 +359,8 @@ res_hma <- t(sapply(3:200,function(n) { hma(price,n,fee) } ) )
 rownames(res_hma) <- myrange
 res_alma <- t(sapply(3:200,function(n) { alma(price,n,fee) } ) )
 rownames(res_alma) <- myrange
+res_t3 <- t(sapply(3:200,function(n) { T3ma(price,n,fee) } ) )
+rownames(res_t3) <- myrange
 
 ```
 
@@ -389,6 +420,13 @@ plot(rownames(res_alma),res_alma[,1],pch=19,xlim=c(1,50),xlab="moving average in
 abline(h=hodl,col="red")
 grid()
 
+plot(rownames(res_t3),res_t3[,1],pch=19,xlab="moving average interval (days)",ylab="fold return",main="T3ma")
+abline(h=hodl,col="red")
+grid()
+
+plot(rownames(res_t3),res_t3[,1],pch=19,xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="T3ma")
+abline(h=hodl,col="red")
+grid()
 
 ```
 
@@ -430,6 +468,10 @@ plot(res_alma[,2],res_alma[,1],pch=19,cex=4,col="gray",main="ALMA",xlab="n trade
 text(res_alma[,2],res_alma[,1],labels=rownames(res_alma),cex=1.5)
 abline(h=hodl,col="red")
 
+plot(res_t3[,2],res_t3[,1],pch=19,cex=4,col="gray",main="T3",xlab="n trades",ylab="fold return USD")
+text(res_t3[,2],res_t3[,1],labels=rownames(res_t3),cex=1.5)
+abline(h=hodl,col="red")
+
 ```
 
 ## Restart analysis
@@ -444,6 +486,11 @@ price <- btcdat$data$quotes
 price <- data.frame(price$time_close,price$quote$USD$close,price$quote$USD$volume,stringsAsFactors=FALSE)
 colnames(price) <- c("date","close","Volume")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+myend <- price[c(1,nrow(price)),2][2]
+mystart <- price[c(1,nrow(price)),2][1]
+hodl <- (myend - mystart) / mystart
+hodl
 
 res_sma <- t(sapply(myrange,function(n) { sma(price,n,fee) } ))
 rownames(res_sma) <- myrange
@@ -463,6 +510,8 @@ res_hma <- t(sapply(3:200,function(n) { hma(price,n,fee) } ) )
 rownames(res_hma) <- myrange
 res_alma <- t(sapply(3:200,function(n) { alma(price,n,fee) } ) )
 rownames(res_alma) <- myrange
+res_t3 <- t(sapply(3:200,function(n) { T3ma(price,n,fee) } ) )
+rownames(res_t3) <- myrange
 
 plot(rownames(res_sma),res_sma[,1],pch=19,xlab="moving average interval (days)",ylab="fold return",main="SMA")
 abline(h=hodl,col="red")
@@ -483,7 +532,6 @@ grid()
 plot(rownames(res_dema),res_dema[,1],pch=19,xlim=c(1,60),xlab="moving average interval (days)",ylab="fold return",main="DEMA")
 abline(h=hodl,col="red")
 grid()
-
 
 plot(rownames(res_wma),res_wma[,1],pch=19,xlab="moving average interval (days)",ylab="fold return",main="WMA")
 abline(h=hodl,col="red")
@@ -514,6 +562,14 @@ abline(h=hodl,col="red")
 grid()
 
 plot(rownames(res_alma),res_alma[,1],pch=19,xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="ALMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(rownames(res_t3),res_t3[,1],pch=19,xlab="moving average interval (days)",ylab="fold return",main="T3MA")
+abline(h=hodl,col="red")
+grid()
+
+plot(rownames(res_t3),res_t3[,1],pch=19,xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="T3MA")
 abline(h=hodl,col="red")
 grid()
 
@@ -551,6 +607,10 @@ abline(h=hodl,col="red")
 
 plot(res_alma[,2],res_alma[,1],pch=19,cex=4,col="gray",main="ALMA",xlab="n trades",ylab="fold return USD")
 text(res_alma[,2],res_alma[,1],labels=rownames(res_alma),cex=1.5)
+abline(h=hodl,col="red")
+
+plot(res_t3[,2],res_t3[,1],pch=19,cex=4,col="gray",main="T3MA",xlab="n trades",ylab="fold return USD")
+text(res_t3[,2],res_t3[,1],labels=rownames(res_t3),cex=1.5)
 abline(h=hodl,col="red")
 
 ```
