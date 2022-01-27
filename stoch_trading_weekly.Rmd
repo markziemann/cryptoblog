@@ -38,8 +38,6 @@ suppressPackageStartupMessages({
 
 Sys.Date()
 
-CORES=detectCores()/2
-
 ```
 
 Reminder: this is not financial advice.
@@ -52,7 +50,7 @@ Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to p
 
 mydate <- Sys.Date()-1
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=weekly&time_start=2013-06-01&time_end=",mydate,sep="")
 
 download.file(URL,destfile="btcdat.txt")
 
@@ -224,9 +222,9 @@ The slowD will be set to the same as fast D.
 
 fee=0.001
 
-nFastK <- seq(2,50,5)
-nFastD <- seq(2,80,5)
-smooth <- seq(1,80,5)
+nFastK <- seq(2,30,5)
+nFastD <- seq(2,50,5)
+smooth <- seq(1,50,5)
 params <- expand.grid(nFastK,nFastD,smooth)
 colnames(params) <- c("nFastK","nFastD","smooth")
 res <- mclapply(X=1:nrow(params) , FUN=function(i) {
@@ -235,7 +233,7 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   nSlowD=as.numeric(params[i,2])
   smooth=as.numeric(params[i,3])
   mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
-} , mc.cores = CORES)
+} , mc.cores = detectCores())
 res <- as.data.frame(do.call(rbind, res))
 colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
@@ -321,7 +319,7 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   nSlowD=as.numeric(params[i,2])
   smooth=as.numeric(params[i,3])
   mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
-} , mc.cores = CORES)
+} , mc.cores = detectCores())
 res <- as.data.frame(do.call(rbind, res))
 colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
@@ -444,8 +442,8 @@ abline(h=1,col="red",lty=2)
 
 ## Conclusion
 
-The stochastic gave some nice returns with ROI 1000x over hodl, which is better than the 43D moving 
-average (3.8x), DMI (24.4x) and TSI (151x).
+The stochastic gave 4.6x over hodl, which is similar to the 43D moving 
+average and better than the DMI (3.3x) but worse than the TSI (8.5x).
 Of all the momentum indicators I've tested, this one looks superior.
 
 ## Session information

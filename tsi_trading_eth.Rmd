@@ -57,6 +57,8 @@ suppressPackageStartupMessages({
 
 Sys.Date()
 
+CORES = detectCores()/2
+
 ```
 
 Reminder: this is not financial advice.
@@ -207,7 +209,7 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   n2=as.numeric(params[i,2])
   ns=as.numeric(params[i,3])
   mytsi(price,n1=n1,n2=n2,ns=ns,fee=fee)
-} , mc.cores = detectCores())
+} , mc.cores = CORES)
 res <- as.data.frame(do.call(rbind, res))
 colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
@@ -292,7 +294,7 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   n2=as.numeric(params[i,2])
   ns=as.numeric(params[i,3])
   mytsi(price,n1=n1,n2=n2,ns=ns,fee=fee)
-} , mc.cores = detectCores())
+} , mc.cores = CORES)
 res <- as.data.frame(do.call(rbind, res))
 colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)

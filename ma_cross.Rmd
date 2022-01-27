@@ -45,7 +45,7 @@ suppressPackageStartupMessages({
   library("kableExtra")
 })
 
-NUMCORES=detectCores()
+NUMCORES=detectCores()/2
 
 Sys.Date()
 
