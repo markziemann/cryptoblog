@@ -75,6 +75,10 @@ TESTING = FALSE
 
 system("DATE=$(date -u) ; sed \"s/MYTIME/${DATE}/\" index0.html > index1.html")
 
+mydate <- Sys.time()
+attr(mydate, "tzone") <- "UTC" 
+mydate <- as.Date(mydate)
+
 ```
 
 ## Get BTC price data
@@ -83,9 +87,7 @@ Obtaining BTC price data (daily) for the last 300 days.
 
 ```{r,btc_data1}
 
-datebefore <- Sys.Date()-300
-mydate <- Sys.Date()
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=",datebefore,"&time_end=",Sys.Date(),sep="")
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&count=300"
 download.file(URL,destfile="btcdat.txt")
 btcdat <- fromJSON("btcdat.txt")
 price <- btcdat$data$quotes
@@ -99,7 +101,7 @@ Now gather hourly price data for the last 23 hours.
 
 ```{r,btc_data2}
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=hourly&time_period=hourly&time_start=",Sys.Date()-1,"&time_end=",Sys.Date(),sep="")
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=hourly&time_period=hourly&count=11"
 download.file(URL,destfile="btcdat.txt")
 btcdat <- fromJSON("btcdat.txt")
 price2 <- btcdat$data$quotes
@@ -111,7 +113,7 @@ high <- max(price2[,2])
 low <-  min(price2[,3])
 close <- price2[nrow(price2),4]
 
-df <- data.frame(date=Sys.Date(),high=high,low=low,close=close,stringsAsFactors=FALSE)
+df <- data.frame(date=mydate,high=high,low=low,close=close,stringsAsFactors=FALSE)
 price <- rbind(price,df)
 tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
@@ -529,9 +531,7 @@ Obtaining ETH historical data (daily).
 
 ```{r,eth1}
 
-datebefore <- Sys.Date()-300
-mydate <- Sys.Date()
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=",datebefore,"&time_end=",Sys.Date(),sep="")
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&count=300"
 download.file(URL,destfile="ethdat.txt")
 ethdat <- fromJSON("ethdat.txt")
 price <- ethdat$data$quotes
@@ -545,7 +545,7 @@ Now gather hourly price data for the last 23 hours.
 
 ```{r,eth2}
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=hourly&time_period=hourly&time_start=",Sys.Date()-1,"&time_end=",Sys.Date(),sep="")
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=hourly&time_period=hourly&count=11"
 download.file(URL,destfile="ethdat.txt")
 ethdat <- fromJSON("ethdat.txt")
 price2 <- ethdat$data$quotes
