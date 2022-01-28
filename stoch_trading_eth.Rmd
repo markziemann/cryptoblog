@@ -403,6 +403,24 @@ trades %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
+## Recent action
+
+```{r,recentaction}
+
+HEADER="STOCH"
+par(mfrow=c(2,1))
+plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tail(sto[,1],200) ~ tail(as.Date(price$date),200),type="l",col="blue",
+  xlab="Date",ylab="stoch",main="Stoch")
+lines(as.Date(price$date), sto[,2]  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+```
+
 ## Effect of fees
 
 It is important to factor in the effect of fees because higher exchange fees will erode profits.

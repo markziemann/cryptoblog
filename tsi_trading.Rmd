@@ -395,6 +395,24 @@ par(mfrow=c(1,1))
 
 ```
 
+## Recent action
+
+```{r,recent}
+
+HEADER="TSI"
+par(mfrow=c(2,1))
+plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tail(tsi[,1],200) ~ tail(as.Date(price$date),200),type="l",col="blue",
+  xlab="Date",ylab="TSI",main="TSI")
+lines(tail(as.Date(price$date),200), tail(tsi[,2],200) , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+```
+
 ## Effect of fees
 
 It is important to factor in the effect of fees because higher exchange fees will erode profits.

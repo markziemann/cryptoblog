@@ -314,6 +314,23 @@ par(mfrow=c(1,1))
 
 ```
 
+## 16d DMI recent action
+
+```{r,recent1}
+
+HEADER=paste(best_n,"DMI")
+par(mfrow=c(2,1))
+plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tail(dmi.adx[,1],200) ~ tail(as.Date(price$date),200),type="l",col="blue",
+  xlab="Date",ylab="DMI",main="DMI 16d",ylim=c(10,40))
+lines(tail(as.Date(price$date),200), tail(dmi.adx[,2],200)  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+```
 
 ## Effect of fees
 
