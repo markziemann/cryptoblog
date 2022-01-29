@@ -27,7 +27,7 @@ The ticker code is coded below.
 
 Today's date is shown below.
 
-```{r,lib}
+```{r,lib0}
 
 suppressPackageStartupMessages({
   library("jsonlite")
@@ -51,10 +51,9 @@ Reminder: this is not financial advice.
 
 Obtaining historical data (daily) from CoinMarketCap.com
 
-```{r,getdata}
+```{r,getdata0}
 
 mydate <- Sys.Date()-1
-
 
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=",
   TICKER,
@@ -74,7 +73,7 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 
 Here I'm 
 
-```{r,genscript}
+```{r,genscript0}
 
 filename <- paste(TICKER,"_dat.txt",sep="")
 unlink(filename)
@@ -85,11 +84,41 @@ scriptname <- gsub("xx",TICKER,"ma_trading_xx.Rmd")
 writeLines(script,scriptname)
 rmarkdown::render(scriptname)
 
+script <- readLines("ma_cross_xx.Rmd")
+script <- gsub("xx",TICKER,script)
+scriptname <- gsub("xx",TICKER,"ma_cross_xx.Rmd")
+writeLines(script,scriptname)
+rmarkdown::render(scriptname)
+
+script <- readLines("dmi_trading_xx.Rmd")
+script <- gsub("xx",TICKER,script)
+scriptname <- gsub("xx",TICKER,"dmi_trading_xx.Rmd")
+writeLines(script,scriptname)
+rmarkdown::render(scriptname)
+
+script <- readLines("tsi_trading_xx.Rmd")
+script <- gsub("xx",TICKER,script)
+scriptname <- gsub("xx",TICKER,"tsi_trading_xx.Rmd")
+writeLines(script,scriptname)
+rmarkdown::render(scriptname)
+
+script <- readLines("stoch_trading_xx.Rmd")
+script <- gsub("xx",TICKER,script)
+scriptname <- gsub("xx",TICKER,"stoch_trading_xx.Rmd")
+writeLines(script,scriptname)
+rmarkdown::render(scriptname)
+
+script <- readLines("rsi2_trading_xx.Rmd")
+script <- gsub("xx",TICKER,script)
+scriptname <- gsub("xx",TICKER,"rsi2_trading_xx.Rmd")
+writeLines(script,scriptname)
+rmarkdown::render(scriptname)
+
 ```
 
 ## Session info
 
-```{r,sessionInfo}
+```{r,sessionInfo0}
 
 sessionInfo()
 

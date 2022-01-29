@@ -28,7 +28,7 @@ perform best.
 
 This page is designed to be updated daily - today's date is shown below.
 
-```{r,lib2}
+```{r,lib}
 
 suppressPackageStartupMessages({
   library("jsonlite")
@@ -50,11 +50,11 @@ Reminder: this is not financial advice.
 
 Obtaining historical data (daily) from CoinMarketCap.com
 
-```{r,getdata2}
+```{r,getdata}
 
 mydate <- Sys.Date()-1
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=xx&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=TICKER&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
 #download.file(URL,destfile="dat.txt")
 dat <- fromJSON("dat.txt")
 price <- dat$data$quotes
@@ -301,7 +301,7 @@ message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
 
 sma_dat <- c("indicator"="SMA",
   "parameter"=best_sma,
-  "meanROI"= res_sma[which(rownames(res_sma)==best_sma),"mean"] ,
+  "meanROI"= mean(sma_trades$diff) ,
   "totalROI"= prod(sma_trades$diff) ,
   "ntrades"= nrow(sma_trades) ,
   "ndays"= nrow(price) ,
@@ -450,8 +450,8 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 ```{r,export}
 
 filename <- paste(TICKER,"_dat.txt",sep="")
-write.table(t(sma_dat),file=filename,append=TRUE)
-write.table(t(ema_dat),file=filename,append=TRUE)
+write.table(t(sma_dat),file=filename,append=TRUE,row.names=FALSE)
+write.table(t(ema_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
 
 ```
 ## Session information
