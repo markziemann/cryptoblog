@@ -57,7 +57,7 @@ suppressPackageStartupMessages({
 
 Sys.Date()
 
-CORES=detectCores()/2
+CORES=detectCores()
 
 ```
 

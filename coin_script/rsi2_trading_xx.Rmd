@@ -47,7 +47,8 @@ suppressPackageStartupMessages({
 
 Sys.Date()
 
-CORES = detectCores()/2
+CORES = detectCores()
+
 ```
 
 Reminder: this is not financial advice.
@@ -251,8 +252,8 @@ Based on this we can do some filtering for mean>1.08 and returns>2000.
 
 ```{r,filt2}
 
-top <- subset(res,mean>1.08 & returns>2000)
-top <- top[order(-top$returns),]
+top <- subset(res,mean>1.08 )
+top <- head(top,100)
 top %>%
   kbl(caption="optimal strategies with high mean ROI and high returns") %>%
   kable_paper("hover", full_width = F)
@@ -395,7 +396,7 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 ```{r,export}
 
 filename <- paste(TICKER,"_dat.txt",sep="")
-write.table(t(rsi2_dat),file=filename,append=TRUE,row.names=FALSE)
+write.table(t(rsi2_dat),file=filename,append=TRUE,row.names=FALSE,col.names=FALSE)
 
 ```
 

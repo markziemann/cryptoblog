@@ -38,7 +38,7 @@ suppressPackageStartupMessages({
 
 Sys.Date()
 
-CORES=detectCores()/2
+CORES=detectCores()
 
 ```
 
@@ -473,7 +473,7 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 ```{r,export}
 
 filename <- paste(TICKER,"_dat.txt",sep="")
-write.table(t(stoch_dat),file=filename,append=TRUE,row.names=FALSE)
+write.table(t(stoch_dat),file=filename,append=TRUE,row.names=FALSE,col.names=FALSE)
 
 ```
 
