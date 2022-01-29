@@ -14,8 +14,8 @@ sleep 15m
 Rscript -e "rmarkdown::render('coins.Rmd')"
 cp coins.html crypto
 
-Rscript -e "rmarkdown::render('ma_trading.Rmd')" && \
-  scp -P 21098 ma_trading.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+Rscript -e "rmarkdown::render('ma_trading_btc.Rmd')" && \
+  scp -P 21098 ma_trading_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('ma_trading_eth.Rmd')" && \
   scp -P 21098 ma_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
@@ -23,38 +23,38 @@ Rscript -e "rmarkdown::render('ma_trading_eth.Rmd')" && \
 Rscript -e "rmarkdown::render('ma_trading_ethbtc.Rmd')" && \
   scp -P 21098 ma_trading_ethbtc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
-Rscript -e "rmarkdown::render('ma_trading_weekly.Rmd')" && \
-  scp -P 21098 ma_trading_weekly.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+Rscript -e "rmarkdown::render('ma_trading_weekly_btc.Rmd')" && \
+  scp -P 21098 ma_trading_weekly_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('ma_trading_weekly_eth.Rmd')" && \
   scp -P 21098 ma_trading_weekly_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
-Rscript -e "rmarkdown::render('ma_cross.Rmd')" && \
-  scp -P 21098 ma_cross.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+Rscript -e "rmarkdown::render('ma_cross_btc.Rmd')" && \
+  scp -P 21098 ma_cross_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('ma_cross_eth.Rmd')" && \
   scp -P 21098 ma_cross_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
-Rscript -e "rmarkdown::render('dmi_trading.Rmd')" && \
-  scp -P 21098 dmi_trading.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+Rscript -e "rmarkdown::render('dmi_trading_btc.Rmd')" && \
+  scp -P 21098 dmi_trading_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('dmi_trading_eth.Rmd')" && \
   scp -P 21098 dmi_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
-Rscript -e "rmarkdown::render('tsi_trading.Rmd')" && \
-  scp -P 21098 tsi_trading.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+Rscript -e "rmarkdown::render('tsi_trading_btc.Rmd')" && \
+  scp -P 21098 tsi_trading_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('tsi_trading_eth.Rmd')" && \
   scp -P 21098 tsi_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
-Rscript -e "rmarkdown::render('rsi2_trading.Rmd')" && \
-  scp -P 21098 rsi2_trading.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+Rscript -e "rmarkdown::render('rsi2_trading_btc.Rmd')" && \
+  scp -P 21098 rsi2_trading_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('rsi2_trading_eth.Rmd')" && \
   scp -P 21098 rsi2_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
-Rscript -e "rmarkdown::render('stoch_trading.Rmd')" && \
-  scp -P 21098 stoch_trading.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+Rscript -e "rmarkdown::render('stoch_trading_btc.Rmd')" && \
+  scp -P 21098 stoch_trading_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('stoch_trading_eth.Rmd')" && \
   scp -P 21098 stoch_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
