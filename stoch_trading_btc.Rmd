@@ -1,0 +1,477 @@
+---
+title: "Trading BTC based on the Stochastic indicator"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+theme: cosmo
+---
+
+Source: https://github.com/markziemann/cryptoblog/blob/main/stoch_trading.Rmd
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+
+LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
+
+## Intro
+
+Here, we're using the stochastic as a buy/sell indicator for trading BTC.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+  library("parallel")
+})
+
+Sys.Date()
+
+CORES=detectCores()/2
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+
+download.file(URL,destfile="btcdat.txt")
+
+dat <- fromJSON("btcdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+## Calculate hodl returns
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),4][2] 
+mystart <- price[c(1,nrow(price)),4][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## Basic look at the indicator
+
+Default indicator.
+Slightly too fast.
+
+```{r,sto1,fig.height=10,fig.width=8}
+
+price2 <- tail(price,200)
+sto <- stoch(HLC(price2), nFastK = 14, nFastD = 3, nSlowD = 3, bounded = TRUE, smooth=1)
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(sto[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="stoch",main="stoch fast")
+lines(as.Date(price2$date), sto[,2]  , col="red"  )
+grid()
+
+fee = 0.001
+
+sto <- stoch(HLC(price), nFastK=14 , nFastD=3 , nSlowD=3 , bounded = TRUE, smooth=1)
+price2 <- price
+price2 <- cbind(price2,sto)
+price2$higher <- price2$fastK > price2$fastD
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+
+basic_mean <- mean(trades$diff)
+basic_returns <- prod(trades$diff)
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+```
+
+Now with the slower settings.
+
+```{r,sto2,fig.height=10,fig.width=8}
+
+price2 <- tail(price,200)
+sto <- stoch(HLC(price2), nFastK = 21, nFastD = 14, nSlowD = 21, bounded = TRUE, smooth=7)
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(sto[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="stoch",main="stoch slow")
+lines(as.Date(price2$date), sto[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+sto <- stoch(HLC(price), nFastK=21 , nFastD=14 , nSlowD=21 , bounded = TRUE, smooth=7)
+price2 <- price
+price2 <- cbind(price2,sto)
+price2$higher <- price2$fastK > price2$fastD
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+```
+
+## Stoch trading function
+
+Assuming 0.1% trading fee, as per binance current rate.
+
+
+```{r,stofunc1}
+
+mystoch <- function(price,nFastK=14,nFastD=3,nSlowD=3,smooth=1,fee) {
+  sto <- stoch(HLC(price), nFastK , nFastD , nSlowD , bounded = TRUE, smooth=smooth)
+  price2 <- price
+  price2 <- cbind(price2,sto)
+  price2$higher <- price2$fastK > price2$fastD
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c("date","close")]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c("date","close")]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+}
+
+```
+
+## Backtesting
+
+Trying a range of values for nfastk,nfastd and nslowd
+
+The slowD will be set to the same as fast D.
+
+```{r,backtest1}
+
+fee=0.001
+
+nFastK <- seq(2,50,5)
+nFastD <- seq(2,80,5)
+smooth <- seq(1,80,5)
+params <- expand.grid(nFastK,nFastD,smooth)
+colnames(params) <- c("nFastK","nFastD","smooth")
+res <- mclapply(X=1:nrow(params) , FUN=function(i) {
+  nFastK=as.numeric(params[i,1])
+  nFastD=as.numeric(params[i,2])
+  nSlowD=as.numeric(params[i,2])
+  smooth=as.numeric(params[i,3])
+  mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
+} , mc.cores = CORES)
+res <- as.data.frame(do.call(rbind, res))
+colnames(res) <- c("returns","trades")
+res2 <- cbind(params,res)
+res2$returnspertrade <- res2$returns/res2$trades
+res2$mean <- res2$returns^(1/res2$trades)
+
+```
+
+Strategies with best mean trade ROI.
+These don't occur frequently, but when they do, it gives a solid return.
+
+```{r,res1}
+
+head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+```
+
+Strategies with the highest returns - these are too frequent and each trade has only small returns.
+
+```{r,res2}
+
+head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+```
+
+Simply exclude any strategies with more than 200 trades and then look at the ones with the highest
+returns.
+
+```{r,res3}
+
+res3 <- subset(res2,trades<200)
+
+head(res3[order(-res3$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+```
+
+Now let's have a look at a chart of the total returns and mean ROI of all the strategies tested.
+An optimal strategy would be towards the upper right side of the chart.
+The default strategy is shown in red.
+In the second chart, I'm looking at the strategies with <200 trades since 2013.
+Any strategy with mean ROI > 1.1 is considered good. 
+
+```{r,plots1,fig.height=8,fig.width=8}
+
+plot(res2$mean , res2$returns, log="y",xlab="mean ROI", ylab="total returns")
+points(basic_mean,basic_returns,col="red",pch=19,cex=2)
+abline(h=hodl,col="red")
+grid()
+
+plot(res3$mean , res3$returns, log="y",xlab="mean ROI", ylab="total returns, <200 trades")
+points(basic_mean,basic_returns,col="red",pch=19,cex=2)
+abline(h=hodl,col="red")
+grid()
+
+```
+
+Here's the table of results for the strategies with mean trade ROI of >108% and highest overall ROI.
+
+```{r,res4}
+
+res5 <- subset(res2, mean > 1.08 )
+res5 <- res5[order(-res5$returns),]
+res5 <- head(res5,20)
+res5 %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+```
+
+Now that I know which ranges of values work well, I will zoom in and do a more comprehensive
+backtesting for the following values nfastk(32:52),nfastd/nslowd(42:82) and smooth (1:5).
+
+```{r,backtest2}
+
+fee=0.001
+
+nFastK <- seq(min(res5$nFastK),max(res5$nFastK),1)
+nFastD <- seq(min(res5$nFastD),max(res5$nFastD),1)
+smooth <- seq(min(res5$smooth),max(res5$smooth),1)
+params <- expand.grid(nFastK,nFastD,smooth)
+colnames(params) <- c("nFastK","nFastD","smooth")
+res <- mclapply(X=1:nrow(params) , FUN=function(i) {
+  nFastK=as.numeric(params[i,1])
+  nFastD=as.numeric(params[i,2])
+  nSlowD=as.numeric(params[i,2])
+  smooth=as.numeric(params[i,3])
+  mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
+} , mc.cores = CORES)
+res <- as.data.frame(do.call(rbind, res))
+colnames(res) <- c("returns","trades")
+res2 <- cbind(params,res)
+res2$returnspertrade <- res2$returns/res2$trades
+res2$mean <- res2$returns^(1/res2$trades)
+
+```
+
+Here are the highest returning strategies with fewer than 200 trades.
+
+```{r,res6}
+
+res3 <- subset(res2,trades<200)
+res3 <- res3[order(-res3$returns),]
+
+head(res3,10) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+```
+
+## Optimisation
+
+This one looks to be the best: nFastK=7, nSlowD/nFastD=45, smooth=17
+
+I have tested the best slowD and varying it did not make any improvement.
+
+Below I show the results for this strategy, charts and each individual trade.
+
+```{r,best1,fig.width=10,fig.height=8}
+
+best_nFastK = res3[1,1]
+best_nFastD = res3[1,2]
+best_smooth = res3[1,3]
+
+message(paste("Best nFastK:",best_nFastK))
+message(paste("Best nFastD:",best_nFastD))
+message(paste("Best smooth:",best_smooth))
+
+sto <- stoch(HLC(price), nFastK=best_nFastK , nFastD=best_nFastD , nSlowD=best_nFastD , 
+  bounded = TRUE, smooth=best_smooth)
+price2 <- price
+price2 <- cbind(price2,sto)
+price2$higher <- price2$fastK > price2$fastD
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+HEADER="STOCH"
+par(mfrow=c(2,1))
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(sto[,1] ~ as.Date(price$date),type="l",col="blue",
+  xlab="Date",ylab="stoch",main="Stoch")
+lines(as.Date(price$date), sto[,2]  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+trades %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+```
+
+## Recent action
+
+```{r,recentaction}
+
+HEADER="STOCH"
+par(mfrow=c(2,1))
+plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tail(sto[,1],200) ~ tail(as.Date(price$date),200),type="l",col="blue",
+  xlab="Date",ylab="stoch",main="Stoch")
+lines(as.Date(price$date), sto[,2]  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+```
+
+## Effect of fees
+
+It is important to factor in the effect of fees because higher exchange fees will erode profits.
+
+```{r,fees,fig.width=8,fig.height=7}
+
+fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
+
+res_fees <- sapply(fee_levels,function(x) {
+  mystoch(price,nFastK=best_nFastK,nFastD=best_nFastD,nSlowD=best_nFastD,smooth=best_smooth,fee=x)
+} )
+
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext("higher time frame")
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Trades by year
+
+It is good to see whether the strategy gives consistent returns over the years.
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
+yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+yearly <- yearly[which(lapply(yearly,length)>0)]
+vioplot(yearly)
+yr <- sapply(yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+```
+
+## Conclusion
+
+The stochastic gave some nice returns with ROI 1000x over hodl, which is better than the 43D moving 
+average (3.8x), DMI (24.4x) and TSI (151x).
+Of all the momentum indicators I've tested, this one looks superior.
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
