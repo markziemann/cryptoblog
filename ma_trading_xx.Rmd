@@ -28,7 +28,7 @@ perform best.
 
 This page is designed to be updated daily - today's date is shown below.
 
-```{r,lib}
+```{r,lib2}
 
 suppressPackageStartupMessages({
   library("jsonlite")
@@ -50,14 +50,12 @@ Reminder: this is not financial advice.
 
 Obtaining historical data (daily) from CoinMarketCap.com
 
-```{r,getdata}
+```{r,getdata2}
 
 mydate <- Sys.Date()-1
 
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=xx&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
-
-download.file(URL,destfile="dat.txt")
-
+#download.file(URL,destfile="dat.txt")
 dat <- fromJSON("dat.txt")
 price <- dat$data$quotes
 price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
@@ -271,7 +269,7 @@ Now let's select the two best approaches and show the history of trades.
 
 ```{r,best_sma,fig.width=10,fig.height=8}
 
-best_sma = as.numeric(rownames(res_sma)[which(res_sma==max(res_sma))])
+best_sma = as.numeric(rownames(head(res_sma[order(-res_sma$returns),],1)))
 message(paste("Best SMA period:",best_sma))
 ma <- SMA(Cl(price),n=best_sma)
 price2 <- price
@@ -295,10 +293,20 @@ if( nrow(buy) != nrow(sell) ) {
   sell <- sell[1:MIN,]
 }
 sma_trades <- cbind(buy,sell)
-message(paste("Number of trades:",nrow(sma_trades)))
 sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trades$buy_price ) +1 - (2 * fee )
+
+message(paste("Number of trades:",nrow(sma_trades)))
 message(paste("Total ROI:",prod(sma_trades$diff)))
 message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
+
+sma_dat <- c("indicator"="SMA",
+  "parameter"=best_sma,
+  "meanROI"= res_sma[which(rownames(res_sma)==best_sma),"mean"] ,
+  "totalROI"= prod(sma_trades$diff) ,
+  "ntrades"= nrow(sma_trades) ,
+  "ndays"= nrow(price) ,
+  "xhodl"= prod(sma_trades$diff)/hodl )
+
 sma_trades  %>% kbl() %>%  kable_styling()
 SMA_HEADER=paste(best_sma,"day moving average")
 plot(price$close~as.Date(price$date),type="l",log="y",
@@ -325,7 +333,7 @@ Now have a look at the best EMA option.
 
 ```{r,best_ema,fig.width=10,fig.height=8}
 
-best_ema = as.numeric(rownames(res_ema)[which(res_ema==max(res_ema))])
+best_ema = as.numeric(rownames(head(res_ema[order(-res_ema$returns),],1)))
 message(paste("Best EMA period:",best_ema))
 ma <- EMA(Cl(price),n=best_ema)
 price2 <- price
@@ -350,10 +358,20 @@ if( nrow(buy) != nrow(sell) ) {
 }
 ema_trades <- cbind(buy,sell)
 ema_trades$diff <- ( ( ema_trades$sell_price - ema_trades$buy_price ) / ema_trades$buy_price ) +1 - ( 2 * fee )
+
 message(paste("Number of trades:",nrow(ema_trades)))
 message(paste("Total ROI:",prod(ema_trades$diff)))
 message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
-sma_trades  %>% kbl() %>%  kable_styling()
+
+ema_dat <- c("indicator"="EMA",
+  "parameter"=best_ema ,
+  "meanROI"= mean(ema_trades$diff) ,
+  "totalROI"= prod(ema_trades$diff) ,
+  "ntrades"= nrow(ema_trades) ,
+  "ndays"= nrow(price) ,
+  "xhodl"= prod(ema_trades$diff)/hodl )
+
+ema_trades  %>% kbl() %>%  kable_styling()
 EMA_HEADER=paste(best_ema,"day exponential moving average")
 plot(price$close~as.Date(price$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=EMA_HEADER)
@@ -427,8 +445,15 @@ abline(h=1,col="red",lty=2)
 
 ## Data export
 
-```{}
+Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 
+```{r,export}
+
+filename <- paste(TICKER,"_dat.txt",sep="")
+write.table(t(sma_dat),file=filename,append=TRUE)
+write.table(t(ema_dat),file=filename,append=TRUE)
+
+```
 ## Session information
 
 For reproducibility

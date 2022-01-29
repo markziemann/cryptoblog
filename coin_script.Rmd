@@ -76,9 +76,22 @@ Here I'm
 
 ```{r,genscript}
 
+filename <- paste(TICKER,"_dat.txt",sep="")
+unlink(filename)
+
 script <- readLines("ma_trading_xx.Rmd")
 script <- gsub("xx",TICKER,script)
 scriptname <- gsub("xx",TICKER,"ma_trading_xx.Rmd")
 writeLines(script,scriptname)
 rmarkdown::render(scriptname)
+
+```
+
+## Session info
+
+```{r,sessionInfo}
+
+sessionInfo()
+
+```
 
