@@ -431,6 +431,8 @@ We know that bitcoin moves in four year cycles. Lets take a look at profits over
 
 years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
+if (nrow(sma_trades)>0) {
+
 sma_trades$year <- sapply(strsplit(sma_trades[,3],"-"),"[[",1)
 sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,5] } )
 sma_yearly <- sma_yearly[which(lapply(sma_yearly,length)>0)]
@@ -441,6 +443,10 @@ barplot(yr,ylab="yearly fold returns",main="daily SMA strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
+}
+
+if (nrow(ema_trades)>0) {
+
 ema_trades$year <- sapply(strsplit(ema_trades[,3],"-"),"[[",1)
 ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,5] } )
 ema_yearly <- ema_yearly[which(lapply(ema_yearly,length)>0)]
@@ -450,6 +456,8 @@ yr <- sapply(ema_yearly,prod)
 barplot(yr,ylab="yearly fold returns",main="daily EMA strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
+
+}
 
 ```
 

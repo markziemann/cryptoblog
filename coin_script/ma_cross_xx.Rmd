@@ -480,6 +480,9 @@ It is good to see whether the strategy gives consistent returns over the years.
 
 years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
+
+if (nrow(sma_trades)>0) {
+
 sma_trades$year <- sapply(strsplit(sma_trades[,"sell_date"],"-"),"[[",1)
 sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,"diff"] } )
 sma_yearly <- sma_yearly[which(lapply(sma_yearly,length)>0)]
@@ -490,6 +493,10 @@ barplot(yr,ylab="yearly fold returns",main="daily SMA cross strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
+}
+
+if (nrow(ema_trades)>0) {
+
 ema_trades$year <- sapply(strsplit(ema_trades[,"sell_date"],"-"),"[[",1)
 ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,"diff"] } )
 ema_yearly <- ema_yearly[which(lapply(ema_yearly,length)>0)]
@@ -499,6 +506,8 @@ yr <- sapply(ema_yearly,prod)
 barplot(yr,ylab="yearly fold returns",main="daily EMA cross strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
+
+}
 
 ```
 
