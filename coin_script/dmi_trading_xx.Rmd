@@ -117,31 +117,35 @@ All trades are executed at the end of the daily session (UTC midnight).
 ```{r,dmi_func}
 
 dmi <- function(price,n,fee) {
-  dmi.adx <- ADX(price[,c("high","low","close")],n=n)
-  price2 <- price
-  price2 <- cbind(price2,dmi.adx)
-  price2$higher <- price2$DIp > price2$DIn
-  yesterday <- price2$higher
-  yesterday <- c(NA,yesterday)
-  yesterday <- yesterday[1:(length(yesterday)-1)]
-  price2$yesterday <- yesterday
-  price2$trade <- price2$higher - price2$yesterday
-  price2 <- price2[which(price2$trade!=0),]
-  if (nrow(price2) >0 ) {
-    if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-    if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-    buy <- subset(price2,trade==1)[,c("date","close")]
-    colnames(buy) <- c("buy_date","buy_price")
-    sell <- subset(price2,trade==-1)[,c("date","close")]
-    colnames(sell) <- c("sell_date","sell_price")
-    if( nrow(buy) != nrow(sell) ) {
-      MIN=min(nrow(buy),nrow(sell))
-      buy <- buy[1:MIN,]
-      sell <- sell[1:MIN,]
+  if ( nrow(price) / n > 2.1 ) {
+    dmi.adx <- ADX(price[,c("high","low","close")],n=n)
+    price2 <- price
+    price2 <- cbind(price2,dmi.adx)
+    price2$higher <- price2$DIp > price2$DIn
+    yesterday <- price2$higher
+    yesterday <- c(NA,yesterday)
+    yesterday <- yesterday[1:(length(yesterday)-1)]
+    price2$yesterday <- yesterday
+    price2$trade <- price2$higher - price2$yesterday
+    price2 <- price2[which(price2$trade!=0),]
+    if (nrow(price2) >0 ) {
+      if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+      if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+      buy <- subset(price2,trade==1)[,c("date","close")]
+      colnames(buy) <- c("buy_date","buy_price")
+      sell <- subset(price2,trade==-1)[,c("date","close")]
+       colnames(sell) <- c("sell_date","sell_price")
+      if( nrow(buy) != nrow(sell) ) {
+        MIN=min(nrow(buy),nrow(sell))
+        buy <- buy[1:MIN,]
+        sell <- sell[1:MIN,]
+      }
+      trades <- cbind(buy,sell)
+      trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+      return(c(prod(trades$diff),nrow(trades)))
+    } else {
+      return(c(0,0))
     }
-    trades <- cbind(buy,sell)
-    trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-    return(c(prod(trades$diff),nrow(trades)))
   } else {
     return(c(0,0))
   }
@@ -163,10 +167,6 @@ Here is a table of results.
 fee=0.001
 myrange <- 4:200
 res <- t(sapply(myrange,function(n) { dmi(price,n,fee) } ))
-
-sapply(myrange,function(n) { dmi(price,n,fee) } )
-
-
 rownames(res) <- myrange
 colnames(res) <- c("returns","trades")
 res <-  as.data.frame(res)
