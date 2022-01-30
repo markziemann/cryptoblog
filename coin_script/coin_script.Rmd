@@ -133,6 +133,33 @@ rmarkdown::render(scriptname)
 
 ```
 
+
+## Data
+
+SMAcross/EMAcross n1(long), n2(short).
+
+Stoch FastK, nFastD, nSlowD.
+
+TSI n.first, n.second , n.signal
+
+```{r,datsummary}
+
+all_indicators <- NULL
+myfiles <- list.files(".",pattern="_dat")
+
+for (myfile in myfiles) {
+  dat <- read.table(myfile,header=TRUE)
+  TICKER <- sapply(strsplit(myfile,"_"),"[[",1)
+  CAPTION <- paste("Indicators for",TICKER)
+  dat %>% kbl(caption=CAPTION) %>%  kable_styling()
+  dat$ticker <- TICKER
+  all_indicators <- rbind(all_indicators,dat)
+}
+
+head(all_indicators[order(-all_indicators$totalROI),],50) %>% kbl(caption="top 50 indicators by return") %>%  kable_styling()
+
+```
+
 ## Session info
 
 ```{r,sessionInfo0}

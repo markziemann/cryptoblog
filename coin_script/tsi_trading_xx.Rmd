@@ -1,5 +1,5 @@
 ---
-title: "Trading based on True Strength Index (TSI)"
+title: "Trading TICKER based on True Strength Index (TSI)"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -214,7 +214,6 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   mytsi(price,n1=n1,n2=n2,ns=ns,fee=fee)
 } , mc.cores = CORES )
 
-
 res <- as.data.frame(do.call(rbind, res))
 colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
@@ -250,8 +249,10 @@ Now look at the strategies with mean ROI>1.1 and highest overall returns.
 
 ```{r,backtest,res3}
 
-res3 <- subset(res2,mean>=1.1)
-res3 <- res3[order(-res3$returns),]
+res3 <- res2[order(-res2$returns),]
+if (nrow(subset(res3,mean>1.1))>0 ) { res3 <- subset(res3,mean>=1.1) }
+if (nrow(subset(res3,mean>1.08))>0 ) { res3 <- subset(res3,mean>=1.08) }
+
 head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
@@ -335,8 +336,10 @@ Now look at the strategies with mean ROI>1.1 and highest overall returns.
 
 ```{r,backtest,res6}
 
-res3 <- subset(res2,mean>=1.1)
-res3 <- res3[order(-res3$returns),]
+res3 <- res2[order(-res2$returns),]
+if (nrow(subset(res3,mean>1.1))>0 ) { res3 <- subset(res3,mean>=1.1) }
+if (nrow(subset(res3,mean>1.08))>0 ) { res3 <- subset(res3,mean>=1.08) }
+
 head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```

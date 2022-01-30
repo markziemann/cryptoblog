@@ -1,5 +1,5 @@
 ---
-title: "Trading based on the Stochastic indicator"
+title: "Trading TICKER based on the Stochastic indicator"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
