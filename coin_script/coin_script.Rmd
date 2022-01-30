@@ -68,9 +68,13 @@ TICKERS <- TICKERS[which(! TICKERS %in% EXCLUDE)]
 
 writeLines(TICKERS,con="tickers.txt")
 
+mydate <- Sys.Date()-1
+
 for ( TICKER in TICKERS ) {
 
-mydate <- Sys.Date()-1
+DATNAME=paste(TICKER,"_dat.txt",sep="")
+
+if ( !file.exists(DATNAME) ) {
 
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=",
   TICKER,
@@ -122,6 +126,8 @@ script <- gsub("xx",TICKER,script)
 scriptname <- gsub("xx",TICKER,"rsi2_trading_xx.Rmd")
 writeLines(script,scriptname)
 rmarkdown::render(scriptname)
+
+}
 
 }
 
