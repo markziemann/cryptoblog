@@ -96,36 +96,42 @@ script <- gsub("xx",TICKER,script)
 scriptname <- gsub("xx",TICKER,"ma_trading_xx.Rmd")
 writeLines(script,scriptname)
 rmarkdown::render(scriptname)
+unlink(scriptname)
 
 script <- readLines("ma_cross_xx.Rmd")
 script <- gsub("xx",TICKER,script)
 scriptname <- gsub("xx",TICKER,"ma_cross_xx.Rmd")
 writeLines(script,scriptname)
 rmarkdown::render(scriptname)
+unlink(scriptname)
 
 script <- readLines("dmi_trading_xx.Rmd")
 script <- gsub("xx",TICKER,script)
 scriptname <- gsub("xx",TICKER,"dmi_trading_xx.Rmd")
 writeLines(script,scriptname)
 rmarkdown::render(scriptname)
+unlink(scriptname)
 
 script <- readLines("tsi_trading_xx.Rmd")
 script <- gsub("xx",TICKER,script)
 scriptname <- gsub("xx",TICKER,"tsi_trading_xx.Rmd")
 writeLines(script,scriptname)
 rmarkdown::render(scriptname)
+unlink(scriptname)
 
 script <- readLines("stoch_trading_xx.Rmd")
 script <- gsub("xx",TICKER,script)
 scriptname <- gsub("xx",TICKER,"stoch_trading_xx.Rmd")
 writeLines(script,scriptname)
 rmarkdown::render(scriptname)
+unlink(scriptname)
 
 script <- readLines("rsi2_trading_xx.Rmd")
 script <- gsub("xx",TICKER,script)
 scriptname <- gsub("xx",TICKER,"rsi2_trading_xx.Rmd")
 writeLines(script,scriptname)
 rmarkdown::render(scriptname)
+unlink(scriptname)
 
 }
 
