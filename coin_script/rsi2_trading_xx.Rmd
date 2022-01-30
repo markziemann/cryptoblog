@@ -227,12 +227,6 @@ text(res$trades,res$returns,labels=res$period,cex=1.5)
 abline(h=hodl,col="red")
 grid()
 
-plot(res2$trades,res2$returns,log="y", cex=2, pch=19,col="gray",
-  ,xlab="num trades",ylab="fold returns")
-text(res$trades,res$returns,labels=res$period,cex=1.5)
-abline(h=hodl,col="red")
-grid()
-
 plot(res$mean,res$returns,xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res$mean,res$returns , cex=1, labels=res$period)
@@ -243,11 +237,20 @@ grid()
 text(res$mean,res$returns , cex=1, labels=res$period)
 abline(h=hodl,col="red")
 
+if (length(res2$trades)>0 ) {
+
+plot(res2$trades,res2$returns,log="y", cex=2, pch=19,col="gray",
+  ,xlab="num trades",ylab="fold returns")
+text(res$trades,res$returns,labels=res$period,cex=1.5)
+abline(h=hodl,col="red")
+grid()
+
 plot(res2$mean,res2$returns,log="y",xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res$mean,res$returns , cex=1, labels=res$period)
 abline(h=hodl,col="red")
 
+}
 
 ```
 
@@ -273,6 +276,8 @@ This is good indicator because mean gains are >1.08 and number of trades is less
 
 best_n1 = top[1,1]
 best_n2 = top[1,2]
+if(is.na(best_n1)) { best_n1 = 3 }
+if(is.na(best_n2)) { best_n2 = 3 }
  
 message(paste("Selected RSI periods:",best_n1,best_n2))
 
@@ -287,23 +292,25 @@ yesterday <- yesterday[1:(length(yesterday)-1)]
 price2$yesterday <- yesterday
 price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
-if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c("date","close")]
-colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c("date","close")]
-colnames(sell) <- c("sell_date","sell_price")
-if( nrow(buy) != nrow(sell) ) {
-  MIN=min(nrow(buy),nrow(sell))
-  buy <- buy[1:MIN,]
-  sell <- sell[1:MIN,]
-}
-trades <- cbind(buy,sell)
-trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+if ( nrow(price2)>0 ) {
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c("date","close")]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c("date","close")]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
 
 message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+}
 
 rsi2_dat <- c("indicator"="RSI2",
   "parameter"= paste(best_n1,best_n2,sep=",") ,
@@ -338,7 +345,7 @@ It is important to factor in the effect of fees because higher exchange fees wil
 fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
 
 res_fees <- sapply(fee_levels,function(x) { rsi(price,best_n1,best_n2,fee=x) } )
-plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+plot(fee_levels,res_fees[1,] ,pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
 mtext(HEADER)
 abline(h=hodl,col="red")
 grid()
