@@ -131,20 +131,24 @@ rsi <- function(price,n1,n2,maType=EMA,fee=0.001) {
   price2$yesterday <- yesterday
   price2$trade <- price2$higher - price2$yesterday
   price2 <- price2[which(price2$trade!=0),]
-  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-  buy <- subset(price2,trade==1)[,c("date","close")]
-  colnames(buy) <- c("buy_date","buy_price")
-  sell <- subset(price2,trade==-1)[,c("date","close")]
-  colnames(sell) <- c("sell_date","sell_price")
-  if( nrow(buy) != nrow(sell) ) {
-    MIN=min(nrow(buy),nrow(sell))
-    buy <- buy[1:MIN,]
-    sell <- sell[1:MIN,]
+  if (nrow(price2)>0) { 
+    if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+    if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+    buy <- subset(price2,trade==1)[,c("date","close")]
+    colnames(buy) <- c("buy_date","buy_price")
+    sell <- subset(price2,trade==-1)[,c("date","close")]
+    colnames(sell) <- c("sell_date","sell_price")
+    if( nrow(buy) != nrow(sell) ) {
+      MIN=min(nrow(buy),nrow(sell))
+      buy <- buy[1:MIN,]
+      sell <- sell[1:MIN,]
+    }
+    trades <- cbind(buy,sell)
+    trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+    return(c(prod(trades$diff),nrow(trades)))
+  } else {
+    return(c(0,0))
   }
-  trades <- cbind(buy,sell)
-  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-  return(c(prod(trades$diff),nrow(trades)))
 }
 
 ```
