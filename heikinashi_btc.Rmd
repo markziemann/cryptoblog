@@ -1,0 +1,219 @@
+---
+title: "Trading BTC based on MA and EMAs"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+theme: cosmo
+---
+
+Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading.Rmd
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+
+LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
+
+## Intro
+
+The Heikin Ashi candlestick has an alternate formula and yields charts where  the momentum is easier to read.
+
+This page is designed to be updated daily - today's date is shown below.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+  library(anytime)
+})
+
+
+Rcpp::cppFunction('NumericMatrix RawHeikinAshi(NumericMatrix x, CharacterVector n) {
+// assumes OHLC matrix input
+int nrow = x.nrow(), ncol = 4, Op=0, Hi=1, Lo=2, Cl=3;
+NumericMatrix ha(nrow,ncol);
+for (int i = 0; i < nrow; i++) {
+    ha(i, Cl) = (x(i,Op) + x(i,Hi) + x(i,Lo) + x(i,Cl)) / 4.0;
+    ha(i, Op) = (i > 0) ? ((ha(i - 1, Op) + ha(i - 1, Cl)) / 2.0) : x(i, Op);
+    ha(i, Hi) = std::max(x(i, Hi), std::max(ha(i, Op), ha(i, Cl)));
+    ha(i, Lo) = std::min(x(i, Lo), std::min(ha(i, Op), ha(i, Cl)));
+}
+colnames(ha) = n;
+return ha;
+}')
+
+HAOHLC <- function(x) {
+    x <- OHLC(try.xts(x))
+    r <- RawHeikinAshi(x, paste0("ha.", colnames(x)))
+    return(reclass(r, x))
+}
+
+Sys.Date()
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+
+download.file(URL,destfile="btcdat.txt")
+
+dat <- fromJSON("btcdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$quote$USD$open , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close, price$quote$USD$timestamp )
+colnames(price) <- c("open","high","low","close","date")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+rownames(price) <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+price$date <- NULL
+
+# delete 1 day to start on Monday
+weekdays(as.Date(rownames(head(price))[1]))
+first_monday <- which(weekdays(as.Date(rownames(price)))=="Monday")[1]
+price <- price[first_monday:nrow(price),]
+weekdays(as.Date(rownames(head(price))[1]))
+
+```
+
+## Create traditional and heikin-ashi candlestick charts
+
+```{r,candlesticks,fig.height=8,fig.width=8}
+
+# traditional candlesticks
+btc_trad <- xts(price,order.by=as.Date(rownames(price)))
+chartSeries(btc_trad,log.scale=TRUE)
+
+# heikin-ashi
+ha <- HAOHLC(price)
+btc_ha <- xts(ha,order.by=as.Date(rownames(ha)))
+chartSeries(btc_ha,log.scale=TRUE)
+
+price2 <- tail(price,200)
+
+# traditional candlesticks
+btc_trad <- xts(price2,order.by=as.Date(rownames(price2)))
+chartSeries(btc_trad,log.scale=TRUE)
+
+# heikin-ashi
+ha <- HAOHLC(price2)
+btc_ha <- xts(ha,order.by=as.Date(rownames(ha)))
+chartSeries(btc_ha,log.scale=TRUE)
+
+```
+
+## Transform to 3 day chart
+
+This approach can be used to convert smaller timeframe charts to higher timeframes.
+
+In this example from daily to 3day.
+
+```{r,transform}
+
+timeframe <- function(price,n) {
+  idx <- seq(1,nrow(price),n)
+  pricel <- lapply(idx,function(i) {
+    slice <- price[i:(i+(n-1)),]
+    open <- slice[1,"open"]
+    high <- max(slice$high)
+    low <- min(slice$low)
+    close <- slice[nrow(slice),"close"]
+    return(c(open,high,low,close))
+  })
+
+  if ( nrow(price) %% n != 0 ) {
+    remainder <- n - (nrow(price) %% n )
+    slice <- tail(price,remainder)
+    open <- slice[1,"open"]
+    high <- max(slice$high)
+    low <- min(slice$low)
+    close <- slice[nrow(slice),"close"]
+    pricel[[length(pricel)]] <- c(open,high,low,close)
+  } 
+
+  price2 <- do.call(rbind,pricel)
+  rownames(price2) <- rownames(price)[idx]
+  colnames(price2) <- c("open","high","low","close")
+  return(price2)
+}
+
+
+
+
+```
+
+## Generate 3day chart
+
+
+```{r,Nday_candles}
+
+ohlcnd <- timeframe(price,7)
+
+# traditional candlesticks
+btc_trad <- xts(ohlcnd,order.by=as.Date(rownames(ohlcnd)))
+chartSeries(btc_trad,log.scale=TRUE)
+
+# heikin-ashi
+ha <- HAOHLC(ohlcnd)
+btc_ha <- xts(ha,order.by=as.Date(rownames(ha)))
+chartSeries(btc_ha,log.scale=TRUE)
+
+ohlcnd_tail <- tail(ohlcnd,100)
+
+# traditional candlesticks
+btc_trad <- xts(ohlcnd_tail,order.by=as.Date(rownames(ohlcnd_tail)))
+chartSeries(btc_trad,log.scale=TRUE)
+
+# heikin-ashi
+ha <- HAOHLC(ohlcnd_tail)
+btc_ha <- xts(ha,order.by=as.Date(rownames(ha)))
+chartSeries(btc_ha,log.scale=TRUE)
+
+
+```
+
+## Conclusion
+
+The best SMAs were 11 and 43 days, and the returns were approx 3x better than simply hodling.
+The best EMAs was 7 and 14 days.
+Based on minimising the number of trades for only a small reduction of returns, it appears 
+the 43d SMA is preferred.
+Another reason why I like the 43 day is that the range from 40-44 are all giving good 
+returns, this gives more confidence to this range as being profitable in future.
+The fee rate strongly affects the fold return, so it is definitely worthwhile to seek 
+exchanges with lower fees.
+Profitability varies strongly by year with bull market most profitable and bear market least 
+profitable, meaning it is probably a good idea to sit funds in fiat for 12 months following
+ a cycle top.
+
+If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
+These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
+Subscribing to alerts costs 0.0005 BTC per year.
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
