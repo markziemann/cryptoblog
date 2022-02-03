@@ -10,7 +10,6 @@ output:
 theme: cosmo
 ---
 
-
 Source: https://github.com/markziemann/cryptoblog/blob/main/stablecoincap.Rmd
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
@@ -22,8 +21,10 @@ LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
 
 ## Intro
 
-I had an idea that the share of stablecoins could be used to predict the end of a bull market, so I went to [tradingview](https://www.tradingview.com/symbols/CRYPTOCAP-USDT.D/) 
-and yes it appears that a jump in stablecoin dominance began in mid 2020, peaking in September and then began dropping, coinciding with the bull run of January 2021.
+I had an idea that the share of stablecoins could be used to predict the end of a bull market, 
+so I went to [tradingview](https://www.tradingview.com/symbols/CRYPTOCAP-USDT.D/) 
+and yes it appears that a jump in stablecoin dominance began in mid 2020, peaking in September and then
+began dropping, coinciding with the bull run of January 2021.
 The concept is that once stablecoin dominance returns to normal levels, the bull market will start to run out of steam due to falling inflows relative to profit takers.
 
 This page is designed to be updated daily - today's date is shown below.
@@ -37,6 +38,8 @@ library(tidyverse)
 
 Sys.Date()
 
+knitr::opts_chunk$set(fig.width=8, fig.height=8) 
+
 ```
 
 Reminder: this is not financial advice.
@@ -46,6 +49,13 @@ Reminder: this is not financial advice.
 We will be simplifying things by working only with the market cap of the top two stablecoins Tether (USDT) and USD Coin (USDC) against cryptocurrencies Bitcoin (BTC) and Ethereum (ETH).
 
 Here is a graph of the market cap of these assets since 2019.
+
+As you can see in the second chart, stablecoin market cap is increasing dramatically.
+
+This represents the phenomenon that stablecoins are becoming an important part of the crypto ecosystem.
+This could be driven by utility as a medium of exchange without borders, as a vehicle for earning high interest, or simply a way to avoid currency debasement in vulnerable countries 
+like Venezuela, Lebanon and Turkey.
+It seems natural that some of this money will find it's way into existing crypto assets once the markey gains momentum again.
 
 ```{r,getdata,fig.height=8,fig.width=8}
 
@@ -80,19 +90,30 @@ mc$scrat <- mc$sc / mc$total
 mc$times_mc <- as.character(mc$times_mc)
 mc$times_mc <- as.Date(sapply(strsplit(mc$times_mc,"T"),"[[",1))
 
-plot(mc$times_mc,mc$btc_mc,type="l",col="orange",ylab="market cap (USD)")
+plot(mc$times_mc,mc$btc_mc,type="l",col="orange",
+  ylab="market cap (USD)",main="Major crypto and stable asset market cap")
 lines(mc$times_mc,mc$eth_mc,col="blue")
 lines(mc$times_mc,mc$usdt_mc,col="green")
 lines(mc$times_mc,mc$usdc_mc,col="red")
 legend("topleft", legend=c("BTC", "ETH", "USDT", "USDC"),
        col=c("orange", "blue", "green", "red"), lty=1:4)
 
+plot(mc$times_mc,mc$usdt_mc,type="l",col="green",
+  ylab="market cap (USD)",main="Major stable asset market cap")
+lines(mc$times_mc,mc$usdc_mc,col="red")
+legend("topleft", legend=c("USDT", "USDC"),
+       col=c("green", "red"), lty=1:4)
+
 ```
 
 ## Now chart the stablecoin dominance
 
-As you can see, the 3% target is very important as it was the lowest level reached during the rally of early 2021.
-If history repeats, we would anticipate a market slowdown (reversal) when it again reaches 3% in late 2021 or early 2022.
+Next, we can see that the dominance is oscillating in an overall upward direciton.
+
+Previously, we imagined that the stablecoin dominance would reach 3% for a second time, but it bottommed out at 6%.
+
+The upward momentum is very strong, the recent local tops were 7.5% and 10.5%, so it seems logical it will reach 13.5% in the current downturn.
+After the dominance starts to dip again, we should be looking at the 9% level for a potential bottom.
 
 ```{r,scdom,fig.height=8,fig.width=8}
 
@@ -106,40 +127,8 @@ p
 
 ```
 
-## Calculate the linear model for stablecoin dominance since the peak
+## Notes
 
-This will help to predict the time it will take to hit the 3% target
-
-```{r,lm,fig.height=8,fig.width=8}
-
-top <- mc[which(mc$scrat == max(mc$scrat) ),]
-
-mc_pk <- mc[rownames(top):nrow(mc),]
-
-model <- lm(scrat ~ times_mc, data = mc_pk)
-
-model
-
-```
-
-## When will the peak be reached at the current rate?
-
-Assume the market peaks out when stablecoin dominance reduces to 3%
-
-```{r,timing,fig.height=8,fig.width=8}
-
-ggplot(mc_pk, aes(x=times_mc, y=scrat)) +
-  scale_x_date(limit=c(as.Date("2021-07-01"),as.Date("2022-04-01"))) +
-  ylim(0.025, 0.12) +
-  geom_point() +
-  xlab("") +
-  ylab("stablecoin dominance") +
-  geom_hline(yintercept=0.03, linetype="dashed", color = "red", size=2) +
-  stat_smooth(method = lm,fullrange=TRUE)
-
-```
-
-This chart indicates the current bull run will start to run out of dry powder at the end of March 2021.
 Keep in mind that the tragectory of the stablecoin dominance changes can change dramatically, 
 especially in a blow-off top when crypto valuations become rapidly overheated.
 This indicator is not meant to be used in isolation in calling a top. 
