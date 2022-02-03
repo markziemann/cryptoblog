@@ -421,7 +421,7 @@ trades %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ## Recent action
 
-```{r,recentaction}
+```{r,recentaction,fig.height=8,fig.width=8}
 
 HEADER="STOCH"
 par(mfrow=c(2,1))

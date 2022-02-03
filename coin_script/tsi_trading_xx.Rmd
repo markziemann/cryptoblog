@@ -413,7 +413,7 @@ par(mfrow=c(1,1))
 
 ## Recent action
 
-```{r,recent}
+```{r,recent,fig.height=8,fig.width=8}
 
 HEADER="TSI"
 par(mfrow=c(2,1))

@@ -378,7 +378,7 @@ if (nrow(trades)>0) {
 
 Recent action of the indicator.
 
-```{r,update}
+```{r,update,fig.height=8,fig.width=8}
 
 n=100
 price <- cbind(price,rsi1,rsi2)

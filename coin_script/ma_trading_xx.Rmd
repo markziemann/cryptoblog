@@ -327,7 +327,7 @@ lines(ma~ as.Date(price$date) ,col="red")
 
 ### SMA recent action
 
-```{r,sma_recent}
+```{r,sma_recent,fig.height=8,fig.width=8}
 
 plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=SMA_HEADER)
