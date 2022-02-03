@@ -232,11 +232,6 @@ res_ema <- mclapply(1:nrow(mas),function(n) {
  emacross(price,n,fee)
 } , mc.cores=NUMCORES)
 
-res_ema <- lapply(1:nrow(mas),function(n) {
-  message(n)
-  emacross(price,n,fee)
-})
-
 res_ema <- do.call(rbind,res_ema)
 mas1 <- as.data.frame(mas,stringsAsFactors=FALSE)
 res_ema <- cbind(mas1,res_ema)
