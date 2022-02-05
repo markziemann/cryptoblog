@@ -27,7 +27,7 @@ Trading off simple moving averages (SMAs), exponenial moving averages (EMAs) and
 lines are popular methods for timing entry and exit of positions.
 In this blog post I will be back-testing simple moving averages to find the one which performed the best.
 
-This page is designed to be updated daily - today's date is shown below.
+This report is time sensitive - today's date is shown below.
 
 ```{r,lib}
 

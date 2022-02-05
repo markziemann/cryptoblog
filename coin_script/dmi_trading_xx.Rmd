@@ -31,7 +31,7 @@ Then sell when the negative indicator is larger than the positive indicator.
 What I am examining here is different intervals for the calculation of the DMI, typically 
 14 day is used, however I will be seeing whether other intervals perform better.
 
-This page is designed to be updated daily - today's date is shown below.
+This report is time sensitive - today's date is shown below.
 
 ```{r,lib}
 

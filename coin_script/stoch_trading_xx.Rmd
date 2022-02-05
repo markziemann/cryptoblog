@@ -23,6 +23,8 @@ LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
 
 Here, we're using the stochastic as a buy/sell indicator for trading.
 
+This report is time sensitive - today's date is shown below.
+
 ```{r,lib}
 
 suppressPackageStartupMessages({

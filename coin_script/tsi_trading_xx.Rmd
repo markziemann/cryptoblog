@@ -40,7 +40,7 @@ The standard values used are:
 
 however I will be seeing whether other intervals perform better.
 
-This page is designed to be updated daily - today's date is shown below.
+This report is time sensitive - today's date is shown below.
 
 ```{r,lib}
 
