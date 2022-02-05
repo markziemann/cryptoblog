@@ -467,7 +467,7 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 
 ```{r,export}
 
-filename <- paste(TICKER,"_dat.txt",sep="")
+filename <- paste("TICKER","_dat.txt",sep="")
 write.table(t(sma_dat),file=filename,append=TRUE,row.names=FALSE)
 write.table(t(ema_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
 

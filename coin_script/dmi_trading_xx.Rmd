@@ -346,7 +346,7 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 
 ```{r,export}
 
-filename <- paste(TICKER,"_dat.txt",sep="")
+filename <- paste("TICKER","_dat.txt",sep="")
 write.table(t(dmi_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
 
 ```

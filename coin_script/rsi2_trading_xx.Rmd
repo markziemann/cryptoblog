@@ -408,7 +408,7 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 
 ```{r,export}
 
-filename <- paste(TICKER,"_dat.txt",sep="")
+filename <- paste("TICKER","_dat.txt",sep="")
 write.table(t(rsi2_dat),file=filename,append=TRUE,row.names=FALSE,col.names=FALSE)
 
 ```

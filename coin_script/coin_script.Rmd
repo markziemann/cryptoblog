@@ -55,42 +55,42 @@ coinfun <- function(TICKER) {
   dir.create(TICKER)
 
   script <- readLines("ma_trading_xx.Rmd")
-  script <- gsub("xx",TICKER,script)
+  script <- gsub("TICKER",TICKER,script)
   scriptname <- gsub("xx",TICKER,"ma_trading_xx.Rmd")
   writeLines(script,scriptname)
   rmarkdown::render(scriptname,output_dir=TICKER)
   unlink(scriptname)
 
   script <- readLines("ma_cross_xx.Rmd")
-  script <- gsub("xx",TICKER,script)
+  script <- gsub("TICKER",TICKER,script)
   scriptname <- gsub("xx",TICKER,"ma_cross_xx.Rmd")
   writeLines(script,scriptname)
   rmarkdown::render(scriptname,output_dir=TICKER)
   unlink(scriptname)
 
   script <- readLines("dmi_trading_xx.Rmd")
-  script <- gsub("xx",TICKER,script)
+  script <- gsub("TICKER",TICKER,script)
   scriptname <- gsub("xx",TICKER,"dmi_trading_xx.Rmd")
   writeLines(script,scriptname)
   rmarkdown::render(scriptname,output_dir=TICKER)
   unlink(scriptname)
 
   script <- readLines("tsi_trading_xx.Rmd")
-  script <- gsub("xx",TICKER,script)
+  script <- gsub("TICKER",TICKER,script)
   scriptname <- gsub("xx",TICKER,"tsi_trading_xx.Rmd")
   writeLines(script,scriptname)
   rmarkdown::render(scriptname,output_dir=TICKER)
   unlink(scriptname)
 
   script <- readLines("stoch_trading_xx.Rmd")
-  script <- gsub("xx",TICKER,script)
+  script <- gsub("TICKER",TICKER,script)
   scriptname <- gsub("xx",TICKER,"stoch_trading_xx.Rmd")
   writeLines(script,scriptname)
   rmarkdown::render(scriptname,output_dir=TICKER)
   unlink(scriptname)
 
   script <- readLines("rsi2_trading_xx.Rmd")
-  script <- gsub("xx",TICKER,script)
+  script <- gsub("TICKER",TICKER,script)
   scriptname <- gsub("xx",TICKER,"rsi2_trading_xx.Rmd")
   writeLines(script,scriptname)
   rmarkdown::render(scriptname,output_dir=TICKER)
@@ -134,7 +134,7 @@ for ( TICKER in TICKERS ) {
     price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
     filename <- paste(TICKER,"_dat.txt",sep="")
     unlink(filename)
-    if ( nrow(price) > 200 ) {
+    if ( nrow(price) > 250 ) {
       coinfun(TICKER)
     }
   }
