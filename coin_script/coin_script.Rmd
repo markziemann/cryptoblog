@@ -96,7 +96,7 @@ coinfun <- function(TICKER) {
   rmarkdown::render(scriptname,output_dir=TICKER)
   unlink(scriptname)
 
-  file.copy(paste(TICKER,"_dat.txt"),TICKER)
+  file.copy(paste(TICKER,"_dat.txt",sep=""),TICKER)
 }
 
 ```
