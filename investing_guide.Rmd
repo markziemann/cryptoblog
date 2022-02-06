@@ -98,7 +98,7 @@ about the products it makes.
 So you try the product, test it out, see what it can do.
 Compare products between companies, observe where the competitive advantage lies.
 
-Buy a tiny amount of bitcoin (or altcoin) on an exchange, transfer it to a wallet on your PC or phone.
+In the case of bitcoin, try buying a tiny amount on an exchange, transfer it to a wallet on your PC or phone.
 Use it to pay for stuff.
 Request others to pay you in bitcoin.
 
@@ -108,7 +108,7 @@ under the hood.
 It gives me a better idea about what makes the Bitcoin network resilient and what challenges it faces.
 it provides a window into potential new applications, like lightning, or even apps built on top of it.
 You will also better appreciate the weaknesses, for example how difficult to set these up and keep
-them running smoothly
+them running smoothly.
 
 ## Tips for beginner investors
 
@@ -139,7 +139,7 @@ to protect against network fees and congestion, then consider accounts at more t
 That way, a smaller fraction of funds will be lost in case of hack.
 
 4. Never invest more than you can afford to lose and keep a long term mindset.
-Bitcoin is a long term investment, if you need the funds to secure a guaranteed income, then crypto 
+Bitcoin is a long term investment, if you need the funds to maintain your income, then crypto 
 probably isn't right for you.
 Have a look at the 10 year chart for BTC.
 You will see that the price undergoes wild swings in the relative short term, but over the long 
@@ -182,7 +182,11 @@ It is always helpful to remember that BTC is the only store-of-value crypto.
 All others are utility tokens; analogous to technology start-ups.
 As with start-ups, it is extremely competitive - the failure rate is high.
 
-8. Another small tip: denominate your investments in BTC, that way you don't feel like you're losing when 
+8. Always keep dry powder by keeping some stablecoins.
+Maintain at least 10% of the portfolio in stablecoins, even when the market is super bullish.
+You'll need some cash on the sidelines in case new opportunities arise.
+
+9. Another small tip: denominate your investments in BTC, that way you don't feel like you're losing when 
 the market corrects.
 
 ## Level up
@@ -202,7 +206,7 @@ The different ways are:
 
 2. Lend it out. You can deposit funds at a centralised cryptobank like Celcius, Ledn, Nexo, etc which
 will lend out your funds and you will earn interest, paid in crypto.
-The interest rates are quite good for some of these, for example ~7% pa for BTC at 
+The interest rates are quite good for some of these, for example ~5% pa for BTC at 
 [Celcius](https://celsius.network/).
 Alternatively there are decentralised finance solutions (eg: Compound) although I have not used these 
 myself.
@@ -214,19 +218,17 @@ As the value of the account increases, you should consider dividing the funds ov
 3. Acquire some with your retirement funds.
 Depending on where you live it could be possible to stack bitcoin with your retirement savings account
 (aka: superannuation).
-
-4. Use regulated markets. There are bitcoin ETFs and other funds popping up around the place and
+There are bitcoin ETFs and other funds popping up around the place and
 these could be something that it worth looking into. 
-Especially if the purchase will be made as part of a retirement savings plan.
 Still, the fees involved with such funds are considerable and you're still trusting them (the bank)
 to secure the funds correctly.
 
-5. You can actively trade a small portion of your portfolio.
+4. You can actively trade a small portion of your portfolio.
 I think we'll need a new heading for this one.
 
 ### Active trading
 
-I'm sorry to say, but novice traders are more often than not going to get rekt by trying to trade 
+I'm sorry to say, but novice traders tend to get rekt by trying to trade 
 short term price action.
 Here's why:
 
@@ -242,39 +244,55 @@ You can study the historical charts and analyse levels of support and resistance
 You can make paper trades, and work on a strategy that works for intra-day or multi-day swing strategies.
 Invariably, doing this properly is time consuming which conflicts with other things in your life.
 If you want to keep your full time job, you can't be looking at the charts constantly, you will need to
-spend time at your job, and you might miss trading opportunities because of the job, or worse, time
+spend time at your main profession, and you might miss trading opportunities because of the job, or worse, time
 spent away from the chart causes you to miss huge moves and your position goes underwater.
 If you did this with leverage, there's a chance the entire position is liquidated.
 
 My system: crunch the data with computers so I don't need to look at a chart.
 
+I backtest indicators to identify profitable entry and exits.
+I focus on the simplest possible indicators, such as moving averages and relative strength index.
+I realise that these indicators are not foolproof, there might be 2-3 fakeouts before experiencing a major pump.
+Each of those fake-outs could lose something like 5-10% but if I remain disciplined and respect the time-sensitive nature of the entry/exits,
+then I can expect my returns to be in line with the historical indicator performance.
 
+Emotions can get the better of you, especially when there are multiple fakeouts.
+If you keep the proportion of your portfolio that is being actively traded relatively small, then this alleviates some of the negative emotions.
+Over time if the size of the trading portfolio grows, then consider paying dividends to yourself by stashing some sats into cold storage.
 
-## References
+The analyses you see on this site for BTC and ETH are run everyday, just before the daily close.
+I have a set of six backtested, optimised and profitable signals.
+The program downloads the current price data and calculates whether a buy or sell signal is triggered.
+I get a push notification and then I can take action.
+I would rather let the computer analyse the price data every day so I don't need to be looking at the charts constantly.
+I choose the daily timeframe because it means that trades will only take place at a predicable time of day - 
+I don't want to have alarms going off at different times at night.
+Also, from my experience, the daily timeframe is more profitable than the weekly timeframe for most of the market indicators I've looked at.
 
+The time I do spend looking at charts is normally used to identify and understand new indicators and check the performance of different indicator/asset combinations.
 
-## Links to further resources
+## Caution with altcoins
 
+I spoke about this in my previous post, but it is worth going over it again.
+Bitcoin is a store of value. 
+Most altcoins are utility tokens, they might be governed by a company, or central person.
+Consider ether, a smart contract platform in which the developers kept a large portion of the tokens in their treasury in what some call a "premine".
+This could be classified as an unauthorised security in the USA (similar to what happened to Ripple/XRP) which could be devastating for it's market value.
+In addition, there is intense competition in the layer 1 space as well as the apps that run on them.
+Think of how binance smart chain was able to copy/paste many Ethereum network apps and run them at much lower fees.
+There are some commentators saying that as these utility tokens can be replicated pretty easily (consider the proliferation of layer 1's in the last three years),
+the profit margin that can be captured will diminish.
 
-## Market data
+This is why in recent times, I've decided not to hodl any altcoins. 
+I hodl bitcoin only because it is a store of value.
+It is the cryptocurrency which has the highest chance of existing in 100 years time.
+So for me, the role of altcoins is not to invest in them blindly hoping that they will appreciate.
+Rather, I make a concious decision to use the backtested indicators discussed above to profit, and I collect those profits in bitcoin.
+The problem with this approach is that it increases the complexity of maintaining the investments because now multiple tokens are being monitored.
+Ideally, the fewer tokens traded, the better.
 
-Here are some useful market data resources:
-
-* https://www.investing.com/crypto/bitcoin/historical-data
-
-* https://www.cryptodatadownload.com/data/
-
-* https://99bitcoins.com/bitcoin/historical-price/
-
-* https://coinmarketcap.com/api/documentation/v1/
-
-* https://www.coingecko.com/en/api
- 
-## Miscellaneous
-
-* [The Bitcoin Dashboard](https://bitcoin.clarkmoody.com/dashboard/)
-
-* [Blockstream Explorer](https://blockstream.info/)
+The second reason I might buy an altcoin, is to investigate the technology ecosystem by using it.
+It could open a new business or research opportunity.
 
 ## Feedback and suggestions
 
