@@ -30,7 +30,7 @@ When the short period line crosses above the longer period one it is a buy signa
 short interval line passes under the longer interval line it is a sell signal.
 I will be testing different intervals for the short and long RSI lines to see which gives the best results.
 
-This page is designed to be updated daily - today's date is shown below.
+This report is time sensitive - today's date is shown below.
 
 ```{r,lib}
 
@@ -378,7 +378,7 @@ if (nrow(trades)>0) {
 
 Recent action of the indicator.
 
-```{r,update}
+```{r,update,fig.height=8,fig.width=8}
 
 n=100
 price <- cbind(price,rsi1,rsi2)
@@ -408,7 +408,7 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 
 ```{r,export}
 
-filename <- paste(TICKER,"_dat.txt",sep="")
+filename <- paste("TICKER","_dat.txt",sep="")
 write.table(t(rsi2_dat),file=filename,append=TRUE,row.names=FALSE,col.names=FALSE)
 
 ```

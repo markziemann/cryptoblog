@@ -26,7 +26,7 @@ a popular method for timing entry and exit of positions.
 In this blog post I will be exploring MA strategies on the daily timeframe to find the ones which 
 perform best.
 
-This page is designed to be updated daily - today's date is shown below.
+This report is time sensitive - today's date is shown below.
 
 ```{r,lib}
 
@@ -327,7 +327,7 @@ lines(ma~ as.Date(price$date) ,col="red")
 
 ### SMA recent action
 
-```{r,sma_recent}
+```{r,sma_recent,fig.height=8,fig.width=8}
 
 plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=SMA_HEADER)
@@ -467,7 +467,7 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 
 ```{r,export}
 
-filename <- paste(TICKER,"_dat.txt",sep="")
+filename <- paste("TICKER","_dat.txt",sep="")
 write.table(t(sma_dat),file=filename,append=TRUE,row.names=FALSE)
 write.table(t(ema_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
 

@@ -23,6 +23,8 @@ LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
 
 Here, we're using the stochastic as a buy/sell indicator for trading.
 
+This report is time sensitive - today's date is shown below.
+
 ```{r,lib}
 
 suppressPackageStartupMessages({
@@ -421,7 +423,7 @@ trades %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ## Recent action
 
-```{r,recentaction}
+```{r,recentaction,fig.height=8,fig.width=8}
 
 HEADER="STOCH"
 par(mfrow=c(2,1))
@@ -483,7 +485,7 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 
 ```{r,export}
 
-filename <- paste(TICKER,"_dat.txt",sep="")
+filename <- paste("TICKER","_dat.txt",sep="")
 write.table(t(stoch_dat),file=filename,append=TRUE,row.names=FALSE,col.names=FALSE)
 
 ```

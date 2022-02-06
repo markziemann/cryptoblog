@@ -31,7 +31,7 @@ Then sell when the negative indicator is larger than the positive indicator.
 What I am examining here is different intervals for the calculation of the DMI, typically 
 14 day is used, however I will be seeing whether other intervals perform better.
 
-This page is designed to be updated daily - today's date is shown below.
+This report is time sensitive - today's date is shown below.
 
 ```{r,lib}
 
@@ -287,7 +287,7 @@ par(mfrow=c(1,1))
 
 ## Best DMI recent action
 
-```{r,recent1}
+```{r,recent1,fig.height=8,fig.width=8}
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -346,7 +346,7 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 
 ```{r,export}
 
-filename <- paste(TICKER,"_dat.txt",sep="")
+filename <- paste("TICKER","_dat.txt",sep="")
 write.table(t(dmi_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
 
 ```

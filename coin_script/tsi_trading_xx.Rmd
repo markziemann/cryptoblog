@@ -40,7 +40,7 @@ The standard values used are:
 
 however I will be seeing whether other intervals perform better.
 
-This page is designed to be updated daily - today's date is shown below.
+This report is time sensitive - today's date is shown below.
 
 ```{r,lib}
 
@@ -413,7 +413,7 @@ par(mfrow=c(1,1))
 
 ## Recent action
 
-```{r,recent}
+```{r,recent,fig.height=8,fig.width=8}
 
 HEADER="TSI"
 par(mfrow=c(2,1))
@@ -477,7 +477,7 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 
 ```{r,export}
 
-filename <- paste(TICKER,"_dat.txt",sep="")
+filename <- paste("TICKER","_dat.txt",sep="")
 write.table(t(tsi_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
 
 ```

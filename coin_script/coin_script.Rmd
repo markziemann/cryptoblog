@@ -47,6 +47,60 @@ TICKER="LTC"
 
 Reminder: this is not financial advice.
 
+## Define function
+
+```{r,fun1}
+
+coinfun <- function(TICKER) {
+  dir.create(TICKER)
+
+  script <- readLines("ma_trading_xx.Rmd")
+  script <- gsub("TICKER",TICKER,script)
+  scriptname <- gsub("xx",TICKER,"ma_trading_xx.Rmd")
+  writeLines(script,scriptname)
+  rmarkdown::render(scriptname,output_dir=TICKER)
+  unlink(scriptname)
+
+  script <- readLines("ma_cross_xx.Rmd")
+  script <- gsub("TICKER",TICKER,script)
+  scriptname <- gsub("xx",TICKER,"ma_cross_xx.Rmd")
+  writeLines(script,scriptname)
+  rmarkdown::render(scriptname,output_dir=TICKER)
+  unlink(scriptname)
+
+  script <- readLines("dmi_trading_xx.Rmd")
+  script <- gsub("TICKER",TICKER,script)
+  scriptname <- gsub("xx",TICKER,"dmi_trading_xx.Rmd")
+  writeLines(script,scriptname)
+  rmarkdown::render(scriptname,output_dir=TICKER)
+  unlink(scriptname)
+
+  script <- readLines("tsi_trading_xx.Rmd")
+  script <- gsub("TICKER",TICKER,script)
+  scriptname <- gsub("xx",TICKER,"tsi_trading_xx.Rmd")
+  writeLines(script,scriptname)
+  rmarkdown::render(scriptname,output_dir=TICKER)
+  unlink(scriptname)
+
+  script <- readLines("stoch_trading_xx.Rmd")
+  script <- gsub("TICKER",TICKER,script)
+  scriptname <- gsub("xx",TICKER,"stoch_trading_xx.Rmd")
+  writeLines(script,scriptname)
+  rmarkdown::render(scriptname,output_dir=TICKER)
+  unlink(scriptname)
+
+  script <- readLines("rsi2_trading_xx.Rmd")
+  script <- gsub("TICKER",TICKER,script)
+  scriptname <- gsub("xx",TICKER,"rsi2_trading_xx.Rmd")
+  writeLines(script,scriptname)
+  rmarkdown::render(scriptname,output_dir=TICKER)
+  unlink(scriptname)
+
+  file.copy(paste(TICKER,"_dat.txt",sep=""),TICKER)
+}
+
+```
+
 ## Get data
 
 Obtaining historical data (daily) from CoinMarketCap.com
@@ -58,83 +112,32 @@ download.file(URL,destfile="cmcdat.txt")
 cmcdat <- fromJSON("cmcdat.txt")
 cmcdf <- data.frame(cmcdat$data[,1:4],cmcdat$data$quote$USD)
 dim(cmcdf)
-
 TICKERS <- cmcdf$symbol
-
 EXCLUDE <- c("USDT","USDC","BUSD","UST","TUSD","USDP","USDN","DAI","FEI",
   "TRIBE","RSR","FRAX","LUSD","HUSD","OUSD","XSGD","GUSD","USDX","EURS","CUSD")
-
 TICKERS <- TICKERS[which(! TICKERS %in% EXCLUDE)]
-
 writeLines(TICKERS,con="tickers.txt")
-
 mydate <- Sys.Date()-1
 
 for ( TICKER in TICKERS ) {
-
-DATNAME=paste(TICKER,"_dat.txt",sep="")
-
-if ( !file.exists(DATNAME) ) {
-
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=",
-  TICKER,
-  "&convert=USD&interval=daily&time_start=2013-06-01&time_end=",
-  mydate, sep="")
-
-download.file(URL,destfile="dat.txt")
-dat <- fromJSON("dat.txt")
-price <- dat$data$quotes
-price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
-colnames(price) <- c("date","close")
-price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
-
-filename <- paste(TICKER,"_dat.txt",sep="")
-unlink(filename)
-
-script <- readLines("ma_trading_xx.Rmd")
-script <- gsub("xx",TICKER,script)
-scriptname <- gsub("xx",TICKER,"ma_trading_xx.Rmd")
-writeLines(script,scriptname)
-rmarkdown::render(scriptname)
-unlink(scriptname)
-
-script <- readLines("ma_cross_xx.Rmd")
-script <- gsub("xx",TICKER,script)
-scriptname <- gsub("xx",TICKER,"ma_cross_xx.Rmd")
-writeLines(script,scriptname)
-rmarkdown::render(scriptname)
-unlink(scriptname)
-
-script <- readLines("dmi_trading_xx.Rmd")
-script <- gsub("xx",TICKER,script)
-scriptname <- gsub("xx",TICKER,"dmi_trading_xx.Rmd")
-writeLines(script,scriptname)
-rmarkdown::render(scriptname)
-unlink(scriptname)
-
-script <- readLines("tsi_trading_xx.Rmd")
-script <- gsub("xx",TICKER,script)
-scriptname <- gsub("xx",TICKER,"tsi_trading_xx.Rmd")
-writeLines(script,scriptname)
-rmarkdown::render(scriptname)
-unlink(scriptname)
-
-script <- readLines("stoch_trading_xx.Rmd")
-script <- gsub("xx",TICKER,script)
-scriptname <- gsub("xx",TICKER,"stoch_trading_xx.Rmd")
-writeLines(script,scriptname)
-rmarkdown::render(scriptname)
-unlink(scriptname)
-
-script <- readLines("rsi2_trading_xx.Rmd")
-script <- gsub("xx",TICKER,script)
-scriptname <- gsub("xx",TICKER,"rsi2_trading_xx.Rmd")
-writeLines(script,scriptname)
-rmarkdown::render(scriptname)
-unlink(scriptname)
-
-}
-
+  DATNAME=paste(TICKER,"_dat.txt",sep="")
+  if ( !file.exists(DATNAME) ) {
+    URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=",
+      TICKER,
+      "&convert=USD&interval=daily&time_start=2013-06-01&time_end=",
+      mydate, sep="")
+    download.file(URL,destfile="dat.txt")
+    dat <- fromJSON("dat.txt")
+    price <- dat$data$quotes
+    price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+    colnames(price) <- c("date","close")
+    price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+    filename <- paste(TICKER,"_dat.txt",sep="")
+    unlink(filename)
+    if ( nrow(price) > 250 ) {
+      coinfun(TICKER)
+    }
+  }
 }
 
 ```
