@@ -1,5 +1,5 @@
 ---
-title: "Halfnhalf: Trading BTC based on MA and EMAs"
+title: "Temporal changes to performance of BTC based on MAs signals over time."
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
