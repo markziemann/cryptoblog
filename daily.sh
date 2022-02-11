@@ -71,7 +71,7 @@ Rscript -e "rmarkdown::render('risk_index.Rmd')" && \
 Rscript -e "rmarkdown::render('volatility_size.Rmd')" && \
   scp -P 21098 volatility_size.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
-Rscript -e "rmarkdown::render('temporal_change/ma_temporal1.Rmd')" && \
-  scp -P 21098 temporal_change/ma_temporal1.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+Rscript -e "rmarkdown::render('temporal_change/ma_temporal2.Rmd')" && \
+  scp -P 21098 temporal_change/ma_temporal2.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 
