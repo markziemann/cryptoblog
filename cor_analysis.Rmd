@@ -17,9 +17,9 @@ Source: https://github.com/markziemann/cryptoblog/blob/main/tsi_trading.Rmd
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
-BTC: 3PCBnq7TH37t6uQmVePjpHaHvzFFh72ZbM
+BTC: bc1qgsecwc3e7r0g7zch8wum04a8hk74tfy488m2nv
 
-LTC: MLzwpLhHE81xB459H15sDN7kBW16kLgHCF
+XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
 
 ## Intro
 
@@ -66,6 +66,7 @@ price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low,
 colnames(price) <- c("date","high","low","close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 price0 <- price
+
 ```
 
 ## Calculate hodl returns
@@ -127,9 +128,11 @@ This is working now but unable to predict anything useful.
 
 ```{r,backtest,fig.height=10,fig.width=8}
 
-nd=200
-fd=10
-nc=100
+ndrange <- c(10,20,50,100,150,200)
+fdrange <- c(7,14,21,28)
+ncrange <- c(5,10,20,50)
+
+pricecor <- function(nd,fd,nc) {
 
 nsims=1000
 
@@ -165,7 +168,21 @@ res <- mclapply(mysims, function(y) {
 res <- do.call(rbind,res)
 res <- as.data.frame(res)
 
-( nrow(subset(res,pred>1 & act > 1)) + nrow(subset(res,pred < 1 & act < 1)) ) / nrow(res)
+ret <- ( nrow(subset(res,pred>1 & act > 1)) + nrow(subset(res,pred < 1 & act < 1)) ) / nrow(res)
+
+return( c( nd, fd, nc, ret ) )
+
+}
+
+params <- expand.grid(ndrange,fdrange,ncrange)
+
+bt <- mclapply( 1:nrow(params), function(i) {
+  nd <- params[i,1]
+  fd <- params[i,2]
+  nc <- params[i,3]
+  pricecor( nd, fd, nc )
+} , mc.cores=8 )
+
 
 ```
 

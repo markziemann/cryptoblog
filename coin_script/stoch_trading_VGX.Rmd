@@ -1,5 +1,5 @@
 ---
-title: "Trading BTC based on the Stochastic indicator"
+title: "Trading VGX based on the Stochastic indicator"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -21,10 +21,9 @@ XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBF
 
 ## Intro
 
-Here, we're using the stochastic as a buy/sell indicator for trading BTC.
+Here, we're using the stochastic as a buy/sell indicator for trading.
 
-The backtest function is modified so as to place greater emphasis on recent performance similar to the exponential
-moving average (EMA).
+This report is time sensitive - today's date is shown below.
 
 ```{r,lib}
 
@@ -41,7 +40,7 @@ suppressPackageStartupMessages({
 
 Sys.Date()
 
-CORES=detectCores()/2
+CORES=detectCores()
 
 ```
 
@@ -49,17 +48,15 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
+Obtaining historical data (daily) from CoinMarketCap.com.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
 
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
-
-download.file(URL,destfile="btcdat.txt")
-
-dat <- fromJSON("btcdat.txt")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=VGX&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+#download.file(URL,destfile="dat.txt")
+dat <- fromJSON("dat.txt")
 price <- dat$data$quotes
 price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
@@ -98,8 +95,6 @@ lines(as.Date(price2$date), sto[,2]  , col="red"  )
 grid()
 
 fee = 0.001
-offset=0.5
-multiplier=1
 
 sto <- stoch(HLC(price), nFastK=14 , nFastD=3 , nSlowD=3 , bounded = TRUE, smooth=1)
 price2 <- price
@@ -125,23 +120,12 @@ if( nrow(buy) != nrow(sell) ) {
 trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
 
-time0 <- as.numeric(as.Date(price[1,1]))
-time1 <- as.numeric(as.Date(price[nrow(price),1]))
-timed <- time1-time0
-times <- cbind(as.numeric(as.Date(trades$buy_date)),as.numeric(as.Date(trades$sell_date)))
-times <- rowMeans(times)
-times <- times - time0
-times <- times/timed * multiplier
-times <- times + offset
-trades$times <- times
-trades$adj_diff <- trades$diff ^ trades$times
-
-basic_mean <- mean(trades$adj_diff)
-basic_returns <- prod(trades$adj_diff)
+basic_mean <- mean(trades$diff)
+basic_returns <- prod(trades$diff)
 
 message(paste("Number of trades:",nrow(trades)))
-message(paste("Total ROI:",prod(trades$adj_diff)))
-message(paste("Returns over hodl:",prod(trades$adj_diff)/hodl))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
 ```
 
@@ -187,20 +171,10 @@ if( nrow(buy) != nrow(sell) ) {
 }
 trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-time0 <- as.numeric(as.Date(price[1,1]))
-time1 <- as.numeric(as.Date(price[nrow(price),1]))
-timed <- time1-time0
-times <- cbind(as.numeric(as.Date(trades$buy_date)),as.numeric(as.Date(trades$sell_date)))
-times <- rowMeans(times)
-times <- times - time0
-times <- times/timed * multiplier
-times <- times + offset
-trades$times <- times
-trades$adj_diff <- trades$diff ^ trades$times
 
 message(paste("Number of trades:",nrow(trades)))
-message(paste("Total ROI:",prod(trades$adj_diff)))
-message(paste("Returns over hodl:",prod(trades$adj_diff)/hodl))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
 ```
 
@@ -208,21 +182,12 @@ message(paste("Returns over hodl:",prod(trades$adj_diff)/hodl))
 
 Assuming 0.1% trading fee, as per binance current rate.
 
-offset is the exponent for time 0. For example if it is 0.5 and return is 3x, the day1 trade is 3 ^ 0.5 = 1.7
-
-Start with offset=0.5
-
-multiplier is how much to emphasise the latest period over the earliest period.
-
-Start with multiplier=1.
-
-Trades in oldest time are worth 0.5x.
-Very recent trades are worth 1.5x.
-Trades in the middle of the time are worth 1x.
 
 ```{r,stofunc1}
 
-mystoch <- function(price,nFastK=14,nFastD=3,nSlowD=3,smooth=1,fee, offset=0.5 , multiplier=1) {
+mystoch <- function(price,nFastK=14,nFastD=3,nSlowD=3,smooth=1,fee) {
+mytry <- try (  sto <- stoch(HLC(price), nFastK , nFastD , nSlowD , bounded = TRUE, smooth=smooth)  ,  silent = TRUE)
+if ( typeof(mytry) == "double" ) {
   sto <- stoch(HLC(price), nFastK , nFastD , nSlowD , bounded = TRUE, smooth=smooth)
   price2 <- price
   price2 <- cbind(price2,sto)
@@ -233,30 +198,27 @@ mystoch <- function(price,nFastK=14,nFastD=3,nSlowD=3,smooth=1,fee, offset=0.5 ,
   price2$yesterday <- yesterday
   price2$trade <- price2$higher - price2$yesterday
   price2 <- price2[which(price2$trade!=0),]
-  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-  buy <- subset(price2,trade==1)[,c("date","close")]
-  colnames(buy) <- c("buy_date","buy_price")
-  sell <- subset(price2,trade==-1)[,c("date","close")]
-  colnames(sell) <- c("sell_date","sell_price")
-  if( nrow(buy) != nrow(sell) ) {
-    MIN=min(nrow(buy),nrow(sell))
-    buy <- buy[1:MIN,]
-    sell <- sell[1:MIN,]
+  if (nrow(price2) > 0 ) {
+    if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+    if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+    buy <- subset(price2,trade==1)[,c("date","close")]
+    colnames(buy) <- c("buy_date","buy_price")
+    sell <- subset(price2,trade==-1)[,c("date","close")]
+    colnames(sell) <- c("sell_date","sell_price")
+    if( nrow(buy) != nrow(sell) ) {
+      MIN=min(nrow(buy),nrow(sell))
+      buy <- buy[1:MIN,]
+      sell <- sell[1:MIN,]
+    }
+    trades <- cbind(buy,sell)
+    trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+    return(c(prod(trades$diff),nrow(trades)))
+  } else {
+    return(c(0,0))
   }
-  trades <- cbind(buy,sell)
-  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-  time0 <- as.numeric(as.Date(price[1,1]))
-  time1 <- as.numeric(as.Date(price[nrow(price),1]))
-  timed <- time1-time0
-  times <- cbind(as.numeric(as.Date(trades$buy_date)),as.numeric(as.Date(trades$sell_date)))
-  times <- rowMeans(times)
-  times <- times - time0
-  times <- times/timed * multiplier
-  times <- times + offset
-  trades$times <- times
-  trades$adj_diff <- trades$diff ^ trades$times
-  return(c(prod(trades$diff), prod(trades$adj_diff), nrow(trades)))
+} else {
+  return(c(0,0))
+}
 }
 
 ```
@@ -284,10 +246,10 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
 } , mc.cores = CORES)
 res <- as.data.frame(do.call(rbind, res))
-colnames(res) <- c("returns","returns_adjusted","trades")
+colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
+res2$returnspertrade <- res2$returns/res2$trades
 res2$mean <- res2$returns^(1/res2$trades)
-res2$mean_adjusted <- res2$returns_adjusted^(1/res2$trades)
 
 ```
 
@@ -296,10 +258,7 @@ These don't occur frequently, but when they do, it gives a solid return.
 
 ```{r,res1}
 
-head(res2[order(-res2$mean),],20) %>% kbl(caption="highest mean ROI strategies (unadjusted)") %>%  kable_paper("hover", full_width = F)
-
-head(res2[order(-res2$mean_adjusted),],20) %>% kbl(caption="highest mean ROI strategies (adjusted)") %>%  kable_paper("hover", full_width = F)
-
+head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -307,9 +266,7 @@ Strategies with the highest returns - these are too frequent and each trade has 
 
 ```{r,res2}
 
-head(res2[order(-res2$returns),],20) %>% kbl(caption="highest total ROI strategies (unadjusted)") %>%  kable_paper("hover", full_width = F)
-
-head(res2[order(-res2$returns_adjusted),],20) %>% kbl(caption="highest total ROI strategies (adjusted)") %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -320,9 +277,7 @@ returns.
 
 res3 <- subset(res2,trades<200)
 
-head(res3[order(-res3$returns),],20) %>% kbl(caption="highest total ROI strategies with <200 trades (unadjusted)") %>%  kable_paper("hover", full_width = F)
-
-head(res3[order(-res3$returns_adjusted),],20) %>% kbl(caption="highest total ROI strategies with <200 trades (adjusted)") %>%  kable_paper("hover", full_width = F)
+head(res3[order(-res3$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -338,25 +293,11 @@ plot(res2$mean , res2$returns, log="y",xlab="mean ROI", ylab="total returns")
 points(basic_mean,basic_returns,col="red",pch=19,cex=2)
 abline(h=hodl,col="red")
 grid()
-mtext("unadjusted")
-
-plot(res2$mean_adjusted , res2$returns_adjusted, log="y",xlab="mean ROI", ylab="total returns")
-points(basic_mean,basic_returns,col="red",pch=19,cex=2)
-abline(h=hodl,col="red")
-grid()
-mtext("unadjusted")
 
 plot(res3$mean , res3$returns, log="y",xlab="mean ROI", ylab="total returns, <200 trades")
 points(basic_mean,basic_returns,col="red",pch=19,cex=2)
 abline(h=hodl,col="red")
 grid()
-mtext("unadjusted")
-
-plot(res3$mean_adjusted , res3$returns_adjusted, log="y",xlab="mean ROI", ylab="total returns, <200 trades")
-points(basic_mean,basic_returns,col="red",pch=19,cex=2)
-abline(h=hodl,col="red")
-grid()
-mtext("adjusted")
 
 ```
 
@@ -365,9 +306,9 @@ Here's the table of results for the strategies with mean trade ROI of >108% and 
 ```{r,res4}
 
 res5 <- subset(res2, mean > 1.08 )
-res5 <- res5[order(-res5$returns_adjusted),]
+res5 <- res5[order(-res5$returns),]
 res5 <- head(res5,20)
-res5 %>% kbl(caption="Best total ROI strategies with mean ROI>1.08 (adjusted)") %>%  kable_paper("hover", full_width = F)
+res5 %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -391,10 +332,10 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   mystoch(price,nFastK=nFastK,nFastD=nFastD,nSlowD=nSlowD,smooth=smooth,fee=fee)
 } , mc.cores = CORES)
 res <- as.data.frame(do.call(rbind, res))
-colnames(res) <- c("returns","returns_adjusted","trades")
+colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
+res2$returnspertrade <- res2$returns/res2$trades
 res2$mean <- res2$returns^(1/res2$trades)
-res2$mean_adjusted <- res2$returns_adjusted^(1/res2$trades)
 
 ```
 
@@ -403,8 +344,9 @@ Here are the highest returning strategies with fewer than 200 trades.
 ```{r,res6}
 
 res3 <- subset(res2,trades<200)
-res3 <- res3[order(-res3$returns_adjusted),]
-head(res3,10) %>% kbl(caption="highest returning strategies with fewer than 200 trades(adjusted)") %>%  kable_paper("hover", full_width = F)
+res3 <- res3[order(-res3$returns),]
+
+head(res3,10) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -450,20 +392,18 @@ if( nrow(buy) != nrow(sell) ) {
 }
 trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-time0 <- as.numeric(as.Date(price[1,1]))
-time1 <- as.numeric(as.Date(price[nrow(price),1]))
-timed <- time1-time0
-times <- cbind(as.numeric(as.Date(trades$buy_date)),as.numeric(as.Date(trades$sell_date)))
-times <- rowMeans(times)
-times <- times - time0
-times <- times/timed * multiplier
-times <- times + offset
-trades$times <- times
-trades$adj_diff <- trades$diff ^ trades$times
 
 message(paste("Number of trades:",nrow(trades)))
-message(paste("Total ROI:",prod(trades$adj_diff)))
-message(paste("Returns over hodl:",prod(trades$adj_diff)/hodl))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+stoch_dat <- c("indicator"="stoch",
+  "parameter"= paste(best_nFastK, best_nFastD , best_smooth, sep=",") ,
+  "meanROI"= mean(trades$diff) ,
+  "totalROI"= prod(trades$diff) ,
+  "ntrades"= nrow(trades) ,
+  "ndays"= nrow(price) ,
+  "xhodl"= prod(trades$diff)/hodl )
 
 HEADER="STOCH"
 par(mfrow=c(2,1))
@@ -483,7 +423,7 @@ trades %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ## Recent action
 
-```{r,recentaction}
+```{r,recentaction,fig.height=8,fig.width=8}
 
 HEADER="STOCH"
 par(mfrow=c(2,1))
@@ -511,7 +451,7 @@ res_fees <- sapply(fee_levels,function(x) {
   mystoch(price,nFastK=best_nFastK,nFastD=best_nFastD,nSlowD=best_nFastD,smooth=best_smooth,fee=x)
 } )
 
-plot(fee_levels,res_fees[2,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
 mtext("higher time frame")
 abline(h=hodl,col="red")
 grid()
@@ -526,20 +466,29 @@ It is good to see whether the strategy gives consistent returns over the years.
 
 years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
-trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
-yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,7] } )
-yearly <- yearly[which(lapply(yearly,length)>0)]
-vioplot(yearly)
-yr <- sapply(yearly,prod)
-barplot(yr)
-text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
-abline(h=1,col="red",lty=2)
+if (nrow(trades)>0) {
+  trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
+  yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+  yearly <- yearly[which(lapply(yearly,length)>0)]
+  vioplot(yearly)
+  yr <- sapply(yearly,prod)
+  barplot(yr)
+  text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+  abline(h=1,col="red",lty=2)
+}
 
 ```
 
-## Conclusion
+## Data export
 
-The stochastic gave moderate returns with 2.6x hodl which was less than the SMA strategy (~6x hodl).
+Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
+
+```{r,export}
+
+filename <- paste("VGX","_dat.txt",sep="")
+write.table(t(stoch_dat),file=filename,append=TRUE,row.names=FALSE,col.names=FALSE)
+
+```
 
 ## Session information
 
