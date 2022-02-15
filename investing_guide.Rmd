@@ -1,5 +1,5 @@
 ---
-title: "A sane persons guide to investing in cryptocurrencies"
+title: "A sane person's guide to building a cryptocurrency portfolio"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -27,7 +27,7 @@ First and foremost, this is not financial advice.
 This guide is for educational and informational purposes only.
 
 The cryptocurrency markets are volatile and money can be made and LOST quickly.
-You own the decisions you make. Big boy pants here.
+You own the decisions you make. 
 
 What I'm discussing below are the principles behind how I manage risk and take advantage of upside
 potential.
@@ -98,9 +98,10 @@ about the products it makes.
 So you try the product, test it out, see what it can do.
 Compare products between companies, observe where the competitive advantage lies.
 
-In the case of bitcoin, try buying a tiny amount on an exchange, transfer it to a wallet on your PC or phone.
+In the case of bitcoin, try buying a tiny amount on an exchange, transfer it to a hot wallet on your PC or phone.
 Use it to pay for stuff.
 Request others to pay you in bitcoin.
+This way we can build the p2p economy which Satoshi envisaged.
 
 If you are tech savvy, you can try to go a bit deeper by setting up a node.
 I've recently set up a Bitcoin node and it gives you a deeper understanding about what is going on
@@ -150,9 +151,9 @@ likely going to see the purchasing power of your portfolio grow.
 5. Investigate dollar cost averaging (DCA).
 The market moves in wild ways.
 Some say the market moves in a "maximum pain" pattern, inflicting maximum pain on both bears and bulls
-as the market gets overly emotional and moves become exaggerated.
+as the market gets overly "emotional" and moves become exaggerated.
 Buying a set amount at regular intervals helps to smooth out the noise of the short term moves.
-Start with really small amounts, for example: how much do you spend on streaming services each month?
+Start with really small amounts, for example: how much do you spend on streaming TV services each month?
 Then over time you can slowly increase the contributions as you learn more about the technology and 
 comfortable with the way the market moves.
 DCA can be set up automatically, so you can let it accumulate over time.
@@ -163,20 +164,20 @@ Are you checking the market moves every hour?
 Is it preventing you from enjoying other parts of your life?
 In that case you might have too much invested in the market, and you should consider scaling out.
 A financial advisor will help you to find the right balance in your investment portfolio.
-Crypto investing is very risky, so it might not be for you.
+Crypto investing is very risky, so it might not be good for your mental situation.
 
 7. Keep it simple by sticking to BTC.
 People new to this space open coinmarketcap.com or other websites and get amazed by the variety of
 altcoins available and the massive gains that some achieve in a short amount of time.
-They open a trading account during a massive bull market and buy a basket of five cryptos.
+They open a trading account during a massive bull market and buy a basket of several cryptos.
 They are happy when price is going up, but when it reverses, it can be dramatic and catastrophic.
 If you are monitoring so many different assets, you are spending time securing those funds,
 considering your positions, checking indicators frequently, etc.
 It can be stressful!
-You may think this is diversificaiton, but as the market ultimately hinges on the performance of the 
-major asset, BTC, it actually weakens your position.
+You may think this is healthy diversification, but as the market ultimately hinges on the performance of the 
+one major asset, BTC, it actually weakens your position by diluting your focus.
 Instead of looking at one chart, you're looking at five.
-Instead of having fear that BTC will dump by 50%, you have fear that the s**tcoin could dump by 80% 
+Instead of having fear that BTC will dump by 50%, you have fear that a sketchy altcoin could dump by 80% 
 or worse!
 It is always helpful to remember that BTC is the only store-of-value crypto.
 All others are utility tokens; analogous to technology start-ups.
@@ -188,6 +189,7 @@ You'll need some cash on the sidelines in case new opportunities arise.
 
 9. Another small tip: denominate your investments in BTC, that way you don't feel like you're losing when 
 the market corrects.
+As long as your BTC stack grows over time, you're doing great!
 
 ## Level up
 
@@ -202,7 +204,7 @@ You've already decided on the weighting that cryptos should have in your net wor
 DCA strategy, now it's time to consider different ways to hold cryptos.
 The different ways are:
 
-1. Cold storage. This should be the largest portion, which is held with the lowest risk.
+1. Cold storage. This should be the largest portion as it is held with the lowest risk. For me this is approx 50%.
 
 2. Lend it out. You can deposit funds at a centralised cryptobank like Celcius, Ledn, Nexo, etc which
 will lend out your funds and you will earn interest, paid in crypto.
@@ -211,9 +213,11 @@ The interest rates are quite good for some of these, for example ~5% pa for BTC 
 Alternatively there are decentralised finance solutions (eg: Compound) although I have not used these 
 myself.
 This is a good option for those with a long term horizon, although lending out your coins does involve
-considerable risk.
+considerable counterparty risk.
+As with any lending, it is possible that the loans are not paid back.
 Based on this risk, you could consider lending a small part of your portfolio (max one-third).
 As the value of the account increases, you should consider dividing the funds over >1 accounts.
+For me, I wouldn't keep more than 0.3 BTC at any single institution.
 
 3. Acquire some with your retirement funds.
 Depending on where you live it could be possible to stack bitcoin with your retirement savings account
@@ -248,51 +252,111 @@ spend time at your main profession, and you might miss trading opportunities bec
 spent away from the chart causes you to miss huge moves and your position goes underwater.
 If you did this with leverage, there's a chance the entire position is liquidated.
 
-My system: crunch the data with computers so I don't need to look at a chart.
+Some more famous systems in the crypto space are:
+
+* The Bitcoin strength index, used by Ivan https://www.youtube.com/c/IvanonTech
+
+* The Larson line used by CTO Larsson https://www.youtube.com/c/CTOLARSSON
+
+* Lux algo used by Satoshi Stacker https://www.youtube.com/channel/UCGDjpwZV-bU-sLSnhInCfKQ
+
+These are decent approaches which should help to avoid the biggest losses while capturing the largest moves.
+
+There are other market analysts which take a more technical analysis perspective and predominantly use trend lines
+and identify patterns which are associated with different market phases.
+You might be familiar with patterns like head and shoulders, cup and handle, wedges, triangles, etc.
+Other folks work off horizontal levels and take advantage of indicators like the central pivot ranges to predict where 
+support and resistance will be strong.
+Others use fibonacci retracement and extension levels to predict these support and resistance lines.
+Most technical analysts use a combination of these components together with technical indicators like 
+relative strength index, moving averages, directional movement index, etc, to confirm it is a good time to 
+enter/exit a position.
+Developing such a formulation requires a great deal of experience to accurately predict what the market might do.
+Most beginners fail dreadfully in pursuing this approach due to it's complexity. 
+Which is why I want to discuss a different approach.
+
+In my system I crunch the data with computers so I don't need to look at the charts.
 
 I backtest indicators to identify profitable entry and exits.
-I focus on the simplest possible indicators, such as moving averages and relative strength index.
-I realise that these indicators are not foolproof, there might be 2-3 fakeouts before experiencing a major pump.
-Each of those fake-outs could lose something like 5-10% but if I remain disciplined and respect the time-sensitive nature of the entry/exits,
-then I can expect my returns to be in line with the historical indicator performance.
+I focus on the simplest possible indicators, such as moving averages, relative strength index and directional 
+movement indicator.
+I realise that these indicators are not foolproof, there might be 2-3 fakeouts before experiencing a successful 
+trend reversal.
+Each of those fake-outs could lose something like 5-10% but if I remain disciplined and respect the 
+time-sensitive nature of the entry/exits, then I can expect my returns to be in line with the historical 
+indicator performance.
+The key is to reduce the complexity of the system by reducing the ways that human error can occur.
+The only way I can fail in the long run is if I do not act timely enough when my indicators are flashing,
+or I let emotions get the better of me so that I don't trust what the indicators are telling me.
 
-Emotions can get the better of you, especially when there are multiple fakeouts.
-If you keep the proportion of your portfolio that is being actively traded relatively small, then this alleviates some of the negative emotions.
-Over time if the size of the trading portfolio grows, then consider paying dividends to yourself by stashing some sats into cold storage.
+Emotions can get the better of us, especially when the market is tightly balanced and there are multiple fakeouts.
+If you keep the proportion of your portfolio that is being actively traded relatively small, 
+then this alleviates some of the negative emotions.
+Over time if the size of the trading portfolio grows, then it is a good idea to stash a proportion of
+those gains into cold storage.
 
 The analyses you see on this site for BTC and ETH are run everyday, just before the daily close.
 I have a set of six backtested, optimised and profitable signals.
 The program downloads the current price data and calculates whether a buy or sell signal is triggered.
 I get a push notification and then I can take action.
-I would rather let the computer analyse the price data every day so I don't need to be looking at the charts constantly.
+This way the computer can automatically analyse the price data every day so I don't need to be looking at the charts 
+constantly.
 I choose the daily timeframe because it means that trades will only take place at a predicable time of day - 
 I don't want to have alarms going off at different times at night.
-Also, from my experience, the daily timeframe is more profitable than the weekly timeframe for most of the market indicators I've looked at.
+Also, from my experience/analysis, the daily timeframe is more profitable than the weekly timeframe for most of the 
+market indicators I've looked at.
 
-The time I do spend looking at charts is normally used to identify and understand new indicators and check the performance of different indicator/asset combinations.
+The time I do spend looking at charts is normally used to identify and understand new indicators and check the 
+performance of different indicator/asset combinations.
 
 ## Caution with altcoins
 
 I spoke about this in my previous post, but it is worth going over it again.
 Bitcoin is a store of value. 
-Most altcoins are utility tokens, they might be governed by a company, or central person.
-Consider ether, a smart contract platform in which the developers kept a large portion of the tokens in their treasury in what some call a "premine".
-This could be classified as an unauthorised security in the USA (similar to what happened to Ripple/XRP) which could be devastating for it's market value.
+Most altcoins are utility tokens, they might be governed by a company, central person or small team.
+Consider ether, a smart contract platform in which the developers kept a large portion of the tokens in 
+their treasury in what some call a "premine".
+This could be classified as an unauthorised security in the USA (similar to what happened to Ripple/XRP) which 
+could be devastating for it's market value.
 In addition, there is intense competition in the layer 1 space as well as the apps that run on them.
 Think of how binance smart chain was able to copy/paste many Ethereum network apps and run them at much lower fees.
-There are some commentators saying that as these utility tokens can be replicated pretty easily (consider the proliferation of layer 1's in the last three years),
+There are some commentators saying that as these utility tokens can be replicated pretty easily 
+(consider the proliferation of layer 1's in the last three years),
 the profit margin that can be captured will diminish.
 
-This is why in recent times, I've decided not to hodl any altcoins. 
+This is why in recent times, I've decided to reduce my holdings of altcoins to a very small level (1%). 
 I hodl bitcoin only because it is a store of value.
 It is the cryptocurrency which has the highest chance of existing in 100 years time.
 So for me, the role of altcoins is not to invest in them blindly hoping that they will appreciate.
-Rather, I make a concious decision to use the backtested indicators discussed above to profit, and I collect those profits in bitcoin.
-The problem with this approach is that it increases the complexity of maintaining the investments because now multiple tokens are being monitored.
+Rather, if I were to buy an altcoin I make a concious decision to use the backtested indicators discussed 
+above to profit, and I take those profits in bitcoin.
+The problem with using altcoins like this is that it increases the complexity of maintaining the investments
+because now multiple tokens are constantly being monitored.
 Ideally, the fewer tokens traded, the better.
 
 The second reason I might buy an altcoin, is to investigate the technology ecosystem by using it.
 It could open a new business or research opportunity.
+There are some intresting altcoin projects going on that I might write about in future posts.
+
+## Conclusions
+
+So just to summarise:
+
+* Take your journey slowly with cryptos. Don't just go all in all at once.
+Get off zero, start small, dollar cost average and invest time to manage the security of these new assets.
+
+* Stick with bitcoin, and by keep most in cold storage, lend some out, keep a small amount on a 
+hot wallet for day-to-day use.
+
+* If you want to trade some coins, do so at your own risk.
+I have provided six different backtested indicators on my website and there are many others out there which will help you
+avoid the biggest plunges and ride the upward rallies.
+These still require a lot of discipline to follow, so start with a small amount.
+
+* Continue your research by learning about the technology, market indicators and books like
+[Crypto Investing Guide](https://www.booktopia.com.au/crypto-investing-guide-ian-balina/ebook/9781737302117.html).
+
+* See your financial planner to discuss your personal situation.
 
 ## Feedback and suggestions
 
