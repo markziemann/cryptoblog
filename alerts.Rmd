@@ -950,6 +950,132 @@ if ( eth_signal != "NONE") {
 
 ```
 
+## Get XMR price data
+
+Obtaining BTC price data (daily) for the last 300 days.
+
+```{r,xmr_data1}
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=XMR&interval=daily&count=300"
+download.file(URL,destfile="xmrdat.txt")
+xmrdat <- fromJSON("xmrdat.txt")
+price <- xmrdat$data$quotes
+price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+colnames(price) <- c("date","high","low","close")
+tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+```
+
+Now gather hourly price data for the last 23 hours.
+
+```{r,xmr_data2}
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=hourly&time_period=hourly&count=11"
+download.file(URL,destfile="xmrdat.txt")
+xmrdat <- fromJSON("xmrdat.txt")
+price2 <- xmrdat$data$quotes
+price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price2) <- c("date","high","low","close")
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+high <- max(price2[,2])
+low <-  min(price2[,3])
+close <- price2[nrow(price2),4]
+
+df <- data.frame(date=mydate,high=high,low=low,close=close,stringsAsFactors=FALSE)
+price <- rbind(price,df)
+tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+if ( TESTING == TRUE) {
+  price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
+}
+
+```
+
+## XMR TSI indicator
+
+Optimised values:
+
+n1=81, n2=21, n.sig=5
+
+```{r,xmr_tsi,fig.height=10,fig.width=8}
+
+TSI <- function(x, n.first = 25, n.second = 13, n.signal = 7) {
+  #True Strength Indicator
+  #https://school.stockcharts.com/doku.php?id=technical_indicators:true_strength_index
+  x <- try.xts(x, error = as.matrix)
+  pc <- x - lag.xts(x, na.pad = T) #force lag.xts to get na padding
+  dspc <- EMA(EMA(pc, n = n.first), n = n.second)
+  dsapc <- EMA(EMA(abs(pc), n = n.first), n = n.second)
+
+  tsi <- 100 * (dspc/dsapc)
+  signal <- EMA(tsi, n = n.signal)
+  r <- cbind(tsi, signal)
+  r <- reclass(r, x)
+  if (!is.null(dim(r))) colnames(r) <- c("tsi", "signal")
+  return(r)
+}
+
+tsi <- TSI(price$close , n.first = 104, n.second = 15, n.signal = 5 )
+colnames(tsi) <- c("tsi","sig")
+
+price2 <- cbind(price,tsi)
+price2$signal <- tsi[,1] > tsi[,2]
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    xmr_signal="TSI BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    xmr_signal="TSI SELL"
+  }
+} else {
+  xmr_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_TSI_DAILY/BULLISH/' index1.html")
+ system("sed -i 's/BTC_TSI_COL/green/' index1.html")
+} else {
+ system("sed -i 's/BTC_TSI_DAILY/BEARISH/' index1.html")
+ system("sed -i 's/BTC_TSI_COL/red/' index1.html")
+}
+
+message(paste("XMR TSI signal:",btc_signal))
+
+```
+
+```{r,xmr_tsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tsi[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="TSI",main="TSI")
+lines(as.Date(price2$date), tsi[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+Send a push notification.
+
+```{r,xmr_tsi_push}
+
+if ( xmr_signal != "NONE") {
+  MYNOTE <- paste("XMR is flashing a ", xmr_signal,
+   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
+
+```
+
 ## Session information
 
 For reproducibility
