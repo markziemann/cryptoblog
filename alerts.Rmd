@@ -952,11 +952,11 @@ if ( eth_signal != "NONE") {
 
 ## Get XMR price data
 
-Obtaining BTC price data (daily) for the last 300 days.
+Obtaining XMR price data (daily) for the last 300 days.
 
 ```{r,xmr_data1}
 
-URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=XMR&interval=daily&count=300"
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&count=300"
 download.file(URL,destfile="xmrdat.txt")
 xmrdat <- fromJSON("xmrdat.txt")
 price <- xmrdat$data$quotes
