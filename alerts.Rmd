@@ -509,6 +509,14 @@ plot(price2$rsi1 ~ as.Date(price2$date),type="l",col="blue",
 lines(as.Date(price2$date), price2$rsi2  , col="red"  )
 grid()
 
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l",
+  xlab="Date",ylab="RSI ratio",main="double RSI")
+grid()
 par(mfrow=c(1,1))
 
 ```
@@ -933,7 +941,16 @@ plot(price2$rsi1 ~ as.Date(price2$date),type="l",col="blue",
   xlab="Date",ylab="index",main="double RSI")
 lines(as.Date(price2$date), price2$rsi2  , col="red"  )
 grid()
+par(mfrow=c(1,1))
 
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l", 
+  xlab="Date",ylab="RSI ratio",main="double RSI")
+grid()
 par(mfrow=c(1,1))
 
 ```
