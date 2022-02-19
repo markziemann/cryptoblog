@@ -108,6 +108,19 @@ lines(as.Date(price2$date), rsi2  , col="red"  )
 grid()
 par(mfrow=c(1,1))
 
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(rsi1/rsi2 ~ as.Date(price2$date),type="l", 
+  xlab="Date",ylab="RSI ratio",main=HEADER )
+#lines(as.Date(price2$date), rsi2  , col="red"  )
+abline(h=1,lty=2,lwd=2)
+grid()
+par(mfrow=c(1,1))
+
+
 ```
 
 ## Double RSI trading function
@@ -373,6 +386,17 @@ plot(price$rsi1 ~ as.Date(price$date),type="l",col="blue",
   xlab="Date",ylab="RSI",main=HEADER)
 lines(as.Date(price$date), price$rsi2  , col="red"  )
 grid()
+
+par(mfrow=c(2,1))
+plot(price$close ~ as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price$rsi1/price$rsi2 ~ as.Date(price$date),type="l",
+  xlab="Date",ylab="RSI ratio",main=HEADER )
+abline(h=1,lty=2,lwd=2)
+grid()
+par(mfrow=c(1,1))
 
 tail(price ,20) %>%
   kbl(caption="Last 20 days") %>%
