@@ -115,7 +115,7 @@ plot(price2$close ~ as.Date(price2$date),type="l",log="y",
 grid()
 
 plot(rsi1/rsi2 ~ as.Date(price2$date),type="l",
-  xlab="Date",ylab="RSI ratio",main=HEADER )
+  xlab="Date",ylab="RSI ratio",main="RSI 14d/28d" )
 #lines(as.Date(price2$date), rsi2  , col="red"  )
 abline(h=1,lty=2,lwd=2)
 grid()
