@@ -23,15 +23,15 @@ Click on the hyperlinks below to see how these signals were identified.
 [ETH](https://mdz-analytics.com/crypto/ma_trading_eth.html) 34 day.
 
 2. Moving average crosses: [BTC](https://mdz-analytics.com/crypto/ma_cross.html) 12/21 day SMA and;
-[ETH](https://mdz-analytics.com/crypto/ma_cross_eth.html) 5/27 day.
+[ETH](https://mdz-analytics.com/crypto/ma_cross_eth.html) 12/21 day.
 
 3. Directional movement index (DMI): [BTC](https://mdz-analytics.com/crypto/dmi_trading.html) 32 day;
 [ETH](https://mdz-analytics.com/crypto/dmi_trading_eth.html) 16 day.
 
 4. True strength index (TSI): [BTC](https://mdz-analytics.com/crypto/tsi_trading.html) n1=104, n2=15, n.signal=5;
-[ETH](https://mdz-analytics.com/crypto/tsi_trading_eth.html) n1=101, n2=7, n.signal=20.
+[ETH](https://mdz-analytics.com/crypto/tsi_trading_eth.html) n1=97, n2=9, n.signal=19.
 
-5. Stochastic oscillator (stoch): [BTC](https://mdz-analytics.com/crypto/stoch_trading.html) nFastK=7, nFastD=45, smooth=17;
+5. Stochastic oscillator (stoch): [BTC](https://mdz-analytics.com/crypto/stoch_trading.html) nFastK=16, nFastD=54, smooth=6;
 [ETH](https://mdz-analytics.com/crypto/stoch_trading_eth.html) nFastK=20, nFastD=7, smooth=36.
 
 6. Double RSI: [BTC](https://mdz-analytics.com/crypto/rsi2trading.html) n1=43, n2=122;
@@ -392,11 +392,11 @@ if ( btc_signal != "NONE") {
 
 Optimised values:
 
-nFastk = 7, nFastD = 45, smooth = 17
+nFastk = 16, nFastD = 54, smooth = 6
 
 ```{r,btc_stoch,fig.height=10,fig.width=8}
 
-sto <- stoch(HLC(price), nFastK=7 , nFastD=45 , nSlowD=45 , bounded = TRUE, smooth=17)
+sto <- stoch(HLC(price), nFastK=16 , nFastD=54 , nSlowD=54 , bounded = TRUE, smooth=6)
 
 price2 <- cbind(price,sto)
 price2$signal <- price2$fastK > price2$fastD
@@ -460,12 +460,12 @@ if ( btc_signal != "NONE") {
 
 Optimised values:
 
-n1 = 43, n2 = 122
+n1 = 57, n2 = 95
 
 ```{r,btc_rsi1,fig.height=10,fig.width=8}
 
-rsi1 <- RSI(price$close,n=43,maType=EMA)
-rsi2 <- RSI(price$close,n=122,maType=EMA)
+rsi1 <- RSI(price$close,n=57,maType=EMA)
+rsi2 <- RSI(price$close,n=95,maType=EMA)
 
 price2 <- cbind(price,rsi1,rsi2)
 price2$signal <- price2$rsi1 > price2$rsi2
@@ -634,14 +634,14 @@ if ( eth_signal != "NONE") {
 
 ## ETH SMA cross indicator
 
-The 5/27 day SMA cross is a highly profitable strategy.
+The 12/21 day SMA cross is a highly profitable strategy.
 
 ```{r, eth_cross}
 
 price2 <- price
 
-price2$ma1 <- SMA(Cl(price2),n=27)
-price2$ma2 <- SMA(Cl(price2),n=5)
+price2$ma1 <- SMA(Cl(price2),n=21)
+price2$ma2 <- SMA(Cl(price2),n=12)
 
 price2$signal <- price2$ma2 > price2$ma1
 tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
@@ -757,11 +757,11 @@ if ( eth_signal != "NONE") {
 
 Optimised values:
 
-n1=101, n2=7, n.sig=20
+n1=97, n2=9, n.sig=19
 
 ```{r,eth_tsi,fig.height=10,fig.width=8}
 
-tsi <- TSI(price$close , n.first = 101, n.second = 7, n.signal = 20 )
+tsi <- TSI(price$close , n.first = 97, n.second = 9, n.signal = 19 )
 colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
