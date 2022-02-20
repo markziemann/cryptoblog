@@ -517,6 +517,7 @@ grid()
 plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l",
   xlab="Date",ylab="RSI ratio",main="double RSI")
 grid()
+abline(h=1,lty=2,lwd=2)
 par(mfrow=c(1,1))
 
 ```
@@ -951,6 +952,7 @@ grid()
 plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l", 
   xlab="Date",ylab="RSI ratio",main="double RSI")
 grid()
+abline(h=1,lty=2,lwd=2)
 par(mfrow=c(1,1))
 
 ```
