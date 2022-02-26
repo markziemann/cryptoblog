@@ -1055,15 +1055,7 @@ if (today_signal != previous_signal ) {
   xmr_signal <- "NONE"
 }
 
-if (today_signal==TRUE) {
- system("sed -i 's/BTC_TSI_DAILY/BULLISH/' index1.html")
- system("sed -i 's/BTC_TSI_COL/green/' index1.html")
-} else {
- system("sed -i 's/BTC_TSI_DAILY/BEARISH/' index1.html")
- system("sed -i 's/BTC_TSI_COL/red/' index1.html")
-}
-
-message(paste("XMR TSI signal:",btc_signal))
+message(paste("XMR TSI signal:",xmr_signal))
 
 ```
 
