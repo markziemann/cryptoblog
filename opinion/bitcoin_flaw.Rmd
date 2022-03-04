@@ -1,0 +1,359 @@
+---
+title: "Bitcoin has a fatal flaw"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    fig_width: 7
+    fig_height: 7
+theme: cosmo
+---
+
+Source: https://github.com/markziemann/cryptoblog/tree/main/opinion/bitcoin_flaw.Rmd
+
+This document is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+BTC: bc1qgsecwc3e7r0g7zch8wum04a8hk74tfy488m2nv
+
+XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
+
+## Preface
+
+This is not financial advice - it is for educational and informational purposes only.
+
+This is a work in progress, so may have typos and lack links to sources.
+Feel free to get in touch by email mark.ziemann[at]gmail.com or twitter @mdziemann.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+
+```
+
+## I was wrong about Bitcoin
+
+Over the last few weeks I've come to the realisation that Bitcoin has a fatal flaw.
+Since I got involved in this space in 2014, I've been dismissing this issue. 
+It didn't really occur to me how problematic it was.
+Subconsciously, I was in denial.
+
+I thought bitcoin was this unstoppable phenomenon.
+The most resilient computer network in history, allowing p2p commerce, disintermediating
+banks, remittance providers, SWIFT and other middlemen.
+Bitcoin is marketed as "open decentralized, borderless, censorship-resistant, neutral, 
+interconnected and p2p cash", and this is partially true, however it is a bit more 
+complicated than that.
+
+## The fatal flaw
+
+Let me explain what the issue is.
+It is the fact that the blockchain is totally transparent.
+In each block, you can see all transaction information; sender address, amount and receiver address.
+You can scan the blockchain and calculate the balance of every address.
+
+You can go to any number of websites, eg: [bitinfocharts.com](https://bitinfocharts.com/top-100-richest-bitcoin-addresses.html)
+and see the balance of the richest wallets, along with their recent transactions.
+The activities of these parties are free for anyone to see.
+Isn't that a problem?
+Maybe yes, maybe no.
+Let me explain.
+
+In the Bitcoin whitepaper, it was describes as pseudonomous.
+As long as you can keep your address secret, your identity remains private.
+
+Remaining private is pretty difficult however, because everyone you interact with can see your
+address, and therefore see your balance.
+
+## Why privacy is essential
+
+When you transact with your grocery store, pay for a bus ride, or grab a burger with cash
+, what information do you reveal to them?
+Not much, just the transaction amount. 
+The merchant doesn't get your account number, doesn't know your balance, and doesn't know
+who you have been transacting with previously.
+
+What about your credit or debit card, which is compulsory for you E-bay or Amazon purchase?
+They would get the card/account number along with the amount.
+
+What benefit would Bitcoin provide to this scenario?
+If executed on bitcoin blockchain it would be slower, more expensive and with the problems where it
+reveals too much of your personal information to transaction partners.*
+
+But the recent narrative around Bitcoin is as "digital gold", so you don't need to use it for
+regular transactions, just hodl it.
+
+This isn't really sustainable, for two important reasons.
+
+1. If a currency has no use case as a medium of exchange, then this dramatically 
+diminishes it's use case.
+Much of the value of a cryptocurrency is the network effect caused by making it a
+medium of exchange.
+If you ask a merchant to accept payment in a currency, there's a chance they will
+say yes, which will grow the network further.
+No medium of exchange, no growth.
+
+2. Even if Bitcoin is a store of value not used for everyday transactions, 
+the lack of privacy remains an issue.
+If you purchase coins from an exchange, they know how much you have bought
+over the years.
+If you take those coins to a new exchange to cash some out, then the new exchange 
+can see your self-custodial wallet balance, along with all the transactions that
+wallet has made over the years.
+As those exchanges are highly regulated, they need to enforce know-your-customer and 
+anti-money-laundering (KYC/AML) laws, which is an area that tyrannical governments
+could abuse.
+
+## Why Bitcoin will be surveiled to death
+
+You might be in the camp which says that privacy is not that important,
+and that you're happy to transact on an open ledger.
+That's your choice - but hear this:
+Regulated exchanges implementing KYC/AML are collecting information about their
+customers including the self-custody wallets they use.
+This information is being passed on to law enforcement agencies as the law requires,
+and this information is passed onto chain-analysis companies with an aim to
+de-anonymise the blockchain of bitcoin and other cryptos.
+
+So far, these chain-analysis efforts have been aimed at track ransoms and stolen funds and 
+prevent money laundering, which is absolutely legitimate, but my fear is that once 
+these capabilities are developed enough, the veil of pseudonymity will be completely smashed.
+Powerful agencies will collect enough data to be able to identify the owner of every wallet.
+They will be able to surveil their citizens every transaction, as well as citizens globally,
+all with the information that we provide on the transparent blockchain together with KYC
+exchanges.
+
+How powerful are such chain-analysis tools?
+Well take a look at how authorities were able to recover funds from the 120,000 BTC 
+[Bitfinex hack](https://en.wikipedia.org/wiki/2016_Bitfinex_hack) from 2018.
+Worth $72 million at the time, those coins were at one point worth $8 billion!
+So how come the thieves weren't able to simply send the funds to another exchange
+and cash out to a fiat currency?
+Simple - the wallets holding these funds were being constantly tracked by the authorities.
+Regulated exchanges around the world knew that these wallets were black-listed, and so if 
+those funds were ever deposited to an exchange, the exchange could alert authorities.
+And thanks to the KYC regulations, the authorities would know who and where to call.
+
+From the original 120,000 BTC stolen, 94,000 were able to be recovered.
+See the [US Justice Department memo on the case](https://www.justice.gov/opa/pr/two-arrested-alleged-conspiracy-launder-45-billion-stolen-cryptocurrency)
+and [Twitter thread on the matter by @xenumonero](https://twitter.com/xenumonero/status/1491109587050975233).
+The main reason the funds were able to be traced, was the totally transparent nature
+of the Bitcoin blockchain.
+Although the people controlling the wallet used different techniques to avoid tracking, 
+but it was futile:
+
+* making lots of small transactions to make the funds harder to trace
+
+* using a mixer service provided by a darknet.
+A mixer (aka "tumbler" or "coinjoin") is a service that mixes funds from different users and 
+outputs them in an effort to make trasactions untraceable. 
+[See this explainer on what a coinjoin is](https://en.bitcoin.it/wiki/CoinJoin).
+
+* using decentralised exchanges to swap between cryptocurrencies.
+
+In the end, the suspects were caught when they tried to offload some "laundered" coins on an 
+exchange in which they provided their real personal identities.
+
+These tools don't really work, and here's why: none of these techniques actually 
+obfuscate the sender and receiver addresses, it just makes the web of transactions a bit 
+larger.
+While this may be sufficient to stay one step ahead of law enforcement which is "manually" tracing
+funds, like you might browse a spreadsheet, it is no match against automated software tools that
+are specifically designed to flag specific transactions. Like in this case, when the stolen funds
+are deposited to an exchange.
+It doesn't matter how many times the coins are mixed, or into how many tiny amounts the funds are 
+divided, as soon as those "tainted" funds hit a regulated exchange, the alarm bells are going off.
+
+It is important to look at whether swapping into other cryptos (or "chain-hopping") provided any 
+utility in this case.
+If this occurs over a a centralized exchange that checks the legitimacy of coins when accepting 
+deposits, then no it won't.
+Further, if it was a decentralised exchange, then it is likely to leave traces on the respective
+blockchains, particularly if they are both transparent.
+It is interesting to note that the Bitfinex suspects did swap some bitcoins into Monero (a privacy
+crypto), but those Monero funds were not tracable once they were withdrawn from exchanges, however the
+trail of the bitcoin transactions was completely traced by authorities.
+
+Again, although this is a case of good policing work to catch criminals, it highlights that
+there is nowhere to hide on transparent blockchain, and that one day there may be bad actors
+which are able to deanonymise wallets and target individuals.
+
+Similarly, the recent [Canadian trucker blockade](https://en.wikipedia.org/wiki/Canada_convoy_protest)
+highlighted another very important issue.
+The blockade was basically a protest against government vaccine mandates, where truckers were forced
+to get vaccinated so they could continue to work.
+Truckers used their vehicles to clog up inner Ottowa, which led to problems in the city and
+a stand-off.
+The anti-vax movement supporters used various fundraising tools to strengthen the protest, including 
+GoFundMe and GiveSendGo, but the government declared the blockade an illegal protest, and with
+an executive order, those fundraisers were were swiftly shut down by authorities, funds 
+frozen and unlikely to be returned to the protest organisers.
+To circumvent this, protest organisers began accepting bitcoin donations and the funds rolled in,
+however when organisers tried to actually use those funds, by cashing it into the local currency at a
+regulated exchange those funds were also frozen!
+The trucker donation address has been blacklisted by the government and the exchanges had to comply.
+
+Furthermore, as the protest were deemed illegal, the owners of the wallets who made those donations
+are at risk of seeing their exchange accounts and regular bank accounts frozen.
+
+Now I'm not saying that I support the truckers here.
+For the record I think the protest was infantile and short-sighted.
+But the fact that people who supported a cause are now finding themselves potentially in hot water
+is potentially troubling.
+
+What if you want to donate to other causes like Wikileaks or Sci-hub, which arguably are for the
+greater good but donations are illegal in some countries.
+
+What if you wanted to buy something deeply personal, like a medicine, psychological therapy, 
+sex toy, whatever.
+You don't want that info published on the blockchain for the world to see, which is the
+same reason you close the bathroom door when using the toilet.
+
+## You still think bitcoin is unconfiscatable?
+
+It is often said that bitcoin cannot be seized, but this is overly simplistic.
+
+![wrench attach](https://imgs.xkcd.com/comics/security.png "wrench attach, from xkcd.com")
+
+If governments, exchanges and your transaction partners can all see your balance and income,
+this leaves you vulnerable to extortion.
+They don't need to seize your bitcoins, if they know you're stinking rich they'll just take something
+else.
+In the case of criminals, they might take you or someone you love hostage.
+In the case of the government, they might freeze your regular back account, or seize your house.
+
+To avoid this type of surveillance, you need to use a currency where balances cannot be snooped on,
+and where transaction sender/receiver addresses are obfuscated.
+If those bad actors don't know whether you have those digital assets at all, then they won't bother to
+harrass you.
+
+## Why it's going to get worse
+
+Bitcoin and crytos are still small fry.
+At only ~$2 trillion total crypto market cap, and with the space dominated by rampant speculation,
+rather than actual utility, most participants are completely ignoring the problem of privacy.
+Indeed, privacy protecting crytos occupy an extremely small portion of this market - at about $10 B, or
+0.5% of the total.
+
+It seems that while folks are excited about the technological advances that blockchain provides,
+they haven't stopped to think about how it would work out if cryptos became a medium of exchange 
+integrated into our daily lives.
+
+Maybe this viewpoint will change with the roll-out of central bank digital currencies around the world.
+[CBDCs](https://en.wikipedia.org/wiki/Central_bank_digital_currency) are digital currencies, but are 
+controlled by a central entity (the central bank).
+The central bank issues individuals with their account and can issue currency directly to individuals.
+The central authority can not only see what you're doing with your funds, but can with a keystroke
+subtract funds or freeze the wallet permanently.
+In addition, the funds could be controlled in such a way so that they can only be spent at
+"approved" retailers, or that the funds will be subject to negative interest rates, or must be spent in
+a certain time period upon which the funds will become unspendable.
+
+This would be a disaster for personal freedom, but I'm sure it would be presented by politicians as a
+way to boost the economy.
+naturally CBDCs are being rolled-out most rapidly in authoritarian countries, like China, where the 
+CBDC can be used to control the population, in particular by contributing to a persons [social credit score](https://sociable.co/government-and-policy/chinas-digital-currency-help-ccp-punish-coerce-citizens-social-credit-system-cnas/).
+
+Certainly the central banks *might* prevent sharing this data to third parties, but so long as
+such a dataset exists it will be a huge honeypot that will attract hackers who will try to sell this
+information on the dark web.
+
+At least with the current banking system, governments at present cannot surveil all transactions,
+receiving alerts from banks of suspicious activity.
+In the current system, a warrant is required before funds can be frozen or seized.
+
+Another important event that might happen in the next few years is the phasing out of cash.
+Cash is on the most part untracable and resistant to surveillance.
+If it were invented today, then it would be sure to be banned.
+And most likely it will be phased out soon, or subject to more controls.
+If cash is banned, and your only options are CBDCs and cryptos, then I can see privacy oriented
+cryptos becoming more popular in future.
+
+## Is fungibility an emerging problem for bitcoin?
+
+Fungibility is a key characteristic of money in that one unit is interchangable for another.
+Cars are not fungible because there are many makes and models, but cash is, because two $5 bills are
+worth the same as a $10 bill.
+
+I see an emerging problem with bitcoin.
+It started a year or so ago when Kevin O'Leary spoke about how he only wanted to buy bitcoins that
+were newly minted because then he knew they definitely wouldn't be traced back to any illicit
+activity like darknet markets and could be tainted.
+He also spoke about how newly minted bitcoins mined with renewable energy should be worth relatively
+more than those mined with energy from fossil fuels.
+
+We're now seeing some folks speculate that coins held by persons/governments can be blacklisted by
+governments around the world.
+For example, as a result of Russia's recent invasion of Ukraine there are calls for "Russian coins"
+to be blacklisted from Western exchanges.
+
+This raises the prospect that over time, separate markets for these categories of coins will emerge,
+fracturing liquidity and leaving us asking "is this really money?"
+
+## Is it game-over for Bitcoin?
+
+One of the arguments that bitcoiners make about altcoins is that over time, any worthwhile altcoin
+feature will be incorporated by Bitcoin.
+Even I wrote this in an earlier post.
+And yes, it is true that Bitcoin is still undergoing development, but the rate at which these changes
+is made is extremely slow and incremental.
+This slow pace makes sense, as the developers want to ensure that BTC is a reliable system, as it supports
+billions in funds from millions of users.
+
+This slow an incremental development process means that huge changes in blockchain structure are
+not likely to happen in the near future.
+The privacy issues of bitcoin were raised in the community in 2013, however precious little code
+changes have been implemented to protect users privacy.
+
+Yes there is some degree of anonymity on the lightning network, a layer two solution, however
+there are doubts it will work (which I will discuss in a later post).
+
+This lack of privacy protection on the main blockchain over the past ten years indicates to me that
+privacy is not something that is a high priority for the Bitcoin developer team, and therefore
+we're not likely to see any major changes in this space any time soon.
+
+Indeed, even if it were possible for Bitcoin to magically implement private transactions, there would
+be a major regulatory crack-down with exchanges delisting it, as has been [experienced by privacy coins
+in Western countries](https://cointelegraph.com/news/australian-exchanges-delist-privacy-coins-amid-chainalysis-integration).
+
+Were this to happen, then it is likely that the value would tank dramatically, which would spell 
+disaster for folks using BTC as their savings.
+
+The question now is - what is the endgame here
+
+
+* Sure, layer 2 solutions can facilitate faster tranactions with lower transaction costs,
+but this will be limited to small transactions
+
+
+Is it possible to keep bitcoin private?
+
+That's problematic for a currency however, because 
+
+
+
+transfer
+You can see
+
+
+Sure, layer 2 solutions can facilitate faster tranactions with lower transaction costs,
+but this will be limited to small transactions
+
+
+## Conclusions
+
+## Feedback and suggestions
+
+mark.ziemann[at]gmail.com
