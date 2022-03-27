@@ -1019,23 +1019,7 @@ n1=81, n2=21, n.sig=5
 
 ```{r,xmr_tsi,fig.height=10,fig.width=8}
 
-TSI <- function(x, n.first = 25, n.second = 13, n.signal = 7) {
-  #True Strength Indicator
-  #https://school.stockcharts.com/doku.php?id=technical_indicators:true_strength_index
-  x <- try.xts(x, error = as.matrix)
-  pc <- x - lag.xts(x, na.pad = T) #force lag.xts to get na padding
-  dspc <- EMA(EMA(pc, n = n.first), n = n.second)
-  dsapc <- EMA(EMA(abs(pc), n = n.first), n = n.second)
-
-  tsi <- 100 * (dspc/dsapc)
-  signal <- EMA(tsi, n = n.signal)
-  r <- cbind(tsi, signal)
-  r <- reclass(r, x)
-  if (!is.null(dim(r))) colnames(r) <- c("tsi", "signal")
-  return(r)
-}
-
-tsi <- TSI(price$close , n.first = 104, n.second = 15, n.signal = 5 )
+tsi <- TSI(price$close , n.first = 81, n.second = 21, n.signal = 5 )
 colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
@@ -1086,6 +1070,107 @@ if ( xmr_signal != "NONE") {
 }
 
 ```
+
+
+## Get XHV price data
+
+Obtaining XHV price data (daily) for the last 300 days.
+
+```{r,xhv_data1}
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XHV&convert=USD&interval=daily&count=300"
+download.file(URL,destfile="xhvdat.txt")
+xhvdat <- fromJSON("xhvdat.txt")
+price <- xhvdat$data$quotes
+price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+colnames(price) <- c("date","high","low","close")
+tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+```
+
+Now gather hourly price data for the last 23 hours.
+
+```{r,xhv_data2}
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XHV&convert=USD&interval=hourly&time_period=hourly&count=11"
+download.file(URL,destfile="xhvdat.txt")
+xhvdat <- fromJSON("xhvdat.txt")
+price2 <- xhvdat$data$quotes
+price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price2) <- c("date","high","low","close")
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+high <- max(price2[,2])
+low <-  min(price2[,3])
+close <- price2[nrow(price2),4]
+
+df <- data.frame(date=mydate,high=high,low=low,close=close,stringsAsFactors=FALSE)
+price <- rbind(price,df)
+tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+if ( TESTING == TRUE) {
+  price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
+}
+
+```
+
+## XHV TSI indicator
+
+Optimised values:
+
+n1=56, n2=39, n.sig=9
+
+```{r,xhv_tsi,fig.height=10,fig.width=8}
+
+tsi <- TSI(price$close , n.first = 56, n.second = 39, n.signal = 9 )
+colnames(tsi) <- c("tsi","sig")
+
+price2 <- cbind(price,tsi)
+price2$signal <- tsi[,1] > tsi[,2]
+tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    xhv_signal="TSI BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    xhv_signal="TSI SELL"
+  }
+} else {
+  xhv_signal <- "NONE"
+}
+
+message(paste("XHV TSI signal:",xhv_signal))
+
+```
+
+```{r,xhv_tsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tsi[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="TSI",main="TSI")
+lines(as.Date(price2$date), tsi[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+Send a push notification.
+
+```{r,xhv_tsi_push}
+
+if ( xhv_signal != "NONE") {
+  MYNOTE <- paste("XHV is flashing a ", xhv_signal,
+   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE)
+}
 
 ## Session information
 
