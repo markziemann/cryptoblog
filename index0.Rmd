@@ -1,0 +1,174 @@
+---
+title: "MDZ Analytics"
+author: "Mark Ziemann"
+output:
+    rmdformats::downcute:
+        downcute_theme: "chaos"
+    toc: true
+    toc_float: true
+    code_folding: hide
+    fig_width: 7
+    fig_height: 7
+---
+
+## Welcome
+
+In the cryptocurrency markets, inexperienced investors get caught up in
+fear and greed, emotions which are detrimental to investor performance.
+
+**It is essential to have a system** that you stick to, so that these emotions don't
+cloud your judgement.
+Here, I provide free indicators for bitcoin and ethereum, based off years of 
+historical price action and careful computational optimisation.
+
+If you want subscription to mobile push notifications, or customised analysis of
+your favourite alt-coin, please visit the [product page](products.html).
+
+No material here should be considered financial advice.
+
+<hr>
+
+## Daily alerts for BTC and ETH
+
+At the daily open, a script checks for changes in market momentum indicators.
+These include the simple moving average, directional movement index, true strength index and the stochastic oscillator.
+These indicators were refined with comprehensive backtesting as detailed in the sections below.
+
+* [Daily trade alerts for bitcoin and ether](crypto/alerts.html)
+
+Current state if the indicators as at MYTIME:
+
+| Indicator | BTC | ETH |
+| --- | --- | --- |
+| SMA daily | BTC_SMA_DAILY | ETH_SMA_DAILY | 
+| DMI daily | BTC_DMI_DAILY | ETH_DMI_DAILY |
+| TSI daily | BTC_TSI_DAILY | ETH_TSI_DAILY | 
+| Stochastic daily | BTC_STOCH_DAILY | ETH_STOCH_DAILY |
+| Double RSI daily | BTC_RSI_DAILY | ETH_RSI_DAILY |
+
+<hr>
+
+## Moving averages
+
+Among the simplest approaches is to rely on market momentum by buying when price rises above a 
+[moving average](https://www.investopedia.com/articles/active-trading/052014/how-use-moving-average-buy-stocks.asp)
+and sell when price goes below.
+The following analyses identify optimal moving average intervals for bitcoin and ether.
+I have seen good results on the daily and weekly timeframes, while shorter timeframes the results were poor.
+
+* [Moving average strategy for bitcoin (daily)](crypto/ma_trading_btc.html)
+
+* [Moving average strategy for bitcoin (weekly)](crypto/ma_trading_weekly_btc.html)
+
+* [Moving average strategy for ether (daily)](crypto/ma_trading_eth.html)
+
+* [Moving average strategy for ether (weekly)](crypto/ma_trading_weekly_eth.html)
+
+* [Moving average strategy for ether against bitcoin (daily)](crypto/ma_trading_ethbtc.html)
+
+Another useful approach is to use two moving average lines. Buy when the short interval line rises above 
+longer interval line and sell when it goes below.
+
+* [Moving average cross strategy for bitcoin (daily)](crypto/ma_cross_btc.html)
+
+* [Moving average cross strategy for ether (daily)](crypto/ma_cross_eth.html)
+
+<hr>
+
+## Directional movement indicator
+
+There are many different indicators that measure the momentum of a market.
+The [directional movement indicator (DMI)](https://www.investopedia.com/terms/d/dmi.asp) is one
+that quantifies the positive and negative momentum which we can take advantage of to trade cryptos like bitcoin.
+In the following analysis, I test different DMI intervals to see which ones work best.
+
+* [Directional movement indicator strategy for bitcoin (daily)](crypto/dmi_trading_btc.html)
+
+* [Directional movement indicator strategy for ether (daily)](crypto/dmi_trading_eth.html)
+
+<hr>
+
+## True strength index
+
+Another good indicator is the [true strength index (TSI)](https://www.investopedia.com/terms/t/tsi.asp),
+it measures momentum on two timeframes and so it is very sensitive to early changes in momentum.
+In the following analysis, I test different TSI intervals to see which ones work best.
+
+* [True strength index strategy for bitcoin (daily)](crypto/tsi_trading_btc.html)
+
+* [True strength index strategy for ether (daily)](crypto/tsi_trading_eth.html)
+
+<hr>
+
+## Stochastic oscillator
+
+The [Stochastic oscillator](https://www.investopedia.com/terms/s/stochasticoscillator.asp) stoch for short,
+is yet another momentum indicator and provided oversold and overbought signals which can be used for entry and exits.
+In the following analysis, I test different stochastic intervals and parameters to see which strategy work best for BTC and ETH.
+
+* [Stochastic oscillator strategy for bitcoin (daily)](crypto/stoch_trading_btc.html)
+
+* [Stochastic oscillator strategy for ether (daily)](crypto/stoch_trading_eth.html)
+
+<hr>
+
+## Double RSI
+
+The [Double RSI](https://www.trendfollowingsystem.com/double-rsi-trading-system/</a> is a
+specific application of the relative strength indicator involving a short term and a longer term RSI line.
+When the short term line breaks above the long term line it is bullish and vice-versa.
+In the following analysis, I test different periods for RSI calculation to see which strategy work best for BTC and ETH.
+
+* [Double RSI strategy for bitcoin (daily)](crypto/rsi2_trading_btc.html)
+
+* [Double RSI strategy for ether (daily)](crypto/rsi2_trading_eth.html)
+
+<hr>
+
+## Other indicators
+
+* [Bitcoin risk index: a good measure for market temperature?](crypto/risk_index.html)
+
+* [Stablecoin dominance: a tool for timing the market cycle top?](crypto/stablecoincap.html)
+
+* [Weekly, biweekly and monthly RSI indicator for BTC and ETH](crypto/rsi_watch.html)
+
+* [Is bitcoin volatility diminishing over time and can it predict bull markets?](crypto/volatility_size.html)
+
+<hr>
+
+## Blog posts (opinion and perspectives)
+
+* [Crypto 101: Why bother with digital currencies?](crypto/learning_resources.html)
+
+* [A sane person’s guide to building a cryptocurrency portfolio](crypto/investing_guide.html)
+
+* [Bitcoin's fatal flaw nobody is talking about](crypto/bitcoin_flaw.html)
+
+<hr>
+
+## Support this site
+
+If you find this resource useful, consider a small tip.
+It will help fund more research and analysis.
+
+XMR: 4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
+
+<a href="https://www.bitcoinqrcodemaker.com"><img src="https://www.bitcoinqrcodemaker.com/api/?style=monero&amp;address=4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD" alt="Monero QR Code Generator" height="300" width="300" border="0" /></a>
+
+For subscription to notifications and custom backtesting analysis, please visit the [product page](products.html).
+
+## Suggestions and feedback
+
+Mail me mark.ziemann{αt}gmail.com or raise an issue at the [GitHub repo](https://github.com/markziemann/cryptoblog).
+
+## License and source code
+
+This website and materials are distributed in accordance with the [MIT License](https://github.com/markziemann/cryptoblog/blob/main/LICENSE).
+Underlying code for this work and other experimental work can be found on my [GitHub repo](https://github.com/markziemann/cryptoblog).
+
+<hr>
+
+Shout out to the developers of the [downcute rmarkdown template](https://github.com/juba/rmdformats) for making this site look 100% better.
+
+<hr>
