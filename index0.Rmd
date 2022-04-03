@@ -133,7 +133,9 @@ In the following analysis, I test different periods for RSI calculation to see w
 
 * [Weekly, biweekly and monthly RSI indicator for BTC and ETH](crypto/rsi_watch.html)
 
-* [Is bitcoin volatility diminishing over time and can it predict bull markets?](crypto/volatility_size.html)
+* [Is bitcoin volatility diminishing over time and can it predict bull markets?](https://mdz-analytics.com/crypto/volatility_size.html)
+
+* [Does MA/EMA indicator performance change over time?](crypto/ma_temporal2.html)
 
 <hr>
 
