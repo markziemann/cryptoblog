@@ -3,7 +3,8 @@ title: "A sane person's guide to building a cryptocurrency portfolio"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+    rmdformats::downcute:
+        downcute_theme: "chaos"
     toc: true
     toc_float: true
     code_folding: hide
@@ -35,7 +36,7 @@ Consider speaking to a financial advisor about your personal situation and accep
 This is a work in progress, so may have typos and lack links to sources.
 Feel free to get in touch by email mark.ziemann[at]gmail.com or twitter @mdziemann.
 
-```{r,lib}
+```{r,lib, echo=FALSE}
 
 suppressPackageStartupMessages({
   library("jsonlite")

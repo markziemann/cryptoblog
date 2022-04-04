@@ -3,7 +3,8 @@ title: "Bitcoin's fatal flaw"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+    rmdformats::downcute:
+        downcute_theme: "chaos"
     toc: true
     toc_float: true
     code_folding: hide
@@ -27,7 +28,7 @@ This is not financial advice - it is for educational and informational purposes 
 This is a work in progress, so may have typos and lack links to sources.
 Feel free to get in touch by email mark.ziemann[at]gmail.com or twitter @mdziemann.
 
-```{r,lib}
+```{r,lib, echo=FALSE}
 
 suppressPackageStartupMessages({
   library("jsonlite")

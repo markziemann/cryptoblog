@@ -3,7 +3,8 @@ title: "Crypto 101: Why bother with digital currencies?"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+    rmdformats::downcute:
+        downcute_theme: "chaos"
     toc: true
     toc_float: true
     code_folding: hide
@@ -35,7 +36,7 @@ rather the bare mimimum you need to begin to learn on you own how to manage your
 crypto portfolio.
 Also, it's a work in progress, may have typos and lack links to sources.
 
-```{r,lib}
+```{r,lib, echo=FALSE}
 
 suppressPackageStartupMessages({
   library("jsonlite")
