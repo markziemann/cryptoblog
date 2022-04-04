@@ -17,7 +17,6 @@ Source: https://github.com/markziemann/cryptoblog/blob/main/dmi_trading.Rmd
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
-BTC: bc1qgsecwc3e7r0g7zch8wum04a8hk74tfy488m2nv
 
 XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
 
