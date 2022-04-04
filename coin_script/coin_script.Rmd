@@ -15,7 +15,6 @@ Source: https://github.com/markziemann/cryptoblog/blob/main/coin_script.Rmd
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
-
 XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
 
 ## Intro
@@ -104,7 +103,7 @@ coinfun <- function(TICKER) {
 
 Obtaining historical data (daily) from CoinMarketCap.com
 
-```{r,getdata0}
+```{r,getdata0, include=FALSE}
 
 URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=200"
 download.file(URL,destfile="cmcdat.txt")
@@ -117,6 +116,8 @@ EXCLUDE <- c("USDT","USDC","BUSD","UST","TUSD","USDP","USDN","DAI","FEI",
 TICKERS <- TICKERS[which(! TICKERS %in% EXCLUDE)]
 writeLines(TICKERS,con="tickers.txt")
 mydate <- Sys.Date()-1
+
+TICKERS=c("XMR","XHV")
 
 for ( TICKER in TICKERS ) {
   DATNAME=paste(TICKER,"_dat.txt",sep="")
@@ -155,6 +156,7 @@ TSI n.first, n.second , n.signal
 all_indicators <- NULL
 myfiles <- list.files(".",pattern="_dat")
 
+
 for (myfile in myfiles) {
   dat <- read.table(myfile,header=TRUE)
   TICKER <- sapply(strsplit(myfile,"_"),"[[",1)
@@ -164,7 +166,12 @@ for (myfile in myfiles) {
   all_indicators <- rbind(all_indicators,dat)
 }
 
-head(all_indicators[order(-all_indicators$totalROI),],50) %>% kbl(caption="top 50 indicators by return") %>%  kable_styling()
+all_indicators %>% 
+  kbl(caption="all indicators") %>%  kable_styling()
+
+
+head(all_indicators[order(-all_indicators$totalROI),],50) %>%
+  kbl(caption="top 50 indicators by return") %>%  kable_styling()
 
 ```
 
