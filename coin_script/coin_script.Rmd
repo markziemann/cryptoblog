@@ -95,6 +95,14 @@ coinfun <- function(TICKER) {
   unlink(scriptname)
 
   file.copy(paste(TICKER,"_dat.txt",sep=""),TICKER)
+
+  script <- readLines("summary_xx.Rmd")
+  script <- gsub("TICKER",TICKER,script)
+  scriptname <- gsub("xx",TICKER,"summary_xx.Rmd")
+  writeLines(script,scriptname)
+  rmarkdown::render(scriptname,output_dir=TICKER)
+  unlink(scriptname)
+
 }
 
 ```
@@ -111,7 +119,7 @@ cmcdat <- fromJSON("cmcdat.txt")
 cmcdf <- data.frame(cmcdat$data[,1:4],cmcdat$data$quote$USD)
 dim(cmcdf)
 TICKERS <- cmcdf$symbol
-EXCLUDE <- c("USDT","USDC","BUSD","UST","TUSD","USDP","USDN","DAI","FEI",
+EXCLUDE <- c("USDT","USDC","BUSD","UST","TUSD","USDP","USDN","DAI","FEI","WBTC",
   "TRIBE","RSR","FRAX","LUSD","HUSD","OUSD","XSGD","GUSD","USDX","EURS","CUSD")
 TICKERS <- TICKERS[which(! TICKERS %in% EXCLUDE)]
 writeLines(TICKERS,con="tickers.txt")

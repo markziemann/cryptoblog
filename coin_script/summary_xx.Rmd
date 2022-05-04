@@ -1,0 +1,67 @@
+---
+title: "Summarising TICKER indicator performance"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    fig_width: 7
+    fig_height: 7
+theme: cosmo
+---
+
+Source: https://github.com/markziemann/cryptoblog/tree/main/coin_script
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a tip.
+
+XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
+
+This data is not financial advice.
+
+## Intro
+
+Below we present the results of the backtesting optimisation script using
+several momentum indicators on the daily timeframe.
+
+1. SMA: simple moving average. Buy when price exceeds MA line and sell when
+it goes under. The parameter is the optimal timeframe for the MA line in days.
+
+2. EMA: just like SMA except using exponential moving average.
+
+3. SMAcross: Uses two simple moving average lines. When the fast line moves
+above the slow line, buy. Sell when it goes under. The two numbers represent
+the long and short MA intervals (days).
+
+4. EMAcross: Same as above, except exponential moving average lines are used.
+
+5. DMI: Directional movement index (days).
+
+6. TSI: True strength index. The three numbers represent n.first, n.second,
+and n.signal.
+
+7. Stoch: Stochastic oscillator. The three numbers represent nFastK, nFastD,
+and nSmooth.
+
+8. RSI2: Double RSI, this is a RSIcross strategy. The two numbers represent
+short and long intervals.
+
+```{r,read1}
+
+suppressPackageStartupMessages({
+  library("kableExtra")
+  library("dplyr")
+})
+
+FILE <- paste("TICKER","_dat.txt",sep="")
+
+dat <- read.table(FILE,header=TRUE)
+
+dat %>%
+  kbl(caption="Indicator performance") %>%
+  kable_paper("hover", full_width = F)
+
+```
+
