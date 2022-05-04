@@ -5,7 +5,7 @@ Browse the results at https://mdz-analytics.com which are updated daily.
 
 Disclaimer: This is not financial advice.
 
-If this post helped you, consider a small donation. 
+If this repository helped you, consider a small donation. 
 
 XMR: 4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
 
