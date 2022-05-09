@@ -39,8 +39,6 @@ suppressPackageStartupMessages({
 
 Sys.Date()
 
-TICKER="LTC"
-
 ```
 
 Reminder: this is not financial advice.
@@ -116,7 +114,7 @@ Obtaining historical data (daily) from CoinMarketCap.com
 
 ```{r,getdata0, include=FALSE}
 
-URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=10"
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=20"
 download.file(URL,destfile="cmcdat.txt")
 cmcdat <- fromJSON("cmcdat.txt")
 cmcdf <- data.frame(cmcdat$data[,1:4],cmcdat$data$quote$USD)
@@ -128,7 +126,7 @@ TICKERS <- TICKERS[which(! TICKERS %in% EXCLUDE)]
 writeLines(TICKERS,con="tickers.txt")
 mydate <- Sys.Date()-1
 
-TICKERS=c("LUNA")
+#TICKERS=c("LUNA")
 
 for ( TICKER in TICKERS ) {
   DATNAME=paste(TICKER,"_dat.txt",sep="")
@@ -177,7 +175,7 @@ for (myfile in myfiles) {
   all_indicators <- rbind(all_indicators,dat)
 }
 
-all_indicators %>% 
+all_indicators %>%
   kbl(caption="all indicators") %>%  kable_styling()
 
 
