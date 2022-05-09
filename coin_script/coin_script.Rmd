@@ -103,6 +103,9 @@ coinfun <- function(TICKER) {
   rmarkdown::render(scriptname,output_dir=TICKER)
   unlink(scriptname)
 
+  CMD=paste("scp -r -P 21098", TICKER  , "mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/altcoins")
+  system(CMD)
+
 }
 
 ```
@@ -113,7 +116,7 @@ Obtaining historical data (daily) from CoinMarketCap.com
 
 ```{r,getdata0, include=FALSE}
 
-URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=200"
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=10"
 download.file(URL,destfile="cmcdat.txt")
 cmcdat <- fromJSON("cmcdat.txt")
 cmcdf <- data.frame(cmcdat$data[,1:4],cmcdat$data$quote$USD)
@@ -125,7 +128,7 @@ TICKERS <- TICKERS[which(! TICKERS %in% EXCLUDE)]
 writeLines(TICKERS,con="tickers.txt")
 mydate <- Sys.Date()-1
 
-TICKERS=c("XMR","XHV")
+TICKERS=c("LUNA")
 
 for ( TICKER in TICKERS ) {
   DATNAME=paste(TICKER,"_dat.txt",sep="")
