@@ -9,6 +9,9 @@ scp -P 21098 alerts.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/c
 
 scp -P 21098 index1.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/index.html
 
+Rscript -e "rmarkdown::render('alerts_TRX.Rmd')" && \
+scp -P 21098 alerts_TRX.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/altcoins/TRX
+
 sleep 15m
 
 Rscript -e "rmarkdown::render('coins.Rmd')"
