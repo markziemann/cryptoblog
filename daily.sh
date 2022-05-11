@@ -4,15 +4,18 @@ MYCMD=$(echo $0)
 MYDIR=$(dirname $MYCMD)
 cd $MYDIR
 
-Rscript -e "rmarkdown::render('alerts.Rmd')" && \
-scp -P 21098 alerts.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
-
+Rscript -e "rmarkdown::render('alerts/alerts.Rmd')" && \
+scp -P 21098 alerts/alerts.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 scp -P 21098 index1.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/index.html
 
-Rscript -e "rmarkdown::render('alerts_TRX.Rmd')" && \
-scp -P 21098 alerts_TRX.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/altcoins/TRX
+for RMD in alerts/alerts_*Rmd ; do
+  echo $RMD
+  COIN=$(echo $RMD | sed 's/alerts_//' | sed 's/.Rmd//')
+  Rscript -e "rmarkdown::render('${RMD}')"
+  scp -P 21098 alerts/alerts_${RMD}.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/altcoins/${COIN}
+done
 
-sleep 15m
+sleep 10m
 
 Rscript -e "rmarkdown::render('coins.Rmd')"
 cp coins.html crypto
@@ -78,5 +81,5 @@ Rscript -e "rmarkdown::render('temporal_change/ma_temporal2.Rmd')" && \
   scp -P 21098 temporal_change/ma_temporal2.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 cd coin_script
-Rscript -e "rmarkdown::render('coin_script.Rmd')"
-
+Rscript -e "rmarkdown::render('coin_script.Rmd')" && \
+  scp -P 21098 coin_script.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/altcoins
