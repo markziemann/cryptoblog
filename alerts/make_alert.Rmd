@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# make new alerts
+
+for COIN in `cat coins.txt` ; do
+
+  echo $COIN
+  coin=$(echo $COIN | tr '[:upper:]' '[:lower:]' )
+  sed "s/TRX/${COIN}/g" alerts_TRX.Rmd \
+  | sed "s/trx/${coin}/g" > alerts_${COIN}.Rmd
+
+done
