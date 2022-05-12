@@ -25,7 +25,7 @@ Click on the hyperlinks below to see how these signals were identified.
 
 3. Directional movement index (DMI)
 
-4. True strength index (TSI)
+4. True strength index (TSI) **BEST**
 
 5. Stochastic oscillator (stoch)
 
@@ -65,7 +65,7 @@ TESTING = FALSE
 
 ```{r,time}
 
-system("DATE=$(date -u) ; sed \"s/MYTIME/${DATE}/\" index0.html > index1.html")
+#system("DATE=$(date -u) ; sed \"s/MYTIME/${DATE}/\" index0.html > index1.html")
 
 mydate <- Sys.time()
 attr(mydate, "tzone") <- "UTC"
@@ -78,6 +78,7 @@ mydate <- as.Date(mydate)
 ```{r,params}
 
 params <- read.table("https://mdz-analytics.com/altcoins/TRX/TRX_dat.txt", header=TRUE)
+params %>% kbl(caption="optimised backtested parameters") %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -184,7 +185,7 @@ if ( trx_signal != "NONE") {
 
 ## TRX SMA cross indicator
 
-The SMA cross is a highly profitable strategy.
+The SMA cross is a reasonably good strategy.
 
 ```{r, trx_cross}
 
@@ -250,7 +251,6 @@ if ( trx_signal != "NONE") {
 ## TRX DMI indicator
 
 Directional movement indicator is a good approach to identify trend changes.
-DMI using a 32 day interval gives returns similar to than the SMA strategy.
 
 ```{r,trx_dmi,fig.height=10,fig.width=8}
 
@@ -315,6 +315,9 @@ if ( trx_signal != "NONE") {
 ## TRX TSI indicator
 
 True Strength Indicator is one of the more profitable approaches.
+Its success lies in how it changes rapidly when momentum shifts.
+For most coins, this indicator performs "best" in backtesting analysis, which means it
+should carry relatively more weight than other indicators.
 
 ```{r,trx_tsi,fig.height=10,fig.width=8}
 
@@ -401,7 +404,8 @@ if ( trx_signal != "NONE") {
 
 ## TRX stochastic oscillator indicator
 
-SImilar to the TSI, the stoch can pinpoint early changes in momentum.
+Similar to the TSI, the stoch can pinpoint early changes in momentum, however it may give many
+false positives.
 
 ```{r,trx_stoch,fig.height=10,fig.width=8}
 
