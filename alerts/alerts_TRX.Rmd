@@ -176,7 +176,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("The TRX SMA signal is", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
@@ -241,7 +241,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("The TRX SMA cross signal is", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
@@ -306,7 +306,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("TRX is flashing a ", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
@@ -393,7 +393,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("TRX is flashing a ", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
@@ -464,7 +464,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("TRX is flashing a ", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
@@ -544,7 +544,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("TRX is flashing a ", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
