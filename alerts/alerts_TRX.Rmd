@@ -93,7 +93,7 @@ trxdat <- fromJSON("trxdat.txt")
 price <- trxdat$data$quotes
 price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+#tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -107,7 +107,7 @@ trxdat <- fromJSON("trxdat.txt")
 price2 <- trxdat$data$quotes
 price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price2) <- c("date","high","low","close")
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+#tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 high <- max(price2[,2])
 low <-  min(price2[,3])
@@ -176,7 +176,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("The TRX SMA signal is", trx_signal,
-    ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
@@ -241,7 +241,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("The TRX SMA cross signal is", trx_signal,
-    ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
@@ -306,7 +306,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("TRX is flashing a ", trx_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
@@ -393,7 +393,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("TRX is flashing a ", trx_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
@@ -464,7 +464,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("TRX is flashing a ", trx_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
@@ -544,7 +544,7 @@ Send a push notification.
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("TRX is flashing a ", trx_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
