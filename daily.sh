@@ -9,10 +9,10 @@ scp -P 21098 alerts/alerts.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public
 scp -P 21098 index1.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/index.html
 
 for RMD in alerts/alerts_*Rmd ; do
-  echo $RMD
-  COIN=$(echo $RMD | sed 's/alerts_//' | sed 's/.Rmd//')
-  Rscript -e "rmarkdown::render('${RMD}')"
-  scp -P 21098 alerts/alerts_${RMD}.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/altcoins/${COIN}
+  COIN=$(echo $RMD | sed 's#alerts/alerts_##' | sed 's/.Rmd//')
+  echo $COIN $RMD
+#  Rscript -e "rmarkdown::render('${RMD}')"
+  scp -P 21098 alerts/alerts_${COIN}.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/altcoins/${COIN}
 done
 
 sleep 10m

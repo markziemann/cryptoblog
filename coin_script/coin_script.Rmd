@@ -114,7 +114,7 @@ Obtaining historical data (daily) from CoinMarketCap.com
 
 ```{r,getdata0, include=FALSE}
 
-URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=20"
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=50"
 download.file(URL,destfile="cmcdat.txt")
 cmcdat <- fromJSON("cmcdat.txt")
 cmcdf <- data.frame(cmcdat$data[,1:4],cmcdat$data$quote$USD)
@@ -126,11 +126,11 @@ TICKERS <- TICKERS[which(! TICKERS %in% EXCLUDE)]
 writeLines(TICKERS,con="tickers.txt")
 mydate <- Sys.Date()-1
 
-#TICKERS=c("LUNA")
+#TICKERS=c("XMR","XHV")
 
 for ( TICKER in TICKERS ) {
   DATNAME=paste(TICKER,"_dat.txt",sep="")
-  if ( !file.exists(DATNAME) ) {
+  if ( !file.exists(DATNAME) && (as.numeric(Sys.time() - file.info(DATNAME)$mtime ) ) >12 ) {
     URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=",
       TICKER,
       "&convert=USD&interval=daily&time_start=2013-06-01&time_end=",
@@ -150,7 +150,6 @@ for ( TICKER in TICKERS ) {
 }
 
 ```
-
 
 ## Data
 
@@ -177,7 +176,6 @@ for (myfile in myfiles) {
 
 all_indicators %>%
   kbl(caption="all indicators") %>%  kable_styling()
-
 
 head(all_indicators[order(-all_indicators$totalROI),],50) %>%
   kbl(caption="top 50 indicators by return") %>%  kable_styling()
