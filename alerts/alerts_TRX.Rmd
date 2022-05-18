@@ -539,8 +539,8 @@ if ( trx_signal != "NONE") {
 MYNOTE
 
 if ( !is.null(MYNOTE) ) {
-  pbPost("note", "Crypto Alert", MYNOTE, ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
-)
+  MYNOTE <- paste(MYNOTE, ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
+  pbPost("note", "Crypto Alert", MYNOTE )
 }
 
 ```
