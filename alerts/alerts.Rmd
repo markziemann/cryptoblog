@@ -171,10 +171,10 @@ Send a push notification.
 
 ```{r,btc_sma_push}
 
+MYNOTE = NULL
+
 if ( btc_signal != "NONE") {
-  MYNOTE <- paste("The BTC 43D MA signal is", btc_signal, 
-    ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste("The BTC 43D MA signal is", btc_signal)
 }
 
 ```
@@ -233,9 +233,7 @@ Send a push notification.
 ```{r,btc_cross_push}
 
 if ( btc_signal != "NONE") {
-  MYNOTE <- paste("The BTC 12/21 day SMA cross signal is", btc_signal,
-    ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE, "The BTC 12/21 day SMA cross signal is", btc_signal)
 }
 
 ```
@@ -296,9 +294,7 @@ Send a push notification.
 ```{r,btc_dmi_push}
 
 if ( btc_signal != "NONE") {
-  MYNOTE <- paste("BTC is flashing a ", btc_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE, "BTC is flashing a ", btc_signal)
 }
 
 ```
@@ -380,9 +376,7 @@ Send a push notification.
 ```{r,btc_tsi_push}
 
 if ( btc_signal != "NONE") {
-  MYNOTE <- paste("BTC is flashing a ", btc_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE, "BTC is flashing a ", btc_signal)
 }
 
 ```
@@ -448,9 +442,7 @@ Send a push notification.
 ```{r,btc_stoch_push}
 
 if ( btc_signal != "NONE") {
-  MYNOTE <- paste("BTC is flashing a ", btc_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE,"BTC is flashing a ", btc_signal)
 }
 
 ```
@@ -526,8 +518,11 @@ Send a push notification.
 ```{r,btc_rsi_push}
 
 if ( btc_signal != "NONE") {
-  MYNOTE <- paste("BTC is flashing a ", btc_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  MYNOTE <- paste(MYNOTE,"BTC is flashing a ", btc_signal)
+}
+
+if ( !is.null(MYNOTE) ) {
+  MYNOTE <- paste(MYNOTE,". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
@@ -624,10 +619,10 @@ Send a push notification.
 
 ```{r,eth_sma_push}
 
+MYNOTE = NULL
+
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste("The ETH 34D MA signal is", eth_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste("The ETH 34D MA signal is", eth_signal)
 }
 
 ```
@@ -685,9 +680,7 @@ Send a push notification.
 ```{r,eth_cross_push}
 
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste("The ETH 5/27 day SMA cross signal is", eth_signal,
-    ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE,"The ETH 5/27 day SMA cross signal is", eth_signal)
 }
 
 ```
@@ -746,9 +739,7 @@ Send a push notification.
 ```{r,eth_dmi_push}
 
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste("ETH is flashing a ", eth_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE, "ETH is flashing a ", eth_signal)
 }
 
 ```
@@ -814,9 +805,7 @@ Send a push notification.
 ```{r,eth_tsi_push}
 
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste("ETH is flashing a ", eth_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE,"ETH is flashing a ", eth_signal)
 }
 
 ```
@@ -882,9 +871,7 @@ Send a push notification.
 ```{r,eth_stoch_push}
 
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste("ETH is flashing a ", eth_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE,"ETH is flashing a ", eth_signal)
 }
 
 ```
@@ -901,7 +888,7 @@ rsi1 <- RSI(price$close,n=103,maType=EMA)
 rsi2 <- RSI(price$close,n=107,maType=EMA)
 
 price2 <- cbind(price,rsi1,rsi2)
-price2$signal <- price2$rsi1 > price2$rsi2 
+price2$signal <- price2$rsi1 > price2$rsi2
 
 tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
@@ -948,7 +935,7 @@ plot(price2$close ~ as.Date(price2$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main="USD price")
 grid()
 
-plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l", 
+plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l",
   xlab="Date",ylab="RSI ratio",main="double RSI")
 grid()
 abline(h=1,lty=2,lwd=2)
@@ -961,8 +948,11 @@ Send a push notification.
 ```{r,eth_rsi_push}
 
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste("ETH is flashing a ", eth_signal,
-   ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
+  MYNOTE <- paste(MYNOTE,"ETH is flashing a ", eth_signal)
+}
+
+if ( !is.null(MYNOTE) ) {
+  MYNOTE <- paste(MYNOTE,". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
