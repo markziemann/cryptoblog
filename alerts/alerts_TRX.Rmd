@@ -61,6 +61,8 @@ suppressPackageStartupMessages({
 
 TESTING = FALSE
 
+MYNOTE = NULL
+
 ```
 
 ```{r,time}
@@ -150,13 +152,13 @@ if (today_signal != previous_signal ) {
 trx_signal <- "NONE"
 }
 
-if (today_signal==TRUE) {
- system("sed -i 's/TRX_SMA_DAILY/BULLISH/' index1.html")
- system("sed -i 's/TRX_SMA_COL/green/' index1.html")
-} else {
- system("sed -i 's/TRX_SMA_DAILY/BEARISH/' index1.html")
- system("sed -i 's/TRX_SMA_COL/red/' index1.html")
-}
+#if (today_signal==TRUE) {
+# system("sed -i 's/TRX_SMA_DAILY/BULLISH/' index1.html")
+# system("sed -i 's/TRX_SMA_COL/green/' index1.html")
+#} else {
+# system("sed -i 's/TRX_SMA_DAILY/BEARISH/' index1.html")
+# system("sed -i 's/TRX_SMA_COL/red/' index1.html")
+#}
 
 message(paste("TRX SMA signal:",trx_signal))
 
@@ -171,14 +173,10 @@ lines(price2$ma~ as.Date(price2$date) ,col="red")
 
 ```
 
-Send a push notification.
-
 ```{r,trx_sma_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste("The TRX SMA signal is", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste("The TRX SMA signal is", trx_signal,".")
 }
 
 ```
@@ -213,13 +211,13 @@ if (today_signal != previous_signal ) {
 trx_signal <- "NONE"
 }
 
-if (today_signal==TRUE) {
- system("sed -i 's/TRX_SMA_CROSS_DAILY/BULLISH/' index1.html")
- system("sed -i 's/TRX_SMA_CROSS_COL/green/' index1.html")
-} else {
- system("sed -i 's/TRX_SMA_CROSS_DAILY/BEARISH/' index1.html")
- system("sed -i 's/TRX_SMA_CROSS_COL/red/' index1.html")
-}
+#if (today_signal==TRUE) {
+# system("sed -i 's/TRX_SMA_CROSS_DAILY/BULLISH/' index1.html")
+# system("sed -i 's/TRX_SMA_CROSS_COL/green/' index1.html")
+#} else {
+# system("sed -i 's/TRX_SMA_CROSS_DAILY/BEARISH/' index1.html")
+# system("sed -i 's/TRX_SMA_CROSS_COL/red/' index1.html")
+#}
 
 message(paste("TRX SMA cross signal:",trx_signal))
 
@@ -236,14 +234,10 @@ lines(price2$ma2~ as.Date(price2$date) ,col="blue")
 
 ```
 
-Send a push notification.
-
 ```{r,trx_cross_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste("The TRX SMA cross signal is", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE, "The TRX SMA cross signal is", trx_signal,".")
 }
 
 ```
@@ -274,13 +268,13 @@ if (today_signal != previous_signal ) {
   trx_signal <- "NONE"
 }
 
-if (today_signal==TRUE) {
- system("sed -i 's/TRX_DMI_DAILY/BULLISH/' index1.html")
- system("sed -i 's/TRX_DMI_COL/green/' index1.html")
-} else {
- system("sed -i 's/TRX_DMI_DAILY/BEARISH/' index1.html")
- system("sed -i 's/TRX_DMI_COL/red/' index1.html")
-}
+#if (today_signal==TRUE) {
+# system("sed -i 's/TRX_DMI_DAILY/BULLISH/' index1.html")
+# system("sed -i 's/TRX_DMI_COL/green/' index1.html")
+#} else {
+# system("sed -i 's/TRX_DMI_DAILY/BEARISH/' index1.html")
+# system("sed -i 's/TRX_DMI_COL/red/' index1.html")
+#}
 
 message(paste("TRX DMI signal:",trx_signal))
 
@@ -300,14 +294,10 @@ lines(price2$DIn ~ as.Date(price2$date) ,col="red")
 
 ```
 
-Send a push notification.
-
 ```{r,trx_dmi_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste("TRX is flashing a ", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE,"TRX is flashing a ", trx_signal,".")
 }
 
 ```
@@ -362,13 +352,13 @@ if (today_signal != previous_signal ) {
   trx_signal <- "NONE"
 }
 
-if (today_signal==TRUE) {
- system("sed -i 's/TRX_TSI_DAILY/BULLISH/' index1.html")
- system("sed -i 's/TRX_TSI_COL/green/' index1.html")
-} else {
- system("sed -i 's/TRX_TSI_DAILY/BEARISH/' index1.html")
- system("sed -i 's/TRX_TSI_COL/red/' index1.html")
-}
+#if (today_signal==TRUE) {
+# system("sed -i 's/TRX_TSI_DAILY/BULLISH/' index1.html")
+# system("sed -i 's/TRX_TSI_COL/green/' index1.html")
+#} else {
+# system("sed -i 's/TRX_TSI_DAILY/BEARISH/' index1.html")
+# system("sed -i 's/TRX_TSI_COL/red/' index1.html")
+#}
 
 message(paste("TRX TSI signal:",trx_signal))
 
@@ -390,14 +380,10 @@ par(mfrow=c(1,1))
 
 ```
 
-Send a push notification.
-
 ```{r,trx_tsi_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste("TRX is flashing a ", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE,"TRX is flashing a ", trx_signal,".")
 }
 
 ```
@@ -434,13 +420,13 @@ if (today_signal != previous_signal ) {
   trx_signal <- "NONE"
 }
 
-if (today_signal==TRUE) {
- system("sed -i 's/TRX_STOCH_DAILY/BULLISH/' index1.html")
- system("sed -i 's/TRX_STOCH_COL/green/' index1.html")
-} else {
- system("sed -i 's/TRX_STOCH_DAILY/BEARISH/' index1.html")
- system("sed -i 's/TRX_STOCH_COL/red/' index1.html")
-}
+#if (today_signal==TRUE) {
+# system("sed -i 's/TRX_STOCH_DAILY/BULLISH/' index1.html")
+# system("sed -i 's/TRX_STOCH_COL/green/' index1.html")
+#} else {
+# system("sed -i 's/TRX_STOCH_DAILY/BEARISH/' index1.html")
+# system("sed -i 's/TRX_STOCH_COL/red/' index1.html")
+#}
 
 message(paste("TRX stoch signal:",trx_signal))
 
@@ -462,14 +448,10 @@ par(mfrow=c(1,1))
 
 ```
 
-Send a push notification.
-
 ```{r,trx_stoch_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste("TRX is flashing a ", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  MYNOTE <- paste(MYNOTE,"TRX is flashing a ", trx_signal,".")
 }
 
 ```
@@ -505,13 +487,13 @@ if (today_signal != previous_signal ) {
   trx_signal <- "NONE"
 }
 
-if (today_signal==TRUE) {
- system("sed -i 's/TRX_RSI_DAILY/BULLISH/' index1.html")
- system("sed -i 's/TRX_RSI_COL/green/' index1.html")
-} else {
- system("sed -i 's/TRX_RSI_DAILY/BEARISH/' index1.html")
- system("sed -i 's/TRX_RSI_COL/red/' index1.html")
-}
+#if (today_signal==TRUE) {
+# system("sed -i 's/TRX_RSI_DAILY/BULLISH/' index1.html")
+# system("sed -i 's/TRX_RSI_COL/green/' index1.html")
+#} else {
+# system("sed -i 's/TRX_RSI_DAILY/BEARISH/' index1.html")
+# system("sed -i 's/TRX_RSI_COL/red/' index1.html")
+#}
 
 message(paste("TRX RSI signal:",trx_signal))
 
@@ -542,13 +524,21 @@ par(mfrow=c(1,1))
 
 ```
 
-Send a push notification.
-
 ```{r,trx_rsi_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste("TRX is flashing a ", trx_signal,
-    ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
+  MYNOTE <- paste(MYNOTE,"TRX is flashing a ", trx_signal,".")
+}
+
+```
+
+## Send a push notification.
+
+```{r,push}
+
+MYNOTE
+
+if ( !is.null(MYNOTE) ) {
   pbPost("note", "Crypto Alert", MYNOTE)
 }
 
