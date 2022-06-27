@@ -19,7 +19,7 @@ Source: https://github.com/markziemann/cryptoblog/blob/main/alerts.Rmd
 In the backtesting analysis, I have established five different profitable strategies for timing entry/exits.
 Click on the hyperlinks below to see how these signals were identified.
 
-1. Simple moving averages: [BTC](https://mdz-analytics.com/crypto/ma_trading.html) 43 day; 
+1. Simple moving averages: [BTC](https://mdz-analytics.com/crypto/ma_trading.html) 43 day;
 [ETH](https://mdz-analytics.com/crypto/ma_trading_eth.html) 34 day.
 
 2. Moving average crosses: [BTC](https://mdz-analytics.com/crypto/ma_cross.html) 12/21 day SMA and;
@@ -42,7 +42,18 @@ If the signal is TRUE, it is bullish and if FALSE it is bearish.
 When there is a switch from bearish to bullish it is a buy signal and when it switches from bullish to bearish it is a sell signal.
 This HTML is updated just before the daily close each day, but push notifications for any trade signals are also sent by push bullet.
 
-If you would like to receive these signals in real-time, you can subscribe for 0.0005 BTC per year.
+To receive these signals in real-time, subscribe to the following channels - it's free for a limited time!
+
+https://www.pushbullet.com/channel?tag=btc_signal
+
+<a class="pushbullet-subscribe-widget" data-channel="btc_signal" data-widget="button" data-size="small"></a>
+<script type="text/javascript">(function(){var a=document.createElement('script');a.type='text/javascript';a.async=true;a.src='https://widget.pushbullet.com/embed.js';var b=document.getElementsByTagName('script')[0];b.parentNode.insertBefore(a,b);})();</script>
+
+https://www.pushbullet.com/channel?tag=eth_signal
+
+<a class="pushbullet-subscribe-widget" data-channel="eth_signal" data-widget="button" data-size="small"></a>
+<script type="text/javascript">(function(){var a=document.createElement('script');a.type='text/javascript';a.async=true;a.src='https://widget.pushbullet.com/embed.js';var b=document.getElementsByTagName('script')[0];b.parentNode.insertBefore(a,b);})();</script>
+
 If you need some help to design your own trading signals/strategies, I am happy to help for a fee.
 email me at mark.ziemann{αt}gmail.com for any enquiries/suggestions/feedback.
 
@@ -75,7 +86,7 @@ TESTING = FALSE
 system("DATE=$(date -u) ; sed \"s/MYTIME/${DATE}/\" ../index0.html > ../index1.html")
 
 mydate <- Sys.time()
-attr(mydate, "tzone") <- "UTC" 
+attr(mydate, "tzone") <- "UTC"
 mydate <- as.Date(mydate)
 
 ```
@@ -117,7 +128,7 @@ price <- rbind(price,df)
 tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 if ( TESTING == TRUE) {
-  price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
+  price[nrow(price),"close"] <- price[nrow(price),"close"] * 2
 }
 
 ```
@@ -139,7 +150,7 @@ if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
     btc_signal="BUY"
   }
-  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) { 
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
     btc_signal="SELL"
   }
 } else {
@@ -523,7 +534,7 @@ if ( btc_signal != "NONE") {
 
 if ( !is.null(MYNOTE) ) {
   MYNOTE <- paste(MYNOTE,". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  pbPost("note", "Crypto Alert", MYNOTE, channel="btc_signal")
 }
 
 ```
@@ -953,7 +964,7 @@ if ( eth_signal != "NONE") {
 
 if ( !is.null(MYNOTE) ) {
   MYNOTE <- paste(MYNOTE,". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  pbPost("note", "Crypto Alert", MYNOTE, channel="eth_signal")
 }
 
 ```
@@ -1055,7 +1066,7 @@ Send a push notification.
 if ( xmr_signal != "NONE") {
   MYNOTE <- paste("XMR is flashing a ", xmr_signal,
    ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  pbPost("note", "Crypto Alert", MYNOTE, channel="xmr_signal")
 }
 
 ```
@@ -1158,7 +1169,7 @@ Send a push notification.
 if ( xhv_signal != "NONE") {
   MYNOTE <- paste("XHV is flashing a ", xhv_signal,
    ". Visit https://mdz-analytics.com/crypto/alerts.html for the details")
-  pbPost("note", "Crypto Alert", MYNOTE)
+  pbPost("note", "Crypto Alert", MYNOTE, channel="xhv_signal")
 }
 
 ```
