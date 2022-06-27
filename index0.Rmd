@@ -18,10 +18,10 @@ fear and greed, emotions which are detrimental to investor performance.
 
 **It is essential to have a system** that you stick to, so that these emotions don't
 cloud your judgement.
-Here, I provide free indicators for bitcoin and ethereum, based off years of 
+Here, I provide free indicators and mobile push notifications for bitcoin and ethereum, based on years of
 historical price action and careful computational optimisation.
 
-If you want subscription to mobile push notifications, or customised analysis of
+If you want push notifications or customised analysis of
 your favourite alt-coin, please visit the [product page](products.html).
 
 No material here should be considered financial advice.
@@ -40,9 +40,9 @@ Current state if the indicators as at MYTIME:
 
 | Indicator | BTC | ETH |
 | --- | --- | --- |
-| SMA daily | BTC_SMA_DAILY | ETH_SMA_DAILY | 
+| SMA daily | BTC_SMA_DAILY | ETH_SMA_DAILY |
 | DMI daily | BTC_DMI_DAILY | ETH_DMI_DAILY |
-| TSI daily | BTC_TSI_DAILY | ETH_TSI_DAILY | 
+| TSI daily | BTC_TSI_DAILY | ETH_TSI_DAILY |
 | Stochastic daily | BTC_STOCH_DAILY | ETH_STOCH_DAILY |
 | Double RSI daily | BTC_RSI_DAILY | ETH_RSI_DAILY |
 
@@ -114,7 +114,7 @@ In the following analysis, I test different stochastic intervals and parameters 
 
 ## Double RSI
 
-The [Double RSI](https://www.trendfollowingsystem.com/double-rsi-trading-system/</a> is a
+The [Double RSI](https://www.trendfollowingsystem.com/double-rsi-trading-system/) is a
 specific application of the relative strength indicator involving a short term and a longer term RSI line.
 When the short term line breaks above the long term line it is bullish and vice-versa.
 In the following analysis, I test different periods for RSI calculation to see which strategy work best for BTC and ETH.

@@ -13,20 +13,21 @@ output:
 
 ## Products
 
-We offer three types of services, (1) subscription to push notifications, (2) altcoin analysis,
+We offer three types of services, (1) altcoin push notifications, (2) altcoin analysis,
 and (3) custom data analytics.
 
-## 1. Push notifications
+## 1. Altcoin push notifications
 
-The market indicators shown on this site are developed using advanced data analysis, 
+The market indicators shown on this site are developed using advanced data analysis,
 which is optimised for maximum profit.
 This is a strong system to help you grow your portfolio over time.
 These market indicators are checked at the end of the daily close and if there is a flip in
-momentum, then notifications are sent. 
-These notifications are sent to your mobile device via Pushbullet, which is nice 
+momentum, then notifications are sent.
+These notifications are sent to your mobile device via Pushbullet, which is nice
 because you won't need to check the home page every day.
 
-Subscription to these indicators costs USD$100 per calendar year, but is free for the first 100 customers.
+Push notifications for bitcoin and eth are provided for free.
+The price for altcoin push notifications is USD$100 per calendar year, but is free for the first 50 customers.
 Get in touch via email to arrange access: mark.ziemann{αt}gmail.com
 
 ## 2. Altcoin analysis
@@ -34,13 +35,13 @@ Get in touch via email to arrange access: mark.ziemann{αt}gmail.com
 I can provide indicator analysis for your favourite altcoin projects, including optimised values
 for moving averages, TSI, DMI, stoch and double RSI.
 
-This service costs USD$50 per request, but 100 customers can get their first altcoin report for free.
+This service costs USD$100 per request, but the first 50 customers can get their first altcoin report for free.
 
 Get in touch via email for your free request: mark.ziemann{αt}gmail.com
 
 ## 3. Custom data services
 
-Have a trading idea you'd like to have backtested? 
+Have a trading idea you'd like to have backtested?
 Our highly skilled team will put your trading strategies through their paces, and perform optimisation to get the best results.
 
 This service normally costs USD$60 per hour, but the first 20 customers will receive up to five hours of analytical services 
