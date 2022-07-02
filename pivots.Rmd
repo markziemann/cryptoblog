@@ -1,0 +1,310 @@
+---
+title: "Pivot points for BTC and ETH"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    fig_width: 10
+    fig_height: 8
+theme: cosmo
+---
+
+Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading.Rmd
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
+
+## Intro
+
+From Tradingview:
+
+>A pivot point is a technical analysis indicator, or calculations, used to determine the overall trend of the market over different time frames. The pivot point itself is simply the average of the intraday high and low, and the closing price from the previous trading day. On the subsequent day, trading above the pivot point is thought to indicate ongoing bullish sentiment, while trading below the pivot point indicates bearish sentiment.
+
+This page is designed to be updated daily - today's date is shown below.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("lubridate")
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+Sys.Date()
+
+```
+
+Reminder: this is not financial advice.
+
+## Pivot point indicator
+
+Also called Central Pivot Range (CPR).
+
+central pivot point (pp) =  (prev_low + prev_high + prev_close) / 3
+
+Resistance points:
+
+r1 = 2  * pp - prev_low
+
+r2 = pp + ( prev_h - prev_low )
+
+r3 = pp + 2 * ( prev_high  - prev_low )
+
+
+support points
+s1 = 2 * pp - prev_high 
+
+s2 = pp - ( prev_high  - prev_low )
+
+s3 = pp - 2 * ( prev_high  - prev_low )
+
+In this report, the pivot points are shown with dashed lines.
+Pivot line is black.
+S1 line is red.
+S2 line is orange.
+R1 line is blue.
+R2 line is gren.
+
+```{r,piv_fun}
+
+pivots_weekly <- function(price) {
+  weeks <- paste(year(price$date),week(price$date))
+  wl <- lapply(X=unique(weeks) , FUN=function(w) {
+    rows <- which(weeks ==w )
+    wdat <- price[rows,]
+    hi <- max(wdat$high)
+    lo <- min(wdat$low)
+    cl <- wdat[nrow(wdat),"close"]
+    d <- wdat[nrow(wdat),"date"]
+    wagg <- c("date"=d,"high"=hi,"low"=lo,"close"=cl)
+  }  )
+  wmx <- as.data.frame(do.call(rbind,wl))
+  wmx$date <- ymd(wmx$date)
+  wmx$high <- as.numeric(wmx$high)
+  wmx$low <- as.numeric(wmx$low)
+  wmx$close <- as.numeric(wmx$close)
+  hlc2 <- HLC(wmx)
+  pp <- rowMeans(hlc2)
+  r1 <- 2  * pp - hlc2$low
+  r2 <- pp + ( hlc2$high - hlc2$low )
+  r3 <- pp + 2 * ( hlc2$high  - hlc2$low )
+  s1 <- 2 * pp - hlc2$high
+  s2 <- pp - ( hlc2$high  - hlc2$low )
+  s3 <- pp - 2 * ( hlc2$high  - hlc2$low )
+  weeks2 <- weeks[which(weeks != weeks[1])]
+  pp <- rep(pp[1:(length(pp)-1)],table(weeks2))
+  r1 <- rep(r1[1:(length(r1)-1)],table(weeks2))
+  r2 <- rep(r2[1:(length(r2)-1)],table(weeks2))
+  r3 <- rep(r3[1:(length(r3)-1)],table(weeks2))
+  s1 <- rep(s1[1:(length(s1)-1)],table(weeks2))
+  s2 <- rep(s2[1:(length(s2)-1)],table(weeks2))
+  s3 <- rep(s3[1:(length(s3)-1)],table(weeks2))
+  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3)) 
+  deduct_start <- ( nrow(price) - nrow(pivots) ) + 1 
+  price2 <- price[deduct_start:nrow(price),]
+  res <- cbind(price2,pivots)
+  return(res)
+}
+
+#pivw <- pivots_weekly(price)
+
+pivots_monthly <- function(price) {
+  months <- paste(year(price$date),month(price$date))
+  wl <- lapply(X=unique(months) , FUN=function(m) {
+    rows <- which(months == m )
+    mdat <- price[rows,]
+    hi <- max(mdat$high)
+    lo <- min(mdat$low)
+    cl <- mdat[nrow(mdat),"close"]
+    d <- mdat[nrow(mdat),"date"]
+    magg <- c("date"=d,"high"=hi,"low"=lo,"close"=cl)
+  }  )
+  wmx <- as.data.frame(do.call(rbind,wl))
+  wmx$date <- ymd(wmx$date)
+  wmx$high <- as.numeric(wmx$high)
+  wmx$low <- as.numeric(wmx$low)
+  wmx$close <- as.numeric(wmx$close)
+  hlc2 <- HLC(wmx)
+  pp <- rowMeans(hlc2)
+  r1 <- 2  * pp - hlc2$low
+  r2 <- pp + ( hlc2$high - hlc2$low )
+  r3 <- pp + 2 * ( hlc2$high  - hlc2$low )
+  s1 <- 2 * pp - hlc2$high
+  s2 <- pp - ( hlc2$high  - hlc2$low )
+  s3 <- pp - 2 * ( hlc2$high  - hlc2$low )
+  months2 <- months[which(months != months[1])]
+  pp <- rep(pp[1:(length(pp)-1)],table(months2))
+  r1 <- rep(r1[1:(length(r1)-1)],table(months2))
+  r2 <- rep(r2[1:(length(r2)-1)],table(months2))
+  r3 <- rep(r3[1:(length(r3)-1)],table(months2))
+  s1 <- rep(s1[1:(length(s1)-1)],table(months2))
+  s2 <- rep(s2[1:(length(s2)-1)],table(months2))
+  s3 <- rep(s3[1:(length(s3)-1)],table(months2))
+  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3))
+  deduct_start <- ( nrow(price) - nrow(pivots) ) + 1
+  price2 <- price[deduct_start:nrow(price),]
+  res <- cbind(price2,pivots)
+  return(res)
+}
+
+#pivm <- pivots_monthly(price)
+
+```
+
+## Weekly Pivot points for BTC
+
+Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat.txt")
+
+dat <- fromJSON("btcdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high,
+  price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+```{r,pivw1}
+
+piv <- pivots_weekly(price)
+
+plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+  xlab="Date",ylab="price (USD)",main="Weekly pivot points standard")
+grid()
+lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+
+piv <- tail(piv,200)
+
+plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+  xlab="Date",ylab="price (USD)",main="Weekly pivot points standard")
+grid()
+lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$s2, col="orange",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r2 , col="darkgreen",lwd=2,lty=2)
+
+```
+
+## Monthly Pivot points for BTC
+
+```{r,pivm1}
+
+piv <- pivots_monthly(price)
+
+plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+  xlab="Date",ylab="price (USD)",main="Monthly pivot points standard")
+grid()
+lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+
+piv <- tail(piv,400)
+
+plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+  xlab="Date",ylab="price (USD)",main="Monthly pivot points standard")
+grid()
+lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$s2, col="orange",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r2 , col="darkgreen",lwd=2,lty=2)
+
+```
+
+## Weekly Pivot points for ETH
+
+Obtaining ETH historical data (daily) from CoinMarketCap.com from 2015 to present.
+
+```{r,getdata_eth}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat.txt")
+
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high,
+  price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+```{r,pivw1eth}
+
+piv <- pivots_weekly(price)
+
+plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+  xlab="Date",ylab="price (USD)",main="Weekly pivot points standard")
+grid()
+lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+
+piv <- tail(piv,200)
+
+plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+  xlab="Date",ylab="price (USD)",main="Weekly pivot points standard")
+grid()
+lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$s2, col="orange",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r2 , col="darkgreen",lwd=2,lty=2)
+
+```
+
+## Monthly Pivot points for ETH
+
+```{r,pivm1_eth}
+
+piv <- pivots_monthly(price)
+
+plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+  xlab="Date",ylab="price (USD)",main="Monthly pivot points standard")
+grid()
+lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+
+piv <- tail(piv,400)
+
+plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+  xlab="Date",ylab="price (USD)",main="Monthly pivot points standard")
+grid()
+lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$s2, col="orange",lwd=2,lty=2)
+lines(as.Date(piv$date) ,  piv$r2 , col="darkgreen",lwd=2,lty=2)
+
+```
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
