@@ -137,6 +137,8 @@ In the following analysis, I test different periods for RSI calculation to see w
 
 * [Keltner Channels indicator for BTC and ETH](crypto/keltner_channels.html)
 
+* [Weekly and Monthy pivot points for BTC and ETH](crypto/pivots.html)
+
 * [Does MA/EMA indicator performance change over time?](crypto/ma_temporal2.html)
 
 <hr>

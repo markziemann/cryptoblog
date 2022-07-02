@@ -80,6 +80,9 @@ Rscript -e "rmarkdown::render('volatility_size.Rmd')" && \
 Rscript -e "rmarkdown::render('keltner_channels.Rmd')" && \
   scp -P 21098 keltner_channels.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
+Rscript -e "rmarkdown::render('pivots.Rmd')" && \
+  scp -P 21098 pivots.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+
 Rscript -e "rmarkdown::render('temporal_change/ma_temporal2.Rmd')" && \
   scp -P 21098 temporal_change/ma_temporal2.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
