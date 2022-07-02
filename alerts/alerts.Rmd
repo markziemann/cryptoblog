@@ -12,7 +12,19 @@ output:
 theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/alerts.Rmd
+```{r,banner,fig.height=2,fig.width=8,results='hide'}
+
+unlink("banner.png")
+
+file.copy("../images/banner1.png", "banner.png")
+
+```
+
+<a href="https://mdz-analytics.com/">
+<img src="banner.png" alt="banner" width=700" height="100"/>
+</a>
+
+Source code: https://github.com/markziemann/cryptoblog/blob/main/alerts/alerts.Rmd
 
 ## Intro
 
@@ -60,8 +72,16 @@ email me at mark.ziemann{αt}gmail.com for any enquiries/suggestions/feedback.
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
-
 XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
+
+```{r,qr,fig.height=2,fig.width=2}
+
+library(png)
+library(grid)
+img <- readPNG("images/donations.png")
+grid.raster(img)
+
+```
 
 Reminder: this analysis is not financial advice.
 
