@@ -7,8 +7,8 @@ output:
     toc: true
     toc_float: true
     code_folding: hide
-    fig_width: 10
-    fig_height: 8
+    fig_width: 15
+    fig_height: 12
 theme: cosmo
 ---
 
@@ -60,8 +60,8 @@ r2 = pp + ( prev_h - prev_low )
 
 r3 = pp + 2 * ( prev_high  - prev_low )
 
-
 support points
+
 s1 = 2 * pp - prev_high 
 
 s2 = pp - ( prev_high  - prev_low )
@@ -77,6 +77,7 @@ R2 line is gren.
 
 ```{r,piv_fun}
 
+# this function is more for analysing tabular data
 pivots_weekly <- function(price) {
   weeks <- paste(year(price$date),week(price$date))
   wl <- lapply(X=unique(weeks) , FUN=function(w) {
@@ -115,9 +116,9 @@ pivots_weekly <- function(price) {
   res <- cbind(price2,pivots)
   return(res)
 }
-
 #pivw <- pivots_weekly(price)
 
+# this function is more for analysing tabular data
 pivots_monthly <- function(price) {
   months <- paste(year(price$date),month(price$date))
   wl <- lapply(X=unique(months) , FUN=function(m) {
@@ -156,12 +157,208 @@ pivots_monthly <- function(price) {
   res <- cbind(price2,pivots)
   return(res)
 }
-
 #pivm <- pivots_monthly(price)
+
+# this function is more for analysing tabular data
+pivots_quarterly <- function(price) {
+  quarters <- paste(year(price$date),quarter(price$date))
+  wl <- lapply(X=unique(quarters) , FUN=function(m) {
+    rows <- which(quarters == m )
+    mdat <- price[rows,]
+    hi <- max(mdat$high)
+    lo <- min(mdat$low)
+    cl <- mdat[nrow(mdat),"close"]
+    d <- mdat[nrow(mdat),"date"]
+    magg <- c("date"=d,"high"=hi,"low"=lo,"close"=cl)
+  }  )
+  wmx <- as.data.frame(do.call(rbind,wl))
+  wmx$date <- ymd(wmx$date)
+  wmx$high <- as.numeric(wmx$high)
+  wmx$low <- as.numeric(wmx$low)
+  wmx$close <- as.numeric(wmx$close)
+  hlc2 <- HLC(wmx)
+  pp <- rowMeans(hlc2)
+  r1 <- 2  * pp - hlc2$low
+  r2 <- pp + ( hlc2$high - hlc2$low )
+  r3 <- pp + 2 * ( hlc2$high  - hlc2$low )
+  s1 <- 2 * pp - hlc2$high
+  s2 <- pp - ( hlc2$high  - hlc2$low )
+  s3 <- pp - 2 * ( hlc2$high  - hlc2$low )
+  quarters2 <- quarters[which(quarters != quarters[1])]
+  pp <- rep(pp[1:(length(pp)-1)],table(quarters2))
+  r1 <- rep(r1[1:(length(r1)-1)],table(quarters2))
+  r2 <- rep(r2[1:(length(r2)-1)],table(quarters2))
+  r3 <- rep(r3[1:(length(r3)-1)],table(quarters2))
+  s1 <- rep(s1[1:(length(s1)-1)],table(quarters2))
+  s2 <- rep(s2[1:(length(s2)-1)],table(quarters2))
+  s3 <- rep(s3[1:(length(s3)-1)],table(quarters2))
+  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3))
+  deduct_start <- ( nrow(price) - nrow(pivots) ) + 1
+  price2 <- price[deduct_start:nrow(price),]
+  res <- cbind(price2,pivots)
+  return(res)
+}
+#pivm <- pivots_quarterly(price)
+
+# this function is more for analysing tabular data
+pivots_yearly <- function(price) {
+  years <- year(price$date)
+  wl <- lapply(X=unique(years) , FUN=function(m) {
+    rows <- which(years == m )
+    mdat <- price[rows,]
+    hi <- max(mdat$high)
+    lo <- min(mdat$low)
+    cl <- mdat[nrow(mdat),"close"]
+    d <- mdat[nrow(mdat),"date"]
+    magg <- c("date"=d,"high"=hi,"low"=lo,"close"=cl)
+  }  )
+  wmx <- as.data.frame(do.call(rbind,wl))
+  wmx$date <- ymd(wmx$date)
+  wmx$high <- as.numeric(wmx$high)
+  wmx$low <- as.numeric(wmx$low)
+  wmx$close <- as.numeric(wmx$close)
+  hlc2 <- HLC(wmx)
+  pp <- rowMeans(hlc2)
+  r1 <- 2  * pp - hlc2$low
+  r2 <- pp + ( hlc2$high - hlc2$low )
+  r3 <- pp + 2 * ( hlc2$high  - hlc2$low )
+  s1 <- 2 * pp - hlc2$high
+  s2 <- pp - ( hlc2$high  - hlc2$low )
+  s3 <- pp - 2 * ( hlc2$high  - hlc2$low )
+  years2 <- years[which(years != years[1])]
+  pp <- rep(pp[1:(length(pp)-1)],table(years2))
+  r1 <- rep(r1[1:(length(r1)-1)],table(years2))
+  r2 <- rep(r2[1:(length(r2)-1)],table(years2))
+  r3 <- rep(r3[1:(length(r3)-1)],table(years2))
+  s1 <- rep(s1[1:(length(s1)-1)],table(years2))
+  s2 <- rep(s2[1:(length(s2)-1)],table(years2))
+  s3 <- rep(s3[1:(length(s3)-1)],table(years2))
+  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3))
+  deduct_start <- ( nrow(price) - nrow(pivots) ) + 1
+  price2 <- price[deduct_start:nrow(price),]
+  res <- cbind(price2,pivots)
+  return(res)
+}
+#pivm <- pivots_yearly(price)
+
+# this function is more for plotting the pivots nicely
+pivots_weekly2 <- function(price) {
+  weeks <- paste(year(price$date),week(price$date))
+  res <- lapply(X=unique(weeks) , FUN=function(m) {
+    rows <- which(weeks == m )
+    mdat <- price[rows,]
+    hi <- max(mdat$high)
+    lo <- min(mdat$low)
+    cl <- mdat[nrow(mdat),"close"]
+    pp <- mean(c(hi, lo, cl))
+    r1 <- ( 2  * pp ) - lo
+    r2 <- pp + ( hi - lo )
+    r3 <- pp + ( 2 * ( hi - lo ) )
+    s1 <- ( 2 * pp ) - hi
+    s2 <- pp - ( hi  - lo )
+    s3 <- pp - ( 2 * ( hi - lo ) )
+    d0 <- mdat[1,"date"]
+    d1 <- as.Date(d0)+7
+    d2 <- d1+6
+    magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
+      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3)
+  }  )
+  res
+}
+
+# this function is more for plotting the pivots nicely
+pivots_monthly2 <- function(price) {
+  months <- paste(year(price$date),month(price$date))
+  res <- lapply(X=unique(months) , FUN=function(m) {
+    rows <- which(months == m )
+    mdat <- price[rows,]
+    hi <- max(mdat$high)
+    lo <- min(mdat$low)
+    cl <- mdat[nrow(mdat),"close"]
+    pp <- mean(c(hi, lo, cl))
+    r1 <- ( 2  * pp ) - lo
+    r2 <- pp + ( hi - lo )
+    r3 <- pp + ( 2 * ( hi - lo ) )
+    s1 <- ( 2 * pp ) - hi
+    s2 <- pp - ( hi  - lo )
+    s3 <- pp - ( 2 * ( hi - lo ) )
+    d <- mdat[nrow(mdat),"date"]
+    yr <- year(d)
+    mo <- month(d) +1 
+    if ( mo > 12 ) { mo=1 ; yr <- yr +1 }
+    d1 <- as.Date(paste(yr,mo,"01",sep="-"))
+    yr <- year(d)
+    mo <- month(d) +2
+    if ( mo > 13 ) { mo=2 ; yr <- yr +1 }
+    if ( mo > 12 ) { mo=1 ; yr <- yr +1 }
+    d2 <- as.Date(paste(yr,mo,"01",sep="-"))-1
+    magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
+      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3)
+  }  )
+  res
+}
+
+
+# this function is more for plotting the pivots nicely
+pivots_quarterly2 <- function(price) {
+  quarters <- paste(year(price$date),quarter(price$date))
+  res <- lapply(X=unique(quarters) , FUN=function(m) {
+    rows <- which(quarters == m )
+    mdat <- price[rows,]
+    hi <- max(mdat$high)
+    lo <- min(mdat$low)
+    cl <- mdat[nrow(mdat),"close"]
+    pp <- mean(c(hi, lo, cl))
+    r1 <- ( 2  * pp ) - lo
+    r2 <- pp + ( hi - lo )
+    r3 <- pp + ( 2 * ( hi - lo ) )
+    s1 <- ( 2 * pp ) - hi
+    s2 <- pp - ( hi  - lo )
+    s3 <- pp - ( 2 * ( hi - lo ) )
+    d <- as.Date(mdat[1,"date"])
+    y1 <- year(d)
+    q <- quarter(d)
+    m0 <- (q*3)-3
+    m1 <- (q*3) + 1
+    if ( m1 > 12 ) { m1=1 ; y1=y1+1 }
+    d1 <- as.Date(paste(y1,m1,"01",sep="-"))
+    m2 <- m1 + 3
+    y2 <- y1
+    if ( m2 > 12 ) { m2=1 ; y2=y1+1 }
+    d2 <- as.Date(paste(y2,m2,"01",sep="-"))-1
+    magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
+      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3)
+  }  )
+  res
+}
+
+# this function is more for plotting the pivots nicely
+pivots_yearly2 <- function(price) {
+  years <- year(price$date)
+  res <- lapply(X=unique(years) , FUN=function(m) {
+    rows <- which(years == m )
+    mdat <- price[rows,]
+    hi <- max(mdat$high)
+    lo <- min(mdat$low)
+    cl <- mdat[nrow(mdat),"close"]
+    pp <- mean(c(hi, lo, cl))
+    r1 <- ( 2  * pp ) - lo
+    r2 <- pp + ( hi - lo )
+    r3 <- pp + ( 2 * ( hi - lo ) )
+    s1 <- ( 2 * pp ) - hi
+    s2 <- pp - ( hi  - lo )
+    s3 <- pp - ( 2 * ( hi - lo ) )
+    d1 <- as.Date(paste(m+1,"-01-01",sep=""))
+    d2 <- as.Date(paste(m+1,"-12-31",sep=""))
+    magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
+      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3)
+  }  )
+  res
+}
 
 ```
 
-## Weekly Pivot points for BTC
+## Fetch BTC data
 
 Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
 
@@ -180,27 +377,70 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 
 ```
 
+## Weekly Pivot points for BTC
+
 ```{r,pivw1}
 
-piv <- pivots_weekly(price)
+price2 <- price
+pivml <- pivots_weekly2(price2)
 
-plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,50)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
   xlab="Date",ylab="price (USD)",main="Weekly pivot points standard")
 grid()
-lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+lines(as.Date(price2$date) , price2$close , col="black")
 
-piv <- tail(piv,200)
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
 
-plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+```
+
+Now zoom in on the recent action (past 200 days).
+
+You can see that an estimate of next week's values are shown despite the week not being finished yet.
+
+```{r,pivw2}
+
+price2 <- tail(price,200)
+pivml <- pivots_weekly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,50)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
   xlab="Date",ylab="price (USD)",main="Weekly pivot points standard")
 grid()
-lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$s2, col="orange",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r2 , col="darkgreen",lwd=2,lty=2)
+lines(as.Date(price2$date) , price2$close , col="black")
+
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
+
+```
+
+Current values
+
+```{r,pivw3}
+
+piv <- pivots_weekly(price2)
+tail(piv) %>% kbl(caption="Recent price action and weekly pivots") %>%  kable_styling()
 
 ```
 
@@ -208,29 +448,170 @@ lines(as.Date(piv$date) ,  piv$r2 , col="darkgreen",lwd=2,lty=2)
 
 ```{r,pivm1}
 
-piv <- pivots_monthly(price)
+price2 <- price
+pivml <- pivots_monthly2(price2)
 
-plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,50)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
   xlab="Date",ylab="price (USD)",main="Monthly pivot points standard")
 grid()
-lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+lines(as.Date(price2$date) , price2$close , col="black")
 
-piv <- tail(piv,400)
-
-plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
-  xlab="Date",ylab="price (USD)",main="Monthly pivot points standard")
-grid()
-lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$s2, col="orange",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r2 , col="darkgreen",lwd=2,lty=2)
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
 
 ```
 
-## Weekly Pivot points for ETH
+Now zoom in on the recent action (past 400 days).
+
+```{r,pivm2}
+
+price2 <- tail(price,400)
+pivml <- pivots_monthly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,50)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
+  xlab="Date",ylab="price (USD)",main="Monthly pivot points standard")
+grid()
+lines(as.Date(price2$date) , price2$close , col="black")
+
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
+
+```
+
+Current values
+
+```{r,pivm3}
+
+piv <- pivots_monthly(price)
+tail(piv) %>% kbl(caption="Recent price action and monthly pivots") %>%  kable_styling()
+
+```
+
+## Quarterly Pivot points for BTC
+
+```{r,pivq1}
+
+price2 <- price
+pivml <- pivots_quarterly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,50)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
+  xlab="Date",ylab="price (USD)",main="Quarterly pivot points standard")
+grid()
+lines(as.Date(price2$date) , price2$close , col="black")
+
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
+
+```
+
+Now zoom in on the recent action (past 400 days).
+
+```{r,pivq2}
+
+price2 <- tail(price,400)
+pivml <- pivots_quarterly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,50)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
+  xlab="Date",ylab="price (USD)",main="Quarterly pivot points standard")
+grid()
+lines(as.Date(price2$date) , price2$close , col="black")
+
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
+
+```
+
+Current values
+
+```{r,pivq3}
+
+piv <- pivots_quarterly(price)
+tail(piv) %>% kbl(caption="Recent price action and quarterly pivots") %>%  kable_styling()
+
+```
+
+## Yearly Pivot points for BTC
+
+```{r,pivy1}
+
+price2 <- price
+pivml <- pivots_yearly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,50)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
+  xlab="Date",ylab="price (USD)",main="Yearly pivot points standard")
+grid()
+lines(as.Date(price2$date) , price2$close , col="black")
+
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
+
+```
+
+Current values
+
+```{r,pivy2}
+
+piv <- pivots_yearly(price)
+tail(piv) %>% kbl(caption="Recent price action and yearly pivots") %>%  kable_styling()
+
+```
+
+## Fetch ETH data
 
 Obtaining ETH historical data (daily) from CoinMarketCap.com from 2015 to present.
 
@@ -249,53 +630,237 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 
 ```
 
-```{r,pivw1eth}
+## Weekly Pivot points for ETH
 
-piv <- pivots_weekly(price)
+```{r,pivw1e}
 
-plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+price2 <- price
+pivml <- pivots_weekly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,.1)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
   xlab="Date",ylab="price (USD)",main="Weekly pivot points standard")
 grid()
-lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+lines(as.Date(price2$date) , price2$close , col="black")
 
-piv <- tail(piv,200)
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
 
-plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
+```
+
+Now zoom in on the recent action (past 200 days).
+
+You can see that an estimate of next week's values are shown despite the week not being finished yet.
+
+```{r,pivw2e}
+
+price2 <- tail(price,200)
+pivml <- pivots_weekly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,.1)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
   xlab="Date",ylab="price (USD)",main="Weekly pivot points standard")
 grid()
-lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$s2, col="orange",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r2 , col="darkgreen",lwd=2,lty=2)
+lines(as.Date(price2$date) , price2$close , col="black")
+
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
+
+```
+
+Current values
+
+```{r,pivw3e}
+
+piv <- pivots_weekly(price2)
+tail(piv) %>% kbl(caption="Recent price action and weekly pivots") %>%  kable_styling()
 
 ```
 
 ## Monthly Pivot points for ETH
 
-```{r,pivm1_eth}
+```{r,pivm1e}
+
+price2 <- price
+pivml <- pivots_monthly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,.1)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
+  xlab="Date",ylab="price (USD)",main="Monthly pivot points standard")
+grid()
+lines(as.Date(price2$date) , price2$close , col="black")
+
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
+
+```
+
+Now zoom in on the recent action (past 400 days).
+
+```{r,pivm2e}
+
+price2 <- tail(price,400)
+pivml <- pivots_monthly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,.1)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
+  xlab="Date",ylab="price (USD)",main="Monthly pivot points standard")
+grid()
+lines(as.Date(price2$date) , price2$close , col="black")
+
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
+
+```
+
+Current values
+
+```{r,pivm3e}
 
 piv <- pivots_monthly(price)
+tail(piv) %>% kbl(caption="Recent price action and monthly pivots") %>%  kable_styling()
 
-plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
-  xlab="Date",ylab="price (USD)",main="Monthly pivot points standard")
+```
+
+## Quarterly Pivot points for ETH
+
+```{r,pivq1e}
+
+price2 <- price
+pivml <- pivots_quarterly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,.1)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
+  xlab="Date",ylab="price (USD)",main="Quarterly pivot points standard")
 grid()
-lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
+lines(as.Date(price2$date) , price2$close , col="black")
 
-piv <- tail(piv,400)
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
 
-plot(piv$close~as.Date(piv$date),type="l",log="y",lwd=2,
-  xlab="Date",ylab="price (USD)",main="Monthly pivot points standard")
+```
+
+Now zoom in on the recent action (past 400 days).
+
+```{r,pivq2e}
+
+price2 <- tail(price,400)
+pivml <- pivots_quarterly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,.1)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
+  xlab="Date",ylab="price (USD)",main="Quarterly pivot points standard")
 grid()
-lines(as.Date(piv$date) ,  piv$s1, col="red",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$pp , col="black",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r1 , col="blue",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$s2, col="orange",lwd=2,lty=2)
-lines(as.Date(piv$date) ,  piv$r2 , col="darkgreen",lwd=2,lty=2)
+lines(as.Date(price2$date) , price2$close , col="black")
+
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
+
+```
+
+Current values
+
+```{r,pivq3e}
+
+piv <- pivots_quarterly(price)
+tail(piv) %>% kbl(caption="Recent price action and quarterly pivots") %>%  kable_styling()
+
+```
+
+## Yearly Pivot points for ETH
+
+```{r,pivy1e}
+
+price2 <- price
+pivml <- pivots_yearly2(price2)
+
+start_date <- pivml[[1]]$date1
+end_date <- pivml[[length(pivml)]]$date2
+ymax <- max( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",7) ) )
+ymin <- min( c( sapply(pivml,"[[",5) , sapply(pivml,"[[",10) ) )
+ymin <- max(ymin,.1)
+
+plot( c(start_date,end_date) ,  c(ymin,ymax)  ,type="l",log="y",lwd=0,
+  xlab="Date",ylab="price (USD)",main="Yearly pivot points standard")
+grid()
+lines(as.Date(price2$date) , price2$close , col="black")
+
+x <- lapply(pivml, function(x) {
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[6] , x[6] ) , col="black") #pp
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[10] , x[10] ) , col="red") #s1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+} )
+
+```
+
+Current values
+
+```{r,pivy2e}
+
+piv <- pivots_yearly(price)
+tail(piv) %>% kbl(caption="Recent price action and yearly pivots") %>%  kable_styling()
 
 ```
 
