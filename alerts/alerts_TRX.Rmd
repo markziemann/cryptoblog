@@ -265,10 +265,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    trx_signal="DMI BUY"
+    trx_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    trx_signal="DMI SELL"
+    trx_signal="SELL"
   }
 } else {
   trx_signal <- "NONE"
@@ -303,7 +303,7 @@ lines(price2$DIn ~ as.Date(price2$date) ,col="red")
 ```{r,trx_dmi_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE,"TRX is flashing a ", trx_signal,".")
+  MYNOTE <- paste(MYNOTE,"TRX DMI signal is", trx_signal,".")
 }
 
 ```
@@ -349,10 +349,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    trx_signal="TSI BUY"
+    trx_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    trx_signal="TSI SELL"
+    trx_signal="SELL"
   }
 } else {
   trx_signal <- "NONE"
@@ -389,7 +389,7 @@ par(mfrow=c(1,1))
 ```{r,trx_tsi_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE,"TRX is flashing a ", trx_signal,".")
+  MYNOTE <- paste(MYNOTE,"TRX TSI signal is", trx_signal,".")
 }
 
 ```
@@ -417,10 +417,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    trx_signal="stoch BUY"
+    trx_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    trx_signal="stoch SELL"
+    trx_signal="SELL"
   }
 } else {
   trx_signal <- "NONE"
@@ -457,7 +457,7 @@ par(mfrow=c(1,1))
 ```{r,trx_stoch_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE,"TRX is flashing a ", trx_signal,".")
+  MYNOTE <- paste(MYNOTE,"TRX Stoch signal is", trx_signal,".")
 }
 
 ```
@@ -484,10 +484,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    trx_signal="RSI2 BUY"
+    trx_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    trx_signal="RSI2 SELL"
+    trx_signal="SELL"
   }
 } else {
   trx_signal <- "NONE"
@@ -533,7 +533,7 @@ par(mfrow=c(1,1))
 ```{r,trx_rsi_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE,"TRX is flashing a ", trx_signal,".")
+  MYNOTE <- paste(MYNOTE,"TRX RSI2 signal is", trx_signal,".")
 }
 
 ```

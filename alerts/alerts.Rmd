@@ -257,7 +257,7 @@ if (today_signal==TRUE) {
  system("sed -i 's/BTC_SMA_CROSS_COL/red/' ../index1.html")
 }
 
-message(paste("BTC SMA cross signal:",btc_signal))
+message(paste("BTC SMA cross signal is",btc_signal))
 
 ```
 
@@ -276,7 +276,7 @@ Send a push notification.
 ```{r,btc_cross_push}
 
 if ( btc_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE, "The BTC 12/21 day SMA cross signal is", btc_signal)
+  MYNOTE <- paste(MYNOTE, "", btc_signal)
 }
 
 ```
@@ -298,10 +298,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    btc_signal="DMI BUY"
+    btc_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    btc_signal="DMI SELL"
+    btc_signal="SELL"
   }
 } else {
   btc_signal <- "NONE"
@@ -338,7 +338,7 @@ Send a push notification.
 ```{r,btc_dmi_push}
 
 if ( btc_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE, "BTC is flashing a ", btc_signal)
+  MYNOTE <- paste(MYNOTE, "BTC DMI is flashing a", btc_signal)
 }
 
 ```
@@ -381,10 +381,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    btc_signal="TSI BUY"
+    btc_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    btc_signal="TSI SELL"
+    btc_signal="SELL"
   }
 } else {
   btc_signal <- "NONE"
@@ -423,7 +423,7 @@ Send a push notification.
 ```{r,btc_tsi_push}
 
 if ( btc_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE, "BTC is flashing a ", btc_signal)
+  MYNOTE <- paste(MYNOTE, "BTC TSI is flashing a", btc_signal)
 }
 
 ```
@@ -448,10 +448,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    btc_signal="stoch BUY"
+    btc_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    btc_signal="stoch SELL"
+    btc_signal="SELL"
   }
 } else {
   btc_signal <- "NONE"
@@ -490,7 +490,7 @@ Send a push notification.
 ```{r,btc_stoch_push}
 
 if ( btc_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE,"BTC is flashing a ", btc_signal)
+  MYNOTE <- paste(MYNOTE,"BTC Stoch is flashing a", btc_signal)
 }
 
 ```
@@ -515,10 +515,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    btc_signal="RSI2 BUY"
+    btc_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    btc_signal="RSI2 SELL"
+    btc_signal="SELL"
   }
 } else {
   btc_signal <- "NONE"
@@ -566,7 +566,7 @@ Send a push notification.
 ```{r,btc_rsi_push}
 
 if ( btc_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE,"BTC is flashing a ", btc_signal)
+  MYNOTE <- paste(MYNOTE,"BTC RSI2 is flashing a", btc_signal)
 }
 
 if ( !is.null(MYNOTE) ) {
@@ -679,7 +679,7 @@ Send a push notification.
 MYNOTE = NULL
 
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste("The ETH 34D MA signal is", eth_signal)
+  MYNOTE <- paste("The ETH SMA signal is", eth_signal)
 }
 
 ```
@@ -741,7 +741,7 @@ Send a push notification.
 ```{r,eth_cross_push}
 
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE,"The ETH 5/27 day SMA cross signal is", eth_signal)
+  MYNOTE <- paste(MYNOTE,"The ETH SMA cross signal is", eth_signal)
 }
 
 ```
@@ -761,10 +761,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    eth_signal="DMI BUY"
+    eth_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    eth_signal="DMI SELL"
+    eth_signal="SELL"
   }
 } else {
   eth_signal <- "NONE"
@@ -800,7 +800,7 @@ Send a push notification.
 ```{r,eth_dmi_push}
 
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE, "ETH is flashing a ", eth_signal)
+  MYNOTE <- paste(MYNOTE, "ETH DMI is flashing a", eth_signal)
 }
 
 ```
@@ -827,10 +827,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    eth_signal="TSI BUY"
+    eth_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    eth_signal="TSI SELL"
+    eth_signal="SELL"
   }
 } else {
   eth_signal <- "NONE"
@@ -869,7 +869,7 @@ Send a push notification.
 ```{r,eth_tsi_push}
 
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE,"ETH is flashing a ", eth_signal)
+  MYNOTE <- paste(MYNOTE,"ETH TSI is flashing a ", eth_signal)
 }
 
 ```
@@ -895,10 +895,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    eth_signal="stoch BUY"
+    eth_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    eth_signal="stoch SELL"
+    eth_signal="SELL"
   }
 } else {
   eth_signal <- "NONE"
@@ -937,7 +937,7 @@ Send a push notification.
 ```{r,eth_stoch_push}
 
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE,"ETH is flashing a ", eth_signal)
+  MYNOTE <- paste(MYNOTE,"ETH Stoch is flashing a ", eth_signal)
 }
 
 ```
@@ -962,10 +962,10 @@ today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    eth_signal="RSI2 BUY"
+    eth_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    eth_signal="RSI2 SELL"
+    eth_signal="SELL"
   }
 } else {
   eth_signal <- "NONE"
@@ -1014,7 +1014,7 @@ Send a push notification.
 ```{r,eth_rsi_push}
 
 if ( eth_signal != "NONE") {
-  MYNOTE <- paste(MYNOTE,"ETH is flashing a ", eth_signal)
+  MYNOTE <- paste(MYNOTE,"ETH RSI2 is flashing a", eth_signal)
 }
 
 if ( !is.null(MYNOTE) ) {
