@@ -92,7 +92,7 @@ params %>% kbl(caption="optimised backtested parameters") %>%  kable_paper("hove
 
 ## Get TRX price data
 
-Obtaining TRX price data (daily) for the last 300 days.
+Obtaining TRX price data (daily) for the last 300 days and today's price.
 
 ```{r,trx_data1}
 
@@ -102,13 +102,6 @@ trxdat <- fromJSON("trxdat.txt")
 price <- trxdat$data$quotes
 price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
-#tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
-
-```
-
-Now gather hourly price data for the last 23 hours.
-
-```{r,trx_data2}
 
 URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=TRX&convert=USD&interval=hourly&time_period=hourly&count=11"
 download.file(URL,destfile="trxdat.txt")
@@ -116,7 +109,6 @@ trxdat <- fromJSON("trxdat.txt")
 price2 <- trxdat$data$quotes
 price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price2) <- c("date","high","low","close")
-#tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 high <- max(price2[,2])
 low <-  min(price2[,3])

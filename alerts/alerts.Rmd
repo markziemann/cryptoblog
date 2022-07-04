@@ -123,13 +123,6 @@ btcdat <- fromJSON("btcdat.txt")
 price <- btcdat$data$quotes
 price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
-
-```
-
-Now gather hourly price data for the last 23 hours.
-
-```{r,btc_data2}
 
 URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=hourly&time_period=hourly&count=11"
 download.file(URL,destfile="btcdat.txt")
@@ -137,7 +130,6 @@ btcdat <- fromJSON("btcdat.txt")
 price2 <- btcdat$data$quotes
 price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price2) <- c("date","high","low","close")
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 high <- max(price2[,2])
 low <-  min(price2[,3])
@@ -152,6 +144,8 @@ if ( TESTING == TRUE) {
 }
 
 ```
+
+Now fetch the backtested parameters.
 
 ```{r,btc_params}
 
@@ -588,13 +582,6 @@ ethdat <- fromJSON("ethdat.txt")
 price <- ethdat$data$quotes
 price <- data.frame( as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
-
-```
-
-Now gather hourly price data for the last 23 hours.
-
-```{r,eth2}
 
 URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=hourly&time_period=hourly&count=11"
 download.file(URL,destfile="ethdat.txt")
@@ -602,7 +589,6 @@ ethdat <- fromJSON("ethdat.txt")
 price2 <- ethdat$data$quotes
 price2 <- data.frame( as.Date(price2$time_close)  , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price2) <- c("date","high","low","close")
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 high <- max(price2[,2])
 low <- min(price2[,3])
@@ -617,6 +603,8 @@ if ( TESTING == TRUE) {
 }
 
 ```
+
+Fetch backtested parameters.
 
 ```{r,eth_params}
 
