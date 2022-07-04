@@ -11,7 +11,7 @@ scp -P 21098 index1.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/i
 for RMD in alerts/alerts_*Rmd ; do
   COIN=$(echo $RMD | sed 's#alerts/alerts_##' | sed 's/.Rmd//')
   echo $COIN $RMD
-#  Rscript -e "rmarkdown::render('${RMD}')"
+  Rscript -e "rmarkdown::render('${RMD}')"
   scp -P 21098 alerts/alerts_${COIN}.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/altcoins/${COIN}
 done
 
