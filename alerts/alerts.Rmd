@@ -258,7 +258,7 @@ message(paste("BTC SMA cross signal is",btc_signal))
 ```{r, btc_cross_plot,fig.height=8,fig.width=8}
 
 plot(price2$close~as.Date(price2$date),type="l",
-  xlab="Date",ylab="price (USD)",main="BTC w 12/21 day SMA cross")
+  xlab="Date",ylab="price (USD)",main="BTC SMA cross")
 grid()
 lines(price2$ma1~ as.Date(price2$date) ,col="red")
 lines(price2$ma2~ as.Date(price2$date) ,col="blue")
@@ -321,7 +321,7 @@ plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="BTC USD price")
 grid()
 plot(price2$DIp~as.Date(price2$date),type="l", col="blue",
-  xlab="Date",ylab="price (USD)",main="BTC 32d DMI")
+  xlab="Date",ylab="price (USD)",main="BTC DMI")
 grid()
 lines(price2$DIn ~ as.Date(price2$date) ,col="red")
 
@@ -654,7 +654,7 @@ message(paste("ETH SMA signal:",eth_signal))
 ```{r, eth_sma_plot,fig.height=8,fig.width=8}
 
 plot(price2$close~as.Date(price2$date),type="l",
-  xlab="Date",ylab="price (USD)",main="ETH w 34D MA")
+  xlab="Date",ylab="price (USD)",main="ETH SMA")
 grid()
 lines(price2$ma~ as.Date(price2$date) ,col="red")
 
@@ -717,7 +717,7 @@ message(paste("ETH SMA cross signal:",eth_signal))
 ```{r, eth_cross_plot,fig.height=8,fig.width=8}
 
 plot(price2$close~as.Date(price2$date),type="l",
-  xlab="Date",ylab="price (USD)",main="ETH w 5/27 day SMA cross")
+  xlab="Date",ylab="price (USD)",main="ETH SMA cross")
 grid()
 lines(price2$ma1~ as.Date(price2$date) ,col="red")
 lines(price2$ma2~ as.Date(price2$date) ,col="blue")
@@ -777,7 +777,7 @@ plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="ETH USD price")
 grid()
 plot(price2$DIp~as.Date(price2$date),type="l", col="blue",
-  xlab="Date",ylab="price (USD)",main="ETH 16d DMI")
+  xlab="Date",ylab="price (USD)",main="ETH DMI")
 grid()
 lines(price2$DIn ~ as.Date(price2$date) ,col="red")
 
