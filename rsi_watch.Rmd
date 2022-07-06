@@ -7,6 +7,8 @@ output:
     toc: true
     toc_float: true
     code_folding: hide
+    fig_width: 10
+    fig_height: 8
 theme: cosmo
 ---
 
@@ -35,6 +37,8 @@ suppressPackageStartupMessages({
   library("parallel")
   library("kableExtra")
   library("anytime")
+  library("plotly")
+  library("gridExtra")
 })
 
 ```
@@ -78,32 +82,56 @@ price <- rbind(weekly,price)
 
 ## RSI on weekly and biweekly
 
-These can be used to spot market cycle tops.
+These can be used to spot market cycle tops and bottoms.
 
 Firstly to the weekly RSI.
 
-```{r,rsi1btc,fig.height=10,fig.width=8}
+```{r,rsi1btc}
 
 price$rsi <- RSI(price$Close,n=14)
 
 tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
 
-par(mfrow=c(2,1))
-plot(price$Close ~ as.Date(price$Date),type="l",log="y",
-  xlab="Date",ylab="price (USD)",main="USD price")
-grid()
+```
 
-plot(price$rsi ~ as.Date(price$Date),type="l",col="blue",
-  xlab="Date",ylab="RSI",ylim=c(20,100),main="weekly RSI")
-grid()
-abline(h=90,col="red")
-abline(h=30,col="black")
+These charts are interactive, so you can hover, zoom, pan, etc.
+
+```{r,rsi1btc2}
+hline <- function(y = 0, color = "black") {
+  list(
+    type = "line",
+    x0 = 0,
+    x1 = 1,
+    xref = "paper",
+    y0 = y,
+    y1 = y,
+    line = list(color = color, dash="dot")
+  )
+}
+
+fig1 <- plot_ly(price, x= ~Date, y= ~Close,
+  type="scatter", mode="lines", name="log USD price",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(xaxis = list(title="Date"),yaxis = list(type="log",title="log USD price"))
+
+fig2 <- plot_ly(price, x= ~Date, y= ~rsi,
+  type="scatter", mode="lines", name="RSI",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(shapes = list(hline(y=90,color="red"),hline(y=35,color="blue") ) ,
+    xaxis=list(title="Date"),yaxis=list("RSI"))
+
+fig <- subplot(fig1, fig2, nrows = 2, shareX=TRUE) %>% 
+  layout(title = list(text = "BTC weekly RSI"))
+
+fig
 
 ```
 
 Biweekly RSI.
 
-```{r,rsi2btc,fig.height=10,fig.width=8}
+```{r,rsi2btc}
 
 if ( nrow(price) %% 2 == 0 ) {
   idx <- seq(2,nrow(price),2)
@@ -117,16 +145,23 @@ price$rsi <- RSI(price$Close,n=14)
 
 tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
-par(mfrow=c(2,1))
-plot(price$Close ~ as.Date(price$Date),type="l",log="y",
-  xlab="Date",ylab="price (USD)",main="USD price")
-grid()
+fig1 <- plot_ly(price, x= ~Date, y= ~Close,
+  type="scatter", mode="lines", name="log USD price",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(xaxis = list(title="Date"),yaxis = list(type="log",title="log USD price"))
 
-plot(price$rsi ~ as.Date(price$Date),type="l",col="blue",
-  xlab="Date",ylab="RSI",ylim=c(20,100),main="biweekly RSI")
-grid()
-abline(h=90,col="red")
-abline(h=30,col="black")
+fig2 <- plot_ly(price, x= ~Date, y= ~rsi,
+  type="scatter", mode="lines", name="RSI",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(shapes = list(hline(y=90,color="red"),hline(y=40,color="blue") ) ,
+    xaxis=list(title="Date"),yaxis=list("RSI"))
+
+fig <- subplot(fig1, fig2, nrows = 2, shareX=TRUE) %>%
+  layout(title = list(text = "BTC biweekly RSI"))
+
+fig
 
 ```
 
@@ -143,7 +178,6 @@ monthly <- monthly[nrow(monthly):1,]
 monthly <- apply(monthly,2,function(x) { gsub(",","",x) } )
 monthly <- as.data.frame(monthly,stringsAsFactors=FALSE)
 monthly$Close <- as.numeric(monthly$Price)
-
 
 y <- paste("20",sapply(strsplit(monthly$Date," "),"[[",2),sep="")
 m <- sapply(strsplit(monthly$Date," "),"[[",1)
@@ -175,22 +209,29 @@ price <- rbind(monthly,price)
 
 These can be used to spot market cycle tops.
 
-```{r,rsi3btc,fig.height=10,fig.width=8}
+```{r,rsi3btc}
 
 price$rsi <- RSI(price$Close,n=14)
 
 tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
 
-par(mfrow=c(2,1))
-plot(price$Close ~ as.Date(price$Date),type="l",log="y",
-  xlab="Date",ylab="price (USD)",main="USD price")
-grid()
+fig1 <- plot_ly(price, x= ~Date, y= ~Close,
+  type="scatter", mode="lines", name="log USD price",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(xaxis = list(title="Date"),yaxis = list(type="log",title="log USD price"))
 
-plot(price$rsi ~ as.Date(price$Date),type="l",col="blue",
-  xlab="Date",ylab="RSI",ylim=c(20,100),main="monthly RSI")
-grid()
-abline(h=90,col="red")
-abline(h=50,col="black")
+fig2 <- plot_ly(price, x= ~Date, y= ~rsi,
+  type="scatter", mode="lines", name="RSI",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(shapes = list(hline(y=90,color="red"),hline(y=45,color="blue") ) ,
+    xaxis=list(title="Date"),yaxis=list("RSI"))
+
+fig <- subplot(fig1, fig2, nrows = 2, shareX=TRUE) %>%
+  layout(title = list(text = "BTC monthly RSI"))
+
+fig
 
 ```
 
@@ -205,9 +246,10 @@ URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?
 download.file(URL,destfile="ethdat.txt")
 dat <- fromJSON("ethdat.txt")
 price <- dat$data$quotes
-price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
-colnames(price) <- c("date","Close")
-price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+price <- data.frame(price$time_close, price$quote$USD$close ,stringsAsFactors=FALSE)
+colnames(price) <- c("Date","Close")
+price$Date <- as.Date(sapply(strsplit(as.character(price$Date),"T"),"[[",1))
+
 
 ```
 
@@ -217,28 +259,41 @@ These can be used to spot market cycle tops.
 
 Firstly to the weekly RSI.
 
-```{r,rsi1eth,fig.height=10,fig.width=8}
+```{r,rsi1eth}
 
 price$rsi <- RSI(price$Close,n=14)
 
 tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
 
-par(mfrow=c(2,1))
-plot(price$Close ~ as.Date(price$date),type="l",log="y",
-  xlab="Date",ylab="price (USD)",main="USD price")
-grid()
+```
 
-plot(price$rsi ~ as.Date(price$date),type="l",col="blue",
-  xlab="Date",ylab="RSI",ylim=c(20,100),main="weekly RSI")
-grid()
-abline(h=90,col="red")
-abline(h=30,col="black")
+These charts are interactive, so you can hover, zoom, pan, etc.  
+
+```{r,rsi1eth2}
+
+fig1 <- plot_ly(price, x= ~Date, y= ~Close,
+  type="scatter", mode="lines", name="log USD price",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(xaxis = list(title="Date"),yaxis = list(type="log",title="log USD price"))
+
+fig2 <- plot_ly(price, x= ~Date, y= ~rsi,
+  type="scatter", mode="lines", name="RSI",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(shapes = list(hline(y=90,color="red"),hline(y=30,color="blue") ) ,
+    xaxis=list(title="Date"),yaxis=list("RSI"))
+
+fig <- subplot(fig1, fig2, nrows = 2, shareX=TRUE) %>%
+  layout(title = list(text = "ETH weekly RSI"))
+
+fig
 
 ```
 
 Biweekly RSI.
 
-```{r,rsi2eth,fig.height=10,fig.width=8}
+```{r,rsi2eth}
 
 if ( nrow(price) %% 2 == 0 ) {
   idx <- seq(2,nrow(price),2)
@@ -252,16 +307,23 @@ price$rsi <- RSI(price$Close,n=14)
 
 tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
-par(mfrow=c(2,1))
-plot(price$Close ~ as.Date(price$date),type="l",log="y",
-  xlab="Date",ylab="price (USD)",main="USD price")
-grid()
+fig1 <- plot_ly(price, x= ~Date, y= ~Close,
+  type="scatter", mode="lines", name="log USD price",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(xaxis = list(title="Date"),yaxis = list(type="log",title="log USD price"))
 
-plot(price$rsi ~ as.Date(price$date),type="l",col="blue",
-  xlab="Date",ylab="RSI",ylim=c(20,100),main="biweekly RSI")
-grid()
-abline(h=90,col="red")
-abline(h=30,col="black")
+fig2 <- plot_ly(price, x= ~Date, y= ~rsi,
+  type="scatter", mode="lines", name="RSI",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(shapes = list(hline(y=90,color="red"),hline(y=40,color="blue") ) ,
+    xaxis=list(title="Date"),yaxis=list("RSI"))
+
+fig <- subplot(fig1, fig2, nrows = 2, shareX=TRUE) %>%
+  layout(title = list(text = "ETH biweekly RSI"))
+
+fig
 
 ```
 
@@ -274,9 +336,11 @@ URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?
 download.file(URL,destfile="ethdat.txt")
 dat <- fromJSON("ethdat.txt")
 price <- dat$data$quotes
-price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
-colnames(price) <- c("date","Close")
-price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+price <- data.frame(price$time_close, price$quote$USD$close ,stringsAsFactors=FALSE)
+colnames(price) <- c("Date","Close")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+price$Date <- anydate(price$Date)
+
 
 ```
 
@@ -284,22 +348,29 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 
 These can be used to spot market cycle tops.
 
-```{r,rsi3eth,fig.height=10,fig.width=8}
+```{r,rsi3eth}
 
 price$rsi <- RSI(price$Close,n=14)
 
 tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
 
-par(mfrow=c(2,1))
-plot(price$Close ~ as.Date(price$date),type="l",log="y",
-  xlab="Date",ylab="price (USD)",main="USD price")
-grid()
+fig1 <- plot_ly(price, x= ~Date, y= ~Close,
+  type="scatter", mode="lines", name="log USD price",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(xaxis = list(title="Date"),yaxis = list(type="log",title="log USD price"))
 
-plot(price$rsi ~ as.Date(price$date),type="l",col="blue",
-  xlab="Date",ylab="RSI",ylim=c(20,100),main="monthly RSI")
-grid()
-abline(h=90,col="red")
-abline(h=50,col="black")
+fig2 <- plot_ly(price, x= ~Date, y= ~rsi,
+  type="scatter", mode="lines", name="RSI",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(shapes = list(hline(y=90,color="red"),hline(y=45,color="blue") ) ,
+    xaxis=list(title="Date"),yaxis=list("RSI"))
+
+fig <- subplot(fig1, fig2, nrows = 2, shareX=TRUE) %>%
+  layout(title = list(text = "ETH monthly RSI"))
+
+fig
 
 ```
 
