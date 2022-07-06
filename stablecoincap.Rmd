@@ -20,24 +20,26 @@ XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBF
 
 ## Intro
 
-I had an idea that the share of stablecoins could be used to predict the end of a bull market, 
-so I went to [tradingview](https://www.tradingview.com/symbols/CRYPTOCAP-USDT.D/) 
+I had an idea that the share of stablecoins could be used to quantify the amount of dry powder in the
+crypto market.
+So I went to [tradingview](https://www.tradingview.com/symbols/CRYPTOCAP-USDT.D/)
 and yes it appears that a jump in stablecoin dominance began in mid 2020, peaking in September and then
 began dropping, coinciding with the bull run of January 2021.
-The concept is that once stablecoin dominance returns to normal levels, the bull market will start to run out of steam due to falling inflows relative to profit takers.
+The concept is that breaks in stablecoin dominance can predict larger market moves, eg risk on/off.
 
 This page is designed to be updated daily - today's date is shown below.
 
 ```{r,lib}
 
 suppressPackageStartupMessages({
-library(jsonlite)
-library(tidyverse)
+  library(jsonlite)
+  library(tidyverse)
+  library(plotly)
 })
 
 Sys.Date()
 
-knitr::opts_chunk$set(fig.width=8, fig.height=8) 
+knitr::opts_chunk$set(fig.width=8, fig.height=8)
 
 ```
 
@@ -52,9 +54,11 @@ Here is a graph of the market cap of these assets since 2019.
 As you can see in the second chart, stablecoin market cap is increasing dramatically.
 
 This represents the phenomenon that stablecoins are becoming an important part of the crypto ecosystem.
-This could be driven by utility as a medium of exchange without borders, as a vehicle for earning high interest, or simply a way to avoid currency debasement in vulnerable countries 
+This could be driven by utility as a medium of exchange without borders, as a vehicle for earning high 
+interest, or simply a way to avoid currency debasement in vulnerable countries 
 like Venezuela, Lebanon and Turkey.
-It seems natural that some of this money will find it's way into existing crypto assets once the markey gains momentum again.
+It seems natural that some of this money will find it's way into existing crypto assets once the market
+gains momentum again.
 
 ```{r,getdata,fig.height=8,fig.width=8}
 
@@ -68,7 +72,7 @@ btc_mc <- btcdat$data$quotes$quote$USD$market_cap
 ETHURL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2019-01-01&time_end=",mydate,sep="")
 download.file(ETHURL,destfile="ethdat.txt")
 ethdat <- fromJSON("ethdat.txt")
-eth_mc <- ethdat$data$quotes$quote$USD$market_cap 
+eth_mc <- ethdat$data$quotes$quote$USD$market_cap
 
 USDTURL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=USDT&convert=USD&interval=daily&time_start=2019-01-01&time_end=",mydate,sep="")
 download.file(USDTURL,destfile="usdtdat.txt")
@@ -96,47 +100,39 @@ lines(mc$times_mc,mc$usdt_mc,col="green")
 lines(mc$times_mc,mc$usdc_mc,col="red")
 legend("topleft", legend=c("BTC", "ETH", "USDT", "USDC"),
        col=c("orange", "blue", "green", "red"), lty=1:4)
+grid()
 
 plot(mc$times_mc,mc$usdt_mc,type="l",col="green",
   ylab="market cap (USD)",main="Major stable asset market cap")
 lines(mc$times_mc,mc$usdc_mc,col="red")
 legend("topleft", legend=c("USDT", "USDC"),
        col=c("green", "red"), lty=1:4)
+grid()
 
 ```
 
 ## Now chart the stablecoin dominance
 
-Next, we can see that the dominance is oscillating in an overall upward direciton.
+We can see that the dominance is in an overall upward direction, but since 2022 it has been on an 
+absolute tear.
 
-Previously, we imagined that the stablecoin dominance would reach 3% for a second time, but it bottommed out at 6%.
-
-The upward momentum is very strong, the recent local tops were 7.5% and 10.5%, so it seems logical it will reach 13.5% in the current downturn.
-After the dominance starts to dip again, we should be looking at the 9% level for a potential bottom.
+The chart below is interactive, so you can hover over points, zoom in, that sort of thing.
 
 ```{r,scdom,fig.height=8,fig.width=8}
 
 p <- ggplot(mc, aes(x=times_mc, y=scrat)) +
-  geom_line() + 
+  geom_line() +
   xlab("") +
-  geom_hline(yintercept=0.03, linetype="dashed", color = "red", size=2) +
   ylab("stablecoin dominance")
-p
 
+ggplotly(p)
 
 ```
 
 ## Notes
 
-Keep in mind that the tragectory of the stablecoin dominance changes can change dramatically, 
-especially in a blow-off top when crypto valuations become rapidly overheated.
-This indicator is not meant to be used in isolation in calling a top. 
-Other supporting indicators could be NUPL, Pi Cycle Top Indicator, 200 Week Moving Average Heatmap and the power law chart. 
-These are linked below:
-
-* https://www.lookintobitcoin.com/charts/
-
-* https://stats.buybitcoinworldwide.com/long-term-power-law/
+So can stablecoin dominance be used to predict major risk on/off momentum changes? Yes, I think it can,
+along with other momentum indicators, so watch these levels closely.
 
 ## Session information
 
