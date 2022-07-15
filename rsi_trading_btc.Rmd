@@ -5,6 +5,8 @@ date: "`r Sys.Date()`"
 output:
   html_document:
     toc: true
+    fig_width: 8
+    fig_height: 8
 theme: cosmo
 ---
 
@@ -137,7 +139,7 @@ rsisig <- function(price,vals=x,fee) {
   } else {
     roi <- 1
     ntrades <- 0
-    meanroi <- mean(trades$diff)
+    meanroi <- 1
   }
   return(c(ntrades,roi,meanroi))
 }
