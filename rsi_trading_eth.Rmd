@@ -23,6 +23,7 @@ library("quantmod")
 library("TTR")
 library("vioplot")
 library("parallel")
+library("kableExtra")
 
 knitr::opts_chunk$set(fig.width=8, fig.height=8) 
 
@@ -41,7 +42,7 @@ URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?
 download.file(URL,destfile="ethdat.txt")
 
 dat <- fromJSON("ethdat.txt")
-price <- ethdat$data$quotes
+price <- dat$data$quotes
 price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","close")
 price$date <- sapply(strsplit(price$date,"T"),"[[",1)
@@ -154,11 +155,11 @@ rsisig <- function(price,vals=x,fee) {
 fee=0.001
 n_rsi=14
 
-mymx <- expand.grid(seq(20,200,2),seq(10,90,2),seq(10,90,2))
+mymx <- expand.grid(seq(20,200,1),seq(10,90,1),seq(10,90,1))
 
 mylist <- as.list(as.data.frame(t(mymx)))
 
-CORES <- detectCores()
+CORES <- detectCores()/2
 
 res_rsi_sig <- mclapply(X=mylist, mc.cores=CORES, FUN=function(x) {
   rsisig(price,vals=x,fee)
