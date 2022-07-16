@@ -276,7 +276,7 @@ colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
 res2$returnspertrade <- res2$returns/res2$trades
 res2$mean <- res2$returns^(1/res2$trades)
-=
+
 basic <- mymfi(price,n1=25,n2=13,fee=fee)
 basic_returns <- basic[1]
 basic_mean <- basic[1]^(1/basic[2])
