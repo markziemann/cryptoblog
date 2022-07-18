@@ -139,6 +139,8 @@ In the following analysis, I test different periods for RSI calculation to see w
 
 * [Weekly and Monthy pivot points for BTC and ETH](crypto/pivots.html)
 
+* [Testing ensembl indicators for BTC and ETH](crypto/ensembl_ma_trading.html)
+
 * [Does MA/EMA indicator performance change over time?](crypto/ma_temporal2.html)
 
 <hr>
