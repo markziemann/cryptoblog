@@ -179,7 +179,7 @@ Below, I show the 20 highest returning indicators.
 
 ```{r,backtestsma}
 
-fee=0.001
+fee=0.002
 
 mas <- expand.grid(5:200,5:200)
 #mas <- expand.grid(4:20,10:30)
