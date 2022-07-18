@@ -129,7 +129,7 @@ return(c(prod(trades$diff),nrow(trades)))
 
 ```{r,backtest}
 
-fee=0.001
+fee=0.002
 
 myrange <- 3:200
 
@@ -261,7 +261,7 @@ Trading signal
 entry=0
 exit=0
 
-sig_sma <- function(price,grs_rs,entry=0,exit=0,fee=0.001) {
+sig_sma <- function(price,grs_rs,entry=0,exit=0,fee=0.002) {
 price2 <- price
 price2$higher <- grs_rs > 0
 yesterday <- price2$higher

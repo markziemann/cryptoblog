@@ -187,7 +187,7 @@ ensembl <- function(price2,threshold,fee) {
 }
 
 res <- t( sapply(1:3,function(i) {
-  ensembl(price2,threshold=i,fee=0.001)
+  ensembl(price2,threshold=i,fee=0.002)
 }) )
 
 rownames(res) <- c(1,2,3)

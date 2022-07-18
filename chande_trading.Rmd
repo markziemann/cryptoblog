@@ -162,7 +162,7 @@ performance metrics.
 
 ```{r,backtest1}
 
-fee=0.001
+fee=0.002
 
 n1r <- seq(10,150,1)
 nsr <- seq(10,200,1)

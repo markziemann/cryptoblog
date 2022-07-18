@@ -181,7 +181,7 @@ return(prod(trades$diff))
 
 ```{r,backtest}
 
-fee=0.001
+fee=0.002
 n_rsi=14
 
 res_sma <- c(0,0,sapply(3:200,function(n) { rsisma(price,n_ma=n,n_rsi=n_rsi,fee) } ) )

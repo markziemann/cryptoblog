@@ -152,7 +152,7 @@ rsisig <- function(price,vals=x,fee) {
 
 ```{r,backtest}
 
-fee=0.001
+fee=0.002
 n_rsi=14
 
 mymx <- expand.grid(seq(20,200,1),seq(10,90,1),seq(10,90,1))
