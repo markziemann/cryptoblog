@@ -126,11 +126,13 @@ TICKERS <- TICKERS[which(! TICKERS %in% EXCLUDE)]
 writeLines(TICKERS,con="tickers.txt")
 mydate <- Sys.Date()-1
 
-#TICKERS=c("XMR","XHV")
+TICKERS=c("BTC","ETH","XMR","XHV")
 
 for ( TICKER in TICKERS ) {
   DATNAME=paste(TICKER,"_dat.txt",sep="")
-  if ( !file.exists(DATNAME) && (as.numeric(Sys.time() - file.info(DATNAME)$mtime ) ) >12 ) {
+  LAST_UPDATE_TIME=as.numeric(Sys.time() - file.info(DATNAME)$mtime )
+  if ( is.na(LAST_UPDATE_TIME) ) { LAST_UPDATE_TIME=100  }
+  if ( LAST_UPDATE_TIME >12 ) {
     URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=",
       TICKER,
       "&convert=USD&interval=daily&time_start=2013-06-01&time_end=",
