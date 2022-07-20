@@ -16,14 +16,16 @@ In this blog post I will be trilaing using RSI for entry and exit.
 
 ```{r,lib}
 
-library("jsonlite")
-library("tidyverse")
-library("runner")
-library("quantmod")
-library("TTR")
-library("vioplot")
-library("parallel")
-library("kableExtra")
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("parallel")
+  library("kableExtra")
+})
 
 knitr::opts_chunk$set(fig.width=8, fig.height=8) 
 
@@ -62,7 +64,7 @@ hodl
 
 ## RSI analysis
 
-FEES: Assuming 0.1% trading fee, as per binance current rate.
+FEES: Assuming 0.2% trading fee.
 
 The idea here is to enter after RSI recovers from a low point and then recovers to positive territory.
 
@@ -150,12 +152,22 @@ rsisig <- function(price,vals=x,fee) {
 
 ## Backtesting
 
+Here, the entry and exit can be either same or different.
+
 ```{r,backtest}
+
+ENTRYEXITSAME=FALSE
 
 fee=0.002
 n_rsi=14
 
-mymx <- expand.grid(seq(20,200,1),seq(10,90,1),seq(10,90,1))
+if ( ENTRYEXITSAME == TRUE ) {
+  mymx <- expand.grid(seq(20,200,1),seq(10,90,1))
+  mymx <- cbind(mymx,mymx[,2])
+  colnames(mymx) <- c("v1","v2","v3")
+} else {
+  mymx <- expand.grid(seq(20,200,1),seq(10,90,1),seq(10,90,1))
+}
 
 mylist <- as.list(as.data.frame(t(mymx)))
 

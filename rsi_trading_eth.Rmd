@@ -152,10 +152,18 @@ rsisig <- function(price,vals=x,fee) {
 
 ```{r,backtest}
 
+ENTRYEXITSAME=FALSE
+
 fee=0.002
 n_rsi=14
 
-mymx <- expand.grid(seq(20,200,1),seq(10,90,1),seq(10,90,1))
+if ( ENTRYEXITSAME == TRUE ) {
+  mymx <- expand.grid(seq(20,200,1),seq(10,90,1))
+  mymx <- cbind(mymx,mymx[,2])
+  colnames(mymx) <- c("v1","v2","v3")
+} else {
+  mymx <- expand.grid(seq(20,200,1),seq(10,90,1),seq(10,90,1))
+}
 
 mylist <- as.list(as.data.frame(t(mymx)))
 
