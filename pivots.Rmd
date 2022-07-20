@@ -62,11 +62,16 @@ r3 = pp + 2 * ( prev_high  - prev_low )
 
 support points
 
-s1 = 2 * pp - prev_high 
+s1 = 2 * pp - prev_high
 
 s2 = pp - ( prev_high  - prev_low )
 
 s3 = pp - 2 * ( prev_high  - prev_low )
+
+The pivot also has pivot top (PY) and pivot bottom (PB) lines.
+
+pb = ( high + low ) / 2
+pt = ( pp - pb ) + pp
 
 In this report, the pivot points are shown with dashed lines.
 Pivot line is black.
@@ -74,6 +79,7 @@ S1 line is red.
 S2 line is orange.
 R1 line is blue.
 R2 line is gren.
+PB and PT are black (dashed)
 
 ```{r,piv_fun}
 
@@ -96,6 +102,7 @@ pivots_weekly <- function(price) {
   wmx$close <- as.numeric(wmx$close)
   hlc2 <- HLC(wmx)
   pp <- rowMeans(hlc2)
+
   r1 <- 2  * pp - hlc2$low
   r2 <- pp + ( hlc2$high - hlc2$low )
   r3 <- pp + 2 * ( hlc2$high  - hlc2$low )
@@ -110,8 +117,10 @@ pivots_weekly <- function(price) {
   s1 <- rep(s1[1:(length(s1)-1)],table(weeks2))
   s2 <- rep(s2[1:(length(s2)-1)],table(weeks2))
   s3 <- rep(s3[1:(length(s3)-1)],table(weeks2))
-  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3)) 
-  deduct_start <- ( nrow(price) - nrow(pivots) ) + 1 
+  pb = ( hlc2$high + hlc2$low ) / 2
+  pt = ( pp - pb ) + pp
+  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3,pb,pt))
+  deduct_start <- ( nrow(price) - nrow(pivots) ) + 1
   price2 <- price[deduct_start:nrow(price),]
   res <- cbind(price2,pivots)
   return(res)
@@ -151,7 +160,9 @@ pivots_monthly <- function(price) {
   s1 <- rep(s1[1:(length(s1)-1)],table(months2))
   s2 <- rep(s2[1:(length(s2)-1)],table(months2))
   s3 <- rep(s3[1:(length(s3)-1)],table(months2))
-  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3))
+  pb = ( hlc2$high + hlc2$low ) / 2
+  pt = ( pp - pb ) + pp
+  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3,pb,pt))
   deduct_start <- ( nrow(price) - nrow(pivots) ) + 1
   price2 <- price[deduct_start:nrow(price),]
   res <- cbind(price2,pivots)
@@ -192,7 +203,9 @@ pivots_quarterly <- function(price) {
   s1 <- rep(s1[1:(length(s1)-1)],table(quarters2))
   s2 <- rep(s2[1:(length(s2)-1)],table(quarters2))
   s3 <- rep(s3[1:(length(s3)-1)],table(quarters2))
-  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3))
+  pb = ( hlc2$high + hlc2$low ) / 2
+  pt = ( pp - pb ) + pp
+  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3,pb,pt))
   deduct_start <- ( nrow(price) - nrow(pivots) ) + 1
   price2 <- price[deduct_start:nrow(price),]
   res <- cbind(price2,pivots)
@@ -233,7 +246,9 @@ pivots_yearly <- function(price) {
   s1 <- rep(s1[1:(length(s1)-1)],table(years2))
   s2 <- rep(s2[1:(length(s2)-1)],table(years2))
   s3 <- rep(s3[1:(length(s3)-1)],table(years2))
-  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3))
+  pb = ( hlc2$high + hlc2$low ) / 2
+  pt = ( pp - pb ) + pp
+  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3,pb,pt))
   deduct_start <- ( nrow(price) - nrow(pivots) ) + 1
   price2 <- price[deduct_start:nrow(price),]
   res <- cbind(price2,pivots)
@@ -257,11 +272,13 @@ pivots_weekly2 <- function(price) {
     s1 <- ( 2 * pp ) - hi
     s2 <- pp - ( hi  - lo )
     s3 <- pp - ( 2 * ( hi - lo ) )
+    pb = ( hi + lo ) / 2
+    pt = ( pp - pb ) + pp
     d0 <- mdat[1,"date"]
     d1 <- as.Date(d0)+7
     d2 <- d1+6
     magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
-      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3)
+      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3, "pb"=pb, "pt"=pt)
   }  )
   res
 }
@@ -282,9 +299,11 @@ pivots_monthly2 <- function(price) {
     s1 <- ( 2 * pp ) - hi
     s2 <- pp - ( hi  - lo )
     s3 <- pp - ( 2 * ( hi - lo ) )
+    pb = ( hi + lo ) / 2
+    pt = ( pp - pb ) + pp
     d <- mdat[nrow(mdat),"date"]
     yr <- year(d)
-    mo <- month(d) +1 
+    mo <- month(d) +1
     if ( mo > 12 ) { mo=1 ; yr <- yr +1 }
     d1 <- as.Date(paste(yr,mo,"01",sep="-"))
     yr <- year(d)
@@ -293,7 +312,7 @@ pivots_monthly2 <- function(price) {
     if ( mo > 12 ) { mo=1 ; yr <- yr +1 }
     d2 <- as.Date(paste(yr,mo,"01",sep="-"))-1
     magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
-      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3)
+      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3, "pb"=pb, "pt"=pt)
   }  )
   res
 }
@@ -315,6 +334,8 @@ pivots_quarterly2 <- function(price) {
     s1 <- ( 2 * pp ) - hi
     s2 <- pp - ( hi  - lo )
     s3 <- pp - ( 2 * ( hi - lo ) )
+    pb = ( hi + lo ) / 2
+    pt = ( pp - pb ) + pp
     d <- as.Date(mdat[1,"date"])
     y1 <- year(d)
     q <- quarter(d)
@@ -327,7 +348,7 @@ pivots_quarterly2 <- function(price) {
     if ( m2 > 12 ) { m2=1 ; y2=y1+1 }
     d2 <- as.Date(paste(y2,m2,"01",sep="-"))-1
     magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
-      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3)
+      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3, "pb"=pb, "pt"=pt)
   }  )
   res
 }
@@ -348,10 +369,12 @@ pivots_yearly2 <- function(price) {
     s1 <- ( 2 * pp ) - hi
     s2 <- pp - ( hi  - lo )
     s3 <- pp - ( 2 * ( hi - lo ) )
+    pb = ( hi + lo ) / 2
+    pt = ( pp - pb ) + pp
     d1 <- as.Date(paste(m+1,"-01-01",sep=""))
     d2 <- as.Date(paste(m+1,"-12-31",sep=""))
     magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
-      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3)
+      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3, "pb"=pb, "pt"=pt)
   }  )
   res
 }
@@ -401,6 +424,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -431,6 +456,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -468,6 +495,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -496,6 +525,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -533,6 +564,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -561,6 +594,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -598,6 +633,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -654,6 +691,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -684,6 +723,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -721,6 +762,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -749,6 +792,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -786,6 +831,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -814,6 +861,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
@@ -851,6 +900,8 @@ x <- lapply(pivml, function(x) {
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[11] , x[11] ) , col="orange") #s2
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[7] , x[7] ) , col="blue") #r1
   lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[8] , x[8] ) , col="darkgreen") #r2
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[13] , x[13] ) , lty=2, col="black") #pb
+  lines(c(as.Date(x[[1]]),as.Date(x[[2]]) ), c( x[14] , x[14] ) , lty=2,col="black") #pt
 } )
 
 ```
