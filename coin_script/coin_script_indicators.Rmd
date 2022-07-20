@@ -1,0 +1,102 @@
+---
+title: "Systematic analysis coin market indicator performance"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+theme: cosmo
+---
+
+Source: https://github.com/markziemann/cryptoblog/blob/main/coin_script_indicators.Rmd
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
+
+## Intro
+
+Previously I performed backtesting for major altcoins.
+Now it is time to look at which indicator performed best across all coins.
+
+```{r,lib0}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Here I'm looking at the backtest results for the coins examined.
+I want to know which indicator gives the best,most reliable overall performance.
+
+```{r,data1}
+
+files <- list.files(".",pattern="_dat.txt")
+
+l <- lapply(files,function(f) {
+  df <- read.table(f,header=TRUE)
+  name <- sapply(strsplit(f,"_"),"[[",1)
+  df$coin <- name
+  return(df)
+})
+
+df <- do.call(rbind,l)
+
+
+sma <- subset(df,indicator=="SMA")[,"xhodl"]
+ema <- subset(df,indicator=="EMA")[,"xhodl"]
+smacross <- subset(df,indicator=="SMAcross")[,"xhodl"]
+emacross <- subset(df,indicator=="EMAcross")[,"xhodl"]
+dmi <- subset(df,indicator=="DMI")[,"xhodl"]
+tsi <- subset(df,indicator=="TSI")[,"xhodl"]
+stoch <- subset(df,indicator=="stoch")[,"xhodl"]
+rsi2 <- subset(df,indicator=="RSI2")[,"xhodl"]
+
+l2 <- list("SMA"=sma,"EMA"=ema,"SMAcross"=smacross,"EMAcross"=emacross,"DMI"=dmi,
+  "TSI"=tsi,"stoch"=stoch,"RSI2"=rsi2)
+
+
+l2 <- l2[order(unlist(lapply(l2,median)))]
+
+par(mar=c(5,7,5,1))
+
+vioplot(l2,main="total returns for backtested indicators for all coins",horizontal=TRUE,las=1) ; grid()
+
+vioplot(l2,ylim=c(-10,40), horizontal=TRUE,las=1,
+  main="total returns for backtested indicators for all coins")
+grid()
+
+boxplot(l2, ylim=c(-10,40),horizontal=TRUE,las=1,main="total ROI by indicator") ; grid()
+
+barplot(unlist(lapply(l2,median)),horiz=TRUE,las=1,main="median total ROI") ; grid()
+
+```
+
+At writing, the stoch performed best, followed by SMAcross
+
+## Conclusion
+
+Interestingly the stoch performed best in this analysis (2022/07/20), followed by SMAcross and EMAcross, DMI and TSI.
+
+## Session information
+
+```{r,sessionInfo0}
+
+sessionInfo()
+
+```
+
