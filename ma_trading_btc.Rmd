@@ -291,50 +291,6 @@ lines(ma~ as.Date(price$date) ,col="red")
 
 ```
 
-### 43D SMA
-
-I like the 43 day MA because the gains are very high, but requires fewer trades - this is particularly good if the trades are 
-executed manually.
-
-```{r,sma43,fig.width=10,fig.height=8}
-
-best_sma = 43
-message(paste("Selected SMA period:",best_sma))
-ma <- SMA(Cl(price),n=best_sma)
-price2 <- price
-price2$ma <- ma
-price2$higher <- price2$close > price2$ma
-yesterday <- price2$higher
-yesterday <- c(NA,yesterday)
-yesterday <- yesterday[1:(length(yesterday)-1)]
-price2$yesterday <- yesterday
-price2$trade <- price2$higher - price2$yesterday
-price2 <- price2[which(price2$trade!=0),]
-if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c("date","close")]
-colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c("date","close")]
-colnames(sell) <- c("sell_date","sell_price")
-if( nrow(buy) != nrow(sell) ) {
-  MIN=min(nrow(buy),nrow(sell))
-  buy <- buy[1:MIN,]
-  sell <- sell[1:MIN,]
-}
-sma_trades <- cbind(buy,sell)
-message(paste("Number of trades:",nrow(sma_trades)))
-sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trades$buy_price ) +1 - (2 * fee )
-message(paste("Total ROI:",prod(sma_trades$diff)))
-message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
-sma_trades  %>% kbl() %>%  kable_styling()
-SMA_HEADER=paste(best_sma,"day moving average")
-plot(price$close~as.Date(price$date),type="l",log="y",
-  xlab="Date",ylab="price (USD)",main=SMA_HEADER)
-grid()
-lines(ma~ as.Date(price$date) ,col="red")
-
-```
-
 ### SMA recent action
 
 ```{r,sma_recent}
