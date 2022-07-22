@@ -236,20 +236,10 @@ This is less optimal if trades are executed manually.
 
 ```{r,backtest_res2}
 
-head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+res2 <- res2[order(-res2$returns),]
+head(res2,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
-
-Now look at the strategies with mean ROI>1.1 and highest overall returns.
-
-```{r,backtest,res3}
-
-res3 <- subset(res2,mean>=1.1)
-res3 <- res3[order(-res3$returns),]
-head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
-
-```
-
 
 ## Plots
 
@@ -266,11 +256,6 @@ points(basic_mean,basic_returns,col="red",pch=19,cex=2)
 abline(h=hodl,col="red")
 grid()
 
-plot(res3$mean , res3$returns, log="y",xlab="mean ROI", ylab="total returns")
-points(basic_mean,basic_returns,col="red",pch=19,cex=2)
-abline(h=hodl,col="red")
-grid()
-
 ```
 
 ## Backtest part 2
@@ -281,9 +266,9 @@ Now a fine search of the best parameter space.
 
 fee=0.002
 
-n1r <- seq(min(head(res3,20)$n1),max(head(res3,20)$n1),1)
-n2r <- seq(min(head(res3,20)$n2),max(head(res3,20)$n2),1)
-nsr <- seq(min(head(res3,20)$ns),max(head(res3,20)$ns),1)
+n1r <- seq(min(head(res2,20)$n1),max(head(res2,20)$n1),1)
+n2r <- seq(min(head(res2,20)$n2),max(head(res2,20)$n2),1)
+nsr <- seq(min(head(res2,20)$ns),max(head(res2,20)$ns),1)
 params <- expand.grid(n1r,n2r,nsr)
 colnames(params) <- c("n1","n2","nsignal")
 params <- params[which( params$n1 > params$n2) ,]
@@ -321,17 +306,9 @@ This is less optimal if trades are executed manually.
 
 ```{r,backtest_res5}
 
-head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+res2 <- res2[order(-res2$returns),]
 
-```
-
-Now look at the strategies with mean ROI>1.1 and highest overall returns.
-
-```{r,backtest,res6}
-
-res3 <- subset(res2,mean>=1.1)
-res3 <- res3[order(-res3$returns),]
-head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -342,9 +319,9 @@ executed over the years.
 
 ```{r,best1,fig.width=10,fig.height=8}
 
-best_n1 = res3[1,1]
-best_n2 = res3[1,2]
-best_ns = res3[1,3]
+best_n1 = res2[1,1]
+best_n2 = res2[1,2]
+best_ns = res2[1,3]
 
 message(paste("Selected n1 period:",best_n1))
 message(paste("Selected n2 period:",best_n2))

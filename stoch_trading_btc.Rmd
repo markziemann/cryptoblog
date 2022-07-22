@@ -252,22 +252,12 @@ head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_paper("hover", full_width
 
 ```
 
-Strategies with the highest returns - these are too frequent and each trade has only small returns.
+Strategies with the highest returns.
 
 ```{r,res2}
 
-head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
-
-```
-
-Simply exclude any strategies with more than 200 trades and then look at the ones with the highest
-returns.
-
-```{r,res3}
-
-res3 <- subset(res2,trades<200)
-
-head(res3[order(-res3$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+res2 <- res2[order(-res2$returns),]
+head(res2,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -284,31 +274,16 @@ points(basic_mean,basic_returns,col="red",pch=19,cex=2)
 abline(h=hodl,col="red")
 grid()
 
-plot(res3$mean , res3$returns, log="y",xlab="mean ROI", ylab="total returns, <200 trades")
-points(basic_mean,basic_returns,col="red",pch=19,cex=2)
-abline(h=hodl,col="red")
-grid()
-
 ```
 
-Here's the table of results for the strategies with mean trade ROI of >108% and highest overall ROI.
-
-```{r,res4}
-
-res5 <- subset(res2, mean > 1.08 )
-res5 <- res5[order(-res5$returns),]
-res5 <- head(res5,20)
-res5 %>% kbl() %>%  kable_paper("hover", full_width = F)
-
-```
-
-Now that I know which ranges of values work well, I will zoom in and do a more comprehensive
-backtesting for the following values nfastk(32:52),nfastd/nslowd(42:82) and smooth (1:5).
+Now that I know broadly which ranges of values work well, I will zoom in and do a more fine-grained
+backtesting for the parameters which performed well initially.
 
 ```{r,backtest2}
 
 fee=0.002
 
+res5 <- head(res2,20)
 nFastK <- seq(min(res5$nFastK),max(res5$nFastK),1)
 nFastD <- seq(min(res5$nFastD),max(res5$nFastD),1)
 smooth <- seq(min(res5$smooth),max(res5$smooth),1)
@@ -333,20 +308,17 @@ Here are the highest returning strategies with fewer than 200 trades.
 
 ```{r,res6}
 
-res3 <- subset(res2,trades<200)
-res3 <- res3[order(-res3$returns),]
+res3 <- res2[order(-res2$returns),]
 
-head(res3,10) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
 ## Optimisation
 
-This one looks to be the best: nFastK=7, nSlowD/nFastD=45, smooth=17
-
 I have tested the best slowD and varying it did not make any improvement.
 
-Below I show the results for this strategy, charts and each individual trade.
+Below I show the best results for this strategy, charts and each individual trade.
 
 ```{r,best1,fig.width=10,fig.height=8}
 
