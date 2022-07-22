@@ -227,8 +227,6 @@ This is good indicator because the frequency is lower, but the gains are still v
 ```{r,best_sma2,fig.width=10,fig.height=8}
 
 res <- res[order(-res$returns),]
-if (res$mean[1]>1.08) { res<-subset(res,mean>1.08) }
-if (res$mean[1]>1.1) { res<-subset(res,mean>1.1) }
 
 best_n = as.numeric(head(res[order(-res$returns),"period"],1))
 message(paste("Selected DMI period:",best_n))

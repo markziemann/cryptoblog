@@ -249,8 +249,6 @@ Now look at the strategies with mean ROI>1.1 and highest overall returns.
 ```{r,backtest,res3}
 
 res3 <- res2[order(-res2$returns),]
-if (nrow(subset(res3,mean>1.1))>0 ) { res3 <- subset(res3,mean>=1.1) }
-if (nrow(subset(res3,mean>1.08))>0 ) { res3 <- subset(res3,mean>=1.08) }
 
 head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
@@ -327,19 +325,8 @@ This is less optimal if trades are executed manually.
 
 ```{r,backtest_res5}
 
-head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
-
-```
-
-Now look at the strategies with mean ROI>1.1 and highest overall returns.
-
-```{r,backtest,res6}
-
-res3 <- res2[order(-res2$returns),]
-if (nrow(subset(res3,mean>1.1))>0 ) { res3 <- subset(res3,mean>=1.1) }
-if (nrow(subset(res3,mean>1.08))>0 ) { res3 <- subset(res3,mean>=1.08) }
-
-head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+res2 <- res2[order(-res2$returns),]
+head(res2,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
 
 ```
 
@@ -350,9 +337,9 @@ executed over the years.
 
 ```{r,best1,fig.width=10,fig.height=8}
 
-best_n1 = res3[1,1]
-best_n2 = res3[1,2]
-best_ns = res3[1,3]
+best_n1 = res2[1,1]
+best_n2 = res2[1,2]
+best_ns = res2[1,3]
 
 message(paste("Selected n1 period:",best_n1))
 message(paste("Selected n2 period:",best_n2))

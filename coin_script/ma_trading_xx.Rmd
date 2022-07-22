@@ -256,12 +256,10 @@ We then select the strategy with mean ROI>1.08 and the overall highest ROI.
 
 ```{r,top}
 
-res_sma <- subset(res_sma,mean>1.08)
 res_sma <- res_sma[order(-res_sma$returns),]
 res_sma$MA <- rownames(res_sma)
 head(res_sma,10) %>% kbl(caption="Best performing SMA strategies") %>%  kable_styling()
 
-res_ema <- subset(res_ema,mean>1.08)
 res_ema <- res_ema[order(-res_ema$returns),]
 res_ema$MA <- rownames(res_ema)
 head(res_ema,10) %>% kbl(caption="Best performing EMA strategies") %>%  kable_styling()
