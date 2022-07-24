@@ -130,7 +130,7 @@ rsi <- function(price,n1,n2,maType=EMA,fee=0.002) {
   price2$yesterday <- yesterday
   price2$trade <- price2$higher - price2$yesterday
   price2 <- price2[which(price2$trade!=0),]
-  if (nrow(price2)>0) { 
+  if (nrow(price2)>0) {
     if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
     if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
     buy <- subset(price2,trade==1)[,c("date","close")]
@@ -156,7 +156,7 @@ rsi <- function(price,n1,n2,maType=EMA,fee=0.002) {
 
 Now let's go back in time to test the performance of the double RSI indicator using different intervals.
 
-Let's assume a 0.1% trading fee, as per binance current rate.
+Let's assume a 0.2% trading fee.
 
 ```{r,backtestema}
 

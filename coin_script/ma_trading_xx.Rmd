@@ -153,7 +153,7 @@ if (nrow(price2)>0) {
 
 Let's look back in time and trial SMA and EMA strategies with an interval from 3 to 200 days.
 
-Let's assume a 0.1% trading fee, as per binance current rate.
+Let's assume a 0.2% trading fee.
 
 
 ```{r,backtest}
