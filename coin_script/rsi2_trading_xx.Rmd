@@ -236,8 +236,8 @@ This is good indicator because mean gains are >1.08 and number of trades is less
 
 ```{r,best,fig.width=10,fig.height=8}
 
-best_n1 = res[1,1]
-best_n2 = res[1,2]
+best_n1 = res2[1,1]
+best_n2 = res2[1,2]
 if(is.na(best_n1)) { best_n1 = 3 }
 if(is.na(best_n2)) { best_n2 = 3 }
  
