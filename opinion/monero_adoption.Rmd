@@ -1,0 +1,74 @@
+---
+title: "The case for monero adoption"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+    rmdformats::downcute:
+        downcute_theme: "chaos"
+    toc: true
+    toc_float: true
+    code_folding: hide
+    fig_width: 7
+    fig_height: 7
+theme: cosmo
+---
+
+Source: https://github.com/markziemann/cryptoblog/tree/main/opinion/monero_adoption.Rmd
+
+This document is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
+
+## Preface
+
+This is not financial advice - it is for educational and informational purposes only.
+
+This is a work in progress, so may have typos and lack links to sources.
+Feel free to get in touch by email mark.ziemann[at]gmail.com or twitter @mdziemann.
+
+```{r,lib, echo=FALSE}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+```
+
+## I previously wrote about bitcoin's shortcomings
+
+## 8 reasons why monero will be adopted over bitcoin
+
+* Customer privacy
+
+* Merchant privacy
+
+* SOV privacy
+
+* Monero's design enables L1 scaling and cheap transactions
+
+* Monero's tail emission will guarantee network security
+
+* Tail emission will guarantee network longevity
+
+* Halvenings are stupid, gradual tail emission is better
+
+* Mining is possible on consumer grade hardware
+
+## What adoption will look like
+
+* Illicit uses: Dark net markets and ransomware
+
+* Coin cards
+
+* Global south: hyperinflationary and repressive states
+
+* Number of nodes and transactions
+
+* Moving up the market cap rank
