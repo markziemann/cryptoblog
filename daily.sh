@@ -3,7 +3,8 @@
 MYCMD=$(echo $0)
 MYDIR=$(dirname $MYCMD)
 cd $MYDIR
-
+git pull
+Rscript -e "rmarkdown::render('index0.Rmd')"
 Rscript -e "rmarkdown::render('alerts/alerts.Rmd')" && \
 scp -P 21098 alerts/alerts.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 scp -P 21098 index1.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/index.html
@@ -17,8 +18,8 @@ done
 
 sleep 10m
 
-Rscript -e "rmarkdown::render('coins.Rmd')"
-cp coins.html crypto
+#Rscript -e "rmarkdown::render('coins.Rmd')"
+#cp coins.html crypto
 
 Rscript -e "rmarkdown::render('ma_trading_btc.Rmd')" && \
   scp -P 21098 ma_trading_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto

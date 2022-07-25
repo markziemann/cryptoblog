@@ -48,9 +48,17 @@ Current state if the indicators as at MYTIME:
 
 <hr>
 
+## News and updates
+
+* *2022/07/26* - Added interactive plots into the bitcoin risk index and some other indicators.
+
+* *2022/07/25* - BTC Biweekly RSI is at record lows, suggesting that downtrend is over temporarily.
+
+* *2022/07/20* - New indicators added: Keltner channels and pivot points
+
 ## Moving averages
 
-Among the simplest approaches is to rely on market momentum by buying when price rises above a 
+Among the simplest approaches is to rely on market momentum by buying when price rises above a
 [moving average](https://www.investopedia.com/articles/active-trading/052014/how-use-moving-average-buy-stocks.asp)
 and sell when price goes below.
 The following analyses identify optimal moving average intervals for bitcoin and ether.
