@@ -41,9 +41,9 @@ suppressPackageStartupMessages({
 
 ```
 
-## I previously wrote about bitcoin's shortcomings
-
 ## 8 reasons why monero will be adopted over bitcoin
+
+* War on cash
 
 * Customer privacy
 
@@ -60,6 +60,8 @@ suppressPackageStartupMessages({
 * Halvenings are stupid, gradual tail emission is better
 
 * Mining is possible on consumer grade hardware
+
+* Monero thrives in adversarial environment
 
 ## What adoption will look like
 
