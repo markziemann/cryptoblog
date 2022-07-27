@@ -92,7 +92,7 @@ coinfun <- function(TICKER) {
   rmarkdown::render(scriptname,output_dir=TICKER)
   unlink(scriptname)
 
-  file.copy(paste(TICKER,"_dat.txt",sep=""),TICKER)
+  file.copy(paste(TICKER,"_dat.txt",sep=""),TICKER, overwrite = TRUE)
 
   script <- readLines("summary_xx.Rmd")
   script <- gsub("TICKER",TICKER,script)
@@ -126,7 +126,7 @@ TICKERS <- TICKERS[which(! TICKERS %in% EXCLUDE)]
 writeLines(TICKERS,con="tickers.txt")
 mydate <- Sys.Date()-1
 
-TICKERS=c("BTC","ETH","XMR","XHV")
+#TICKERS=c("BTC","ETH","XMR","XHV")
 
 for ( TICKER in TICKERS ) {
   DATNAME=paste(TICKER,"_dat.txt",sep="")
