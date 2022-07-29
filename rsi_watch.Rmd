@@ -1,5 +1,5 @@
 ---
-title: "Watching the weekly RSI for BTC and ETH"
+title: "Watching the weekly RSI for BTC, ETH and XMR"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -369,6 +369,145 @@ fig2 <- plot_ly(price, x= ~Date, y= ~rsi,
 
 fig <- subplot(fig1, fig2, nrows = 2, shareX=TRUE) %>%
   layout(title = list(text = "ETH monthly RSI"))
+
+fig
+
+```
+
+## Get XMR data
+
+Obtaining XMR historical data (daily).
+
+```{r,getdataxmr}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=weekly&time_start=2015-08-01&time_end=",mydate,sep="")
+download.file(URL,destfile="xmrdat.txt")
+dat <- fromJSON("xmrdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$close ,stringsAsFactors=FALSE)
+colnames(price) <- c("Date","Close")
+price$Date <- as.Date(sapply(strsplit(as.character(price$Date),"T"),"[[",1))
+
+
+```
+
+## RSI on weekly and biweekly
+
+These can be used to spot market cycle tops.
+
+Firstly to the weekly RSI.
+
+```{r,rsi1xmr}
+
+price$rsi <- RSI(price$Close,n=14)
+
+tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
+
+```
+
+These charts are interactive, so you can hover, zoom, pan, etc.  
+
+```{r,rsi1xmr2}
+
+fig1 <- plot_ly(price, x= ~Date, y= ~Close,
+  type="scatter", mode="lines", name="log USD price",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(xaxis = list(title="Date"),yaxis = list(type="log",title="log USD price"))
+
+fig2 <- plot_ly(price, x= ~Date, y= ~rsi,
+  type="scatter", mode="lines", name="RSI",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(shapes = list(hline(y=90,color="red"),hline(y=30,color="blue") ) ,
+    xaxis=list(title="Date"),yaxis=list("RSI"))
+
+fig <- subplot(fig1, fig2, nrows = 2, shareX=TRUE) %>%
+  layout(title = list(text = "XMR weekly RSI"))
+
+fig
+
+```
+
+Biweekly RSI.
+
+```{r,rsi2xmr}
+
+if ( nrow(price) %% 2 == 0 ) {
+  idx <- seq(2,nrow(price),2)
+} else {
+  idx <- seq(1,nrow(price),2)
+}
+
+price <- price[idx,]
+
+price$rsi <- RSI(price$Close,n=14)
+
+tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+
+fig1 <- plot_ly(price, x= ~Date, y= ~Close,
+  type="scatter", mode="lines", name="log USD price",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(xaxis = list(title="Date"),yaxis = list(type="log",title="log USD price"))
+
+fig2 <- plot_ly(price, x= ~Date, y= ~rsi,
+  type="scatter", mode="lines", name="RSI",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(shapes = list(hline(y=90,color="red"),hline(y=40,color="blue") ) ,
+    xaxis=list(title="Date"),yaxis=list("RSI"))
+
+fig <- subplot(fig1, fig2, nrows = 2, shareX=TRUE) %>%
+  layout(title = list(text = "XMR biweekly RSI"))
+
+fig
+
+```
+
+## Get monthly data
+
+```{r,getdata2xmr}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=monthly&time_start=2015-08-01&time_end=",mydate,sep="")
+download.file(URL,destfile="xmrdat.txt")
+dat <- fromJSON("xmrdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$close ,stringsAsFactors=FALSE)
+colnames(price) <- c("Date","Close")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+price$Date <- anydate(price$Date)
+
+
+```
+
+## RSI on the monthly
+
+These can be used to spot market cycle tops.
+
+```{r,rsi3xmr}
+
+price$rsi <- RSI(price$Close,n=14)
+
+tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
+
+fig1 <- plot_ly(price, x= ~Date, y= ~Close,
+  type="scatter", mode="lines", name="log USD price",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(xaxis = list(title="Date"),yaxis = list(type="log",title="log USD price"))
+
+fig2 <- plot_ly(price, x= ~Date, y= ~rsi,
+  type="scatter", mode="lines", name="RSI",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>RSI:', round(rsi,0.1) )) %>%
+  layout(shapes = list(hline(y=90,color="red"),hline(y=45,color="blue") ) ,
+    xaxis=list(title="Date"),yaxis=list("RSI"))
+
+fig <- subplot(fig1, fig2, nrows = 2, shareX=TRUE) %>%
+  layout(title = list(text = "XMR monthly RSI"))
 
 fig
 

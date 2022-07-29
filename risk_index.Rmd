@@ -235,7 +235,7 @@ tail(daily) %>% kbl() %>% kable_paper("hover", full_width = F)
 
 ```
 
-## Final notes
+## Conclusion
 
 This is just a model of the historical data, it may not turn out like this in future.
 As the old saying goes, "past performance does not predict future results", 
@@ -249,6 +249,118 @@ There are other indicators of market tops I've listed below:
 * https://www.lookintobitcoin.com/charts/
 
 * https://stats.buybitcoinworldwide.com/long-term-power-law/
+
+## What about ethereum?
+
+```{r,getdata_eth}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-01-01&time_end=",mydate,sep="")
+download.file(URL,destfile="ethdat_daily.txt")
+ethdat <- fromJSON("ethdat_daily.txt")
+price <- ethdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$open, price$quote$USD$close, stringsAsFactors=FALSE)
+colnames(price) <- c("Date","High","Low","Open","Close")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+
+price$Date <- anydate(price$Date)
+
+daily <- price
+
+```
+
+Calculate moving averages, ratio and risk index
+
+```{r,ma1_eth}
+
+daily$MA50d <- SMA(daily$Close,n=50)
+daily$MA50w <- SMA(daily$Close,n=350)
+
+daily$ratio <- daily$MA50d / daily$MA50w
+
+tail(daily) %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
+
+ratio<-daily[which(!is.na(daily$ratio)),"ratio"]
+rat_min <- min(ratio)
+
+```
+
+This plot shows how the ratio peaks are diminishing over time.
+
+```{r,plot1_eth}
+
+par(mfrow=c(2,1))
+
+plot(daily$Close ~ daily$Date, log="y",type="l",
+ xlab="", ylab="USD", main="USD Price" ,pch=19,cex=0.1)
+mtext("blue line=floor,red line=top")
+grid()
+
+plot(daily$Date,daily$ratio,
+ xlab="", ylab="ratio", main="50d MA / 50w MA" ,pch=19,cex=0.1)
+mtext("blue line=floor,red line=top")
+grid()
+
+```
+
+## What about monero?
+
+```{r,getdata_xmr}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&time_start=2013-01-01&time_end=",mydate,sep="")
+download.file(URL,destfile="xmrdat_daily.txt")
+xmrdat <- fromJSON("xmrdat_daily.txt")
+price <- xmrdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$open, price$quote$USD$close, stringsAsFactors=FALSE)
+colnames(price) <- c("Date","High","Low","Open","Close")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+
+price$Date <- anydate(price$Date)
+
+daily <- price
+
+```
+
+Calculate moving averages, ratio and risk index
+
+```{r,ma1_xmr}
+
+daily$MA50d <- SMA(daily$Close,n=50)
+daily$MA50w <- SMA(daily$Close,n=350)
+
+daily$ratio <- daily$MA50d / daily$MA50w
+
+tail(daily) %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
+
+ratio<-daily[which(!is.na(daily$ratio)),"ratio"]
+rat_min <- min(ratio)
+
+```
+
+This plot shows how the ratio peaks are diminishing over time.
+
+```{r,plot1_xmr}
+
+par(mfrow=c(2,1))
+
+plot(daily$Close ~ daily$Date, log="y",type="l",
+ xlab="", ylab="USD", main="USD Price" ,pch=19,cex=0.1)
+mtext("blue line=floor,red line=top")
+grid()
+
+plot(daily$Date,daily$ratio,
+ xlab="", ylab="ratio", main="50d MA / 50w MA" ,pch=19,cex=0.1)
+mtext("blue line=floor,red line=top")
+grid()
+
+```
 
 ## Session information
 
