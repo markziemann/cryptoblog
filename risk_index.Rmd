@@ -290,13 +290,15 @@ rat_min <- min(ratio)
 
 This plot shows how the ratio peaks are diminishing over time.
 
-```{r,plot1_eth}
+```{r,plot1_eth,fig.height=10,fig.width=10}
 
 par(mfrow=c(2,1))
 
 plot(daily$Close ~ daily$Date, log="y",type="l",
  xlab="", ylab="USD", main="USD Price" ,pch=19,cex=0.1)
-mtext("blue line=floor,red line=top")
+mtext("blue line=MA50d,red line=MA50w")
+lines( daily$MA50d ~ daily$Date , col="blue" )
+lines( daily$MA50w ~ daily$Date , col="red" )
 grid()
 
 plot(daily$Date,daily$ratio,
@@ -346,13 +348,15 @@ rat_min <- min(ratio)
 
 This plot shows how the ratio peaks are diminishing over time.
 
-```{r,plot1_xmr}
+```{r,plot1_xmr,fig.height=10,fig.width=10}
 
 par(mfrow=c(2,1))
 
 plot(daily$Close ~ daily$Date, log="y",type="l",
  xlab="", ylab="USD", main="USD Price" ,pch=19,cex=0.1)
-mtext("blue line=floor,red line=top")
+mtext("blue line=MA50d,red line=MA50w")
+lines( daily$MA50d ~ daily$Date , col="blue" )
+lines( daily$MA50w ~ daily$Date , col="red" )
 grid()
 
 plot(daily$Date,daily$ratio,
