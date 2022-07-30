@@ -1,5 +1,5 @@
 ---
-title: "Keltner Channel Indicator for BTC and ETH"
+title: "Keltner Channel Indicator for BTC, ETH and XMR"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -371,28 +371,140 @@ lines(as.Date(price2$date) ,  kc2[,"up"] , col="red")
 
 ```
 
+## Weekly KC for XMR
 
+```{r,weeklydata_xmr}
 
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=weekly&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="xmrdat.txt")
 
+dat <- fromJSON("xmrdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high,
+  price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 
+```
 
+10 week KC.
 
+```{r,kcw10_xmr}
 
+kc <- KC(HLC(price), n = 10, maType=SMA, atr = 2)
 
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="Keltner Channels n=10wk")
+grid()
+lines(as.Date(price$date) ,  kc[,"dn"] ,col="red")
+lines(as.Date(price$date) ,  kc[,"mavg"] , col="red")
+lines(as.Date(price$date) ,  kc[,"up"] , col="red")
 
+price2 <- tail(price,200)
+kc2 <- tail(kc,200)
 
+plot(price2$close~as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="Keltner Channels n=10wk")
+grid()
+lines(as.Date(price2$date) ,  kc2[,"dn"] ,col="red")
+lines(as.Date(price2$date) ,  kc2[,"mavg"] , col="red")
+lines(as.Date(price2$date) ,  kc2[,"up"] , col="red")
 
+```
 
+20 week KC.
 
+```{r,kcw20_xmr}
 
+kc <- KC(HLC(price), n = 20, maType=SMA, atr = 2)
 
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="Keltner Channels n=20wk")
+grid()
+lines(as.Date(price$date) ,  kc[,"dn"] ,col="red")
+lines(as.Date(price$date) ,  kc[,"mavg"] , col="red")
+lines(as.Date(price$date) ,  kc[,"up"] , col="red")
 
+price2 <- tail(price,200)
+kc2 <- tail(kc,200)
 
+plot(price2$close~as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="Keltner Channels n=20wk")
+grid()
+lines(as.Date(price2$date) ,  kc2[,"dn"] ,col="red")
+lines(as.Date(price2$date) ,  kc2[,"mavg"] , col="red")
+lines(as.Date(price2$date) ,  kc2[,"up"] , col="red")
 
+```
 
+## Daily KC for XMR
 
+Obtaining XMR historical data (daily) from CoinMarketCap.com from 2015 to present.
 
+```{r,getdata_xmr}
 
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="xmrdat.txt")
+
+dat <- fromJSON("xmrdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high,
+  price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+```{r,kc2_xmr}
+
+kc <- KC(HLC(price), n = 20, maType=SMA, atr = 2)
+
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="Keltner Channels n=20d")
+grid()
+lines(as.Date(price$date) ,  kc[,"dn"] ,col="red")
+lines(as.Date(price$date) ,  kc[,"mavg"] , col="red")
+lines(as.Date(price$date) ,  kc[,"up"] , col="red")
+
+kc <- KC(HLC(price), n = 43, maType=SMA, atr = 2)
+
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="Keltner Channels n=43d")
+grid()
+lines(as.Date(price$date) ,  kc[,"dn"] ,col="red")
+lines(as.Date(price$date) ,  kc[,"mavg"] , col="red")
+lines(as.Date(price$date) ,  kc[,"up"] , col="red")
+
+kc <- KC(HLC(price), n = 72, maType=SMA, atr = 2)
+
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="Keltner Channels n=72d")
+grid()
+lines(as.Date(price$date) ,  kc[,"dn"] ,col="red")
+lines(as.Date(price$date) ,  kc[,"mavg"] , col="red")
+lines(as.Date(price$date) ,  kc[,"up"] , col="red")
+
+```
+
+## KC XMR daily recent action
+
+```{r,kc_recent_xmr}
+
+kc <- KC(HLC(price), n = 20, maType=SMA, atr = 2)
+
+price2 <- tail(price,200)
+kc2 <- tail(kc,200)
+
+plot(price2$close~as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="Keltner Channels n=20d")
+grid()
+lines(as.Date(price2$date) ,  kc2[,"dn"] ,col="red")
+lines(as.Date(price2$date) ,  kc2[,"mavg"] , col="red")
+lines(as.Date(price2$date) ,  kc2[,"up"] , col="red")
+
+```
 
 ## Session information
 
