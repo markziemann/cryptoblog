@@ -135,19 +135,19 @@ In the following analysis, I test different periods for RSI calculation to see w
 
 ## Other indicators
 
-* [Bitcoin risk index: a good measure for market temperature?](crypto/risk_index.html)
+* [Bitcoin risk index: a good measure for market temperature? (also ETH & XMR)](crypto/risk_index.html)
 
 * [Stablecoin dominance: a tool for timing the market cycle top?](crypto/stablecoincap.html)
 
-* [Weekly, biweekly and monthly RSI indicator for BTC and ETH](crypto/rsi_watch.html)
+* [Weekly, biweekly and monthly RSI indicator for BTC, ETH & XMR](crypto/rsi_watch.html)
 
 * [Is bitcoin volatility diminishing over time and can it predict bull markets?](https://mdz-analytics.com/crypto/volatility_size.html)
 
-* [Keltner Channels indicator for BTC and ETH](crypto/keltner_channels.html)
+* [Keltner Channels indicator for BTC, ETH & XMR](crypto/keltner_channels.html)
 
-* [Weekly and Monthy pivot points for BTC and ETH](crypto/pivots.html)
+* [Weekly and Monthy pivot points for BTC, ETH & XMR](crypto/pivots.html)
 
-* [Testing ensembl indicators for BTC and ETH](crypto/ensembl_ma_trading.html)
+* [Testing ensembl indicators for BTC, ETH & XMR](crypto/ensembl_ma_trading.html)
 
 * [Does MA/EMA indicator performance change over time?](crypto/ma_temporal2.html)
 
