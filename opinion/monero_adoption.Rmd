@@ -1,5 +1,5 @@
 ---
-title: "The case for monero adoption"
+title: "The case for Monero adoption"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -41,11 +41,49 @@ suppressPackageStartupMessages({
 
 ```
 
-## 8 reasons why monero will be adopted over bitcoin
+## 10 reasons why Monero will be adopted, not Bitcoin
 
-* War on cash
+I've written previously on the benefits of Bitcoin and it's major flaw, which is privacy.
+Here I want to unpack further on why I reckon Monero is the most likely to obtain international 
+widespread adoption.
 
-* Customer privacy
+### War on cash
+
+Around the world, it seems cash transactions are becoming more rare.
+Even before the pandemic, countries like Sweden already had the majority of in-person transactions via
+credit based transfers rather than cash.
+When the pandemic occurred, the fraction of cash transactions dropped significantly in places like the
+US and Australia due to perceptions on hygiene, with many retailers deciding not to accept cash anymore.
+
+This is a problem for many reasons, especially when it comes to privacy - cash is the method which 
+leaves the least tracable data and curtailing it will prevent people from transacting in a private way.
+Banks and credit card companies will be able to collect client data and use it to generate revenue.
+
+Secondly, this is an issue about equity as not all people can have a bank or credit card.
+People under a certain age cannot open a full bank account or get a credit card, yet they have every 
+right to buy most goods and services.
+People travelling internationally prefer to obtain physical cash as they don't want to be hit with
+international currency conversion fees at each merchant, and don't want to obtain a an account or card
+for a relatively short stay.
+
+As people use cash less, authorities will continue to put caps on what is legal with cash.
+For example, in the EU, cash transactions >€3000 are not allowed, and transactions larger than this 
+need to be conducted via debit cards. 
+In Israel, this limit is now ~US$1785.
+What is concerning is that these are hard caps and as inflation takes its toll, it is unlikely that
+the caps will be increased, which means eventually cash will be useful only for increasingly small
+transactions.
+If these limits remain, in the long run cash is doomed.
+
+On the horizon, central bank digital currencies (CBDCs) are poised to become the main legal tender,
+and will allow central authorities to surveil populations and control them via only allowing individuals
+to transact with approved merchants.
+
+### Customer privacy
+
+As a consumer you want to protect your sensitive information.
+
+
 
 * Merchant privacy
 
