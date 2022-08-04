@@ -38,13 +38,16 @@ These indicators were refined with comprehensive backtesting as detailed in the 
 
 Current state if the indicators as at MYTIME:
 
-| Indicator | BTC | ETH |
-| --- | --- | --- |
-| SMA daily | BTC_SMA_DAILY | ETH_SMA_DAILY |
-| DMI daily | BTC_DMI_DAILY | ETH_DMI_DAILY |
-| TSI daily | BTC_TSI_DAILY | ETH_TSI_DAILY |
-| Stochastic daily | BTC_STOCH_DAILY | ETH_STOCH_DAILY |
-| Double RSI daily | BTC_RSI_DAILY | ETH_RSI_DAILY |
+| Indicator | BTC | ETH | XMR |
+| --- | --- | --- | --- |
+| SMA | BTC_SMA_DAILY | ETH_SMA_DAILY | XMR_SMA_DAILY |
+| EMA | BTC_EMA_DAILY | ETH_SMA_DAILY| XMR_SMA_DAILY |
+| SMA cross | BTC_SMACROSS_DAILY | ETH_SMACROSS_DAILY | XMR_SMACROSS_DAILY |
+| EMA cross | BTC_EMACROSS_DAILY | ETH_EMACROSS_DAILY | XMR_EMACROSS_DAILY |
+| DMI | BTC_DMI_DAILY | ETH_DMI_DAILY | XMR_DMI_DAILY |
+| TSI | BTC_TSI_DAILY | ETH_TSI_DAILY | XMR_TSI_DAILY |
+| Stochastic | BTC_STOCH_DAILY | ETH_STOCH_DAILY | XMR_STOCH_DAILY | 
+| Double RSI | BTC_RSI_DAILY | ETH_RSI_DAILY | XMR_RSI_DAILY |
 
 <hr>
 
