@@ -53,86 +53,71 @@ Current state if the indicators as at MYTIME:
 
 ## News and updates
 
+* *2022/08/04* - Added XMR/Monero alerts to the front page.
+
 * *2022/07/26* - Added interactive plots into the bitcoin risk index and some other indicators.
 
 * *2022/07/25* - BTC Biweekly RSI is at record lows, suggesting that downtrend is over temporarily.
 
 * *2022/07/20* - New indicators added: Keltner channels and pivot points
 
-## Moving averages
+<hr>
+
+## Our indicators
+
+#### Moving averages
 
 Among the simplest approaches is to rely on market momentum by buying when price rises above a
 [moving average](https://www.investopedia.com/articles/active-trading/052014/how-use-moving-average-buy-stocks.asp)
 and sell when price goes below.
-The following analyses identify optimal moving average intervals for bitcoin and ether.
-I have seen good results on the daily and weekly timeframes, while shorter timeframes the results were poor.
 
-* [Moving average strategy for bitcoin (daily)](crypto/ma_trading_btc.html)
+Backtesting (daily): [BTC](crypto/ma_trading_btc.html), [ETH](crypto/ma_trading_eth.html) and
+[XMR](https://mdz-analytics.com/altcoins/XMR/ma_trading_XMR.html).
 
-* [Moving average strategy for bitcoin (weekly)](crypto/ma_trading_weekly_btc.html)
+Backtesting (weekly): [BTC](crypto/ma_trading_weekly_btc.html) and [ETH](crypto/ma_trading_eth.html).
 
-* [Moving average strategy for ether (daily)](crypto/ma_trading_eth.html)
+Another useful approach is to use crosses of moving average lines.
+Buy when the short interval line rises above longer interval line and sell when it goes below.
+Backtesting: [BTC](crypto/ma_cross_btc.html), [ETH](crypto/ma_cross_eth.html)
+and [XMR](https://mdz-analytics.com/altcoins/XMR/ma_cross_XMR.html).
 
-* [Moving average strategy for ether (weekly)](crypto/ma_trading_weekly_eth.html)
-
-* [Moving average strategy for ether against bitcoin (daily)](crypto/ma_trading_ethbtc.html)
-
-Another useful approach is to use two moving average lines. Buy when the short interval line rises above 
-longer interval line and sell when it goes below.
-
-* [Moving average cross strategy for bitcoin (daily)](crypto/ma_cross_btc.html)
-
-* [Moving average cross strategy for ether (daily)](crypto/ma_cross_eth.html)
-
-<hr>
-
-## Directional movement indicator
+#### Directional movement indicator
 
 There are many different indicators that measure the momentum of a market.
 The [directional movement indicator (DMI)](https://www.investopedia.com/terms/d/dmi.asp) is one
 that quantifies the positive and negative momentum which we can take advantage of to trade cryptos like bitcoin.
 In the following analysis, I test different DMI intervals to see which ones work best.
 
-* [Directional movement indicator strategy for bitcoin (daily)](crypto/dmi_trading_btc.html)
+Backtesting: [BTC](crypto/dmi_trading_btc.html), [ETH](crypto/dmi_trading_eth.html) and
+[XMR](https://mdz-analytics.com/altcoins/XMR/dmi_trading_XMR.html).
 
-* [Directional movement indicator strategy for ether (daily)](crypto/dmi_trading_eth.html)
-
-<hr>
-
-## True strength index
+#### True strength index
 
 Another good indicator is the [true strength index (TSI)](https://www.investopedia.com/terms/t/tsi.asp),
 it measures momentum on two timeframes and so it is very sensitive to early changes in momentum.
 In the following analysis, I test different TSI intervals to see which ones work best.
 
-* [True strength index strategy for bitcoin (daily)](crypto/tsi_trading_btc.html)
+Backtesting: [BTC](crypto/tsi_trading_btc.html), [ETH](crypto/tsi_trading_eth.html) and
+[XMR](https://mdz-analytics.com/altcoins/XMR/tsi_trading_XMR.html).
 
-* [True strength index strategy for ether (daily)](crypto/tsi_trading_eth.html)
-
-<hr>
-
-## Stochastic oscillator
+#### Stochastic oscillator
 
 The [Stochastic oscillator](https://www.investopedia.com/terms/s/stochasticoscillator.asp) stoch for short,
 is yet another momentum indicator and provided oversold and overbought signals which can be used for entry and exits.
 In the following analysis, I test different stochastic intervals and parameters to see which strategy work best for BTC and ETH.
 
-* [Stochastic oscillator strategy for bitcoin (daily)](crypto/stoch_trading_btc.html)
+Backtesting: [BTC](crypto/stoch_trading_btc.html), [ETH](crypto/stoch_trading_eth.html) and
+[XMR](https://mdz-analytics.com/altcoins/XMR/stoch_trading_XMR.html).
 
-* [Stochastic oscillator strategy for ether (daily)](crypto/stoch_trading_eth.html)
-
-<hr>
-
-## Double RSI
+#### Double RSI
 
 The [Double RSI](https://www.trendfollowingsystem.com/double-rsi-trading-system/) is a
 specific application of the relative strength indicator involving a short term and a longer term RSI line.
 When the short term line breaks above the long term line it is bullish and vice-versa.
 In the following analysis, I test different periods for RSI calculation to see which strategy work best for BTC and ETH.
 
-* [Double RSI strategy for bitcoin (daily)](crypto/rsi2_trading_btc.html)
-
-* [Double RSI strategy for ether (daily)](crypto/rsi2_trading_eth.html)
+Backtesting: [BTC](crypto/rsi2_trading_btc.html), [ETH](crypto/rsi2_trading_eth.html) and
+[XMR](https://mdz-analytics.com/altcoins/XMR/rsi2_trading_XMR.html).
 
 <hr>
 
