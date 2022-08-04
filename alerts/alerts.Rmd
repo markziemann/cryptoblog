@@ -286,11 +286,11 @@ btc_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/BTC_SMA_CROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_SMA_CROSS_COL/green/' ../index1.html")
+ system("sed -i 's/BTC_SMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/BTC_SMACROSS_COL/green/' ../index1.html")
 } else {
- system("sed -i 's/BTC_SMA_CROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/BTC_SMA_CROSS_COL/red/' ../index1.html")
+ system("sed -i 's/BTC_SMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/BTC_SMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("BTC SMA cross signal is",btc_signal))
@@ -338,11 +338,11 @@ btc_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/BTC_EMA_CROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_EMA_CROSS_COL/green/' ../index1.html")
+ system("sed -i 's/BTC_EMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/BTC_EMACROSS_COL/green/' ../index1.html")
 } else {
- system("sed -i 's/BTC_EMA_CROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/BTC_EMA_CROSS_COL/red/' ../index1.html")
+ system("sed -i 's/BTC_EMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/BTC_EMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("BTC EMA cross signal is",btc_signal))
@@ -779,11 +779,11 @@ eth_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/ETH_SMA_CROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_SMA_CROSS_COL/green/' ../index1.html")
+ system("sed -i 's/ETH_SMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/ETH_SMACROSS_COL/green/' ../index1.html")
 } else {
- system("sed -i 's/ETH_SMA_CROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/ETH_SMA_CROSS_COL/red/' ../index1.html")
+ system("sed -i 's/ETH_SMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/ETH_SMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("ETH SMA cross signal:",eth_signal))
@@ -831,11 +831,11 @@ eth_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/ETH_EMA_CROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_EMA_CROSS_COL/green/' ../index1.html")
+ system("sed -i 's/ETH_EMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/ETH_EMACROSS_COL/green/' ../index1.html")
 } else {
- system("sed -i 's/ETH_EMA_CROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/ETH_EMA_CROSS_COL/red/' ../index1.html")
+ system("sed -i 's/ETH_EMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/ETH_EMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("ETH EMA cross signal:",eth_signal))
@@ -1254,11 +1254,11 @@ xmr_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/XMR_SMA_CROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_SMA_CROSS_COL/green/' ../index1.html")
+ system("sed -i 's/XMR_SMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/XMR_SMACROSS_COL/green/' ../index1.html")
 } else {
- system("sed -i 's/XMR_SMA_CROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/XMR_SMA_CROSS_COL/red/' ../index1.html")
+ system("sed -i 's/XMR_SMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/XMR_SMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("XMR SMA cross signal is",xmr_signal))
@@ -1306,11 +1306,11 @@ xmr_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/XMR_EMA_CROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_EMA_CROSS_COL/green/' ../index1.html")
+ system("sed -i 's/XMR_EMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/XMR_EMACROSS_COL/green/' ../index1.html")
 } else {
- system("sed -i 's/XMR_EMA_CROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/XMR_EMA_CROSS_COL/red/' ../index1.html")
+ system("sed -i 's/XMR_EMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/XMR_EMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("XMR EMA cross signal is",xmr_signal))
