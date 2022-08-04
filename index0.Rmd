@@ -28,13 +28,13 @@ No material here should be considered financial advice.
 
 <hr>
 
-## Daily alerts for BTC and ETH
+## Daily alerts for BTC, ETH and XMR
 
 At the daily open, a script checks for changes in market momentum indicators.
 These include the simple moving average, directional movement index, true strength index and the stochastic oscillator.
 These indicators were refined with comprehensive backtesting as detailed in the sections below.
 
-* [Daily trade alerts for Bitcoin and Ether](crypto/alerts.html)
+* [Daily trade alerts for Bitcoin, Ether and Monero](crypto/alerts.html)
 
 Current state if the indicators as at MYTIME:
 
