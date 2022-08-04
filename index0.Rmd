@@ -18,7 +18,7 @@ fear and greed, emotions which are detrimental to investor performance.
 
 **It is essential to have a system** that you stick to, so that these emotions don't
 cloud your judgement.
-Here, I provide free indicators and mobile push notifications for bitcoin and ethereum, based on years of
+Here, I provide free indicators and mobile push notifications for Bitcoin and Ethereum, based on years of
 historical price action and careful computational optimisation.
 
 If you want push notifications or customised analysis of
@@ -34,7 +34,7 @@ At the daily open, a script checks for changes in market momentum indicators.
 These include the simple moving average, directional movement index, true strength index and the stochastic oscillator.
 These indicators were refined with comprehensive backtesting as detailed in the sections below.
 
-* [Daily trade alerts for bitcoin and ether](crypto/alerts.html)
+* [Daily trade alerts for Bitcoin and Ether](crypto/alerts.html)
 
 Current state if the indicators as at MYTIME:
 
@@ -55,7 +55,7 @@ Current state if the indicators as at MYTIME:
 
 * *2022/08/04* - Added XMR/Monero alerts to the front page.
 
-* *2022/07/26* - Added interactive plots into the bitcoin risk index and some other indicators.
+* *2022/07/26* - Added interactive plots into the Bitcoin risk index and some other indicators.
 
 * *2022/07/25* - BTC Biweekly RSI is at record lows, suggesting that downtrend is over temporarily.
 
@@ -65,7 +65,7 @@ Current state if the indicators as at MYTIME:
 
 ## Our indicators
 
-#### Moving averages
+#### **Moving averages**
 
 Among the simplest approaches is to rely on market momentum by buying when price rises above a
 [moving average](https://www.investopedia.com/articles/active-trading/052014/how-use-moving-average-buy-stocks.asp)
@@ -81,17 +81,17 @@ Buy when the short interval line rises above longer interval line and sell when 
 Backtesting: [BTC](crypto/ma_cross_btc.html), [ETH](crypto/ma_cross_eth.html)
 and [XMR](https://mdz-analytics.com/altcoins/XMR/ma_cross_XMR.html).
 
-#### Directional movement indicator
+#### **Directional movement indicator**
 
 There are many different indicators that measure the momentum of a market.
 The [directional movement indicator (DMI)](https://www.investopedia.com/terms/d/dmi.asp) is one
-that quantifies the positive and negative momentum which we can take advantage of to trade cryptos like bitcoin.
+that quantifies the positive and negative momentum which we can take advantage of to trade cryptos like Bitcoin.
 In the following analysis, I test different DMI intervals to see which ones work best.
 
 Backtesting: [BTC](crypto/dmi_trading_btc.html), [ETH](crypto/dmi_trading_eth.html) and
 [XMR](https://mdz-analytics.com/altcoins/XMR/dmi_trading_XMR.html).
 
-#### True strength index
+#### **True strength index**
 
 Another good indicator is the [true strength index (TSI)](https://www.investopedia.com/terms/t/tsi.asp),
 it measures momentum on two timeframes and so it is very sensitive to early changes in momentum.
@@ -100,7 +100,7 @@ In the following analysis, I test different TSI intervals to see which ones work
 Backtesting: [BTC](crypto/tsi_trading_btc.html), [ETH](crypto/tsi_trading_eth.html) and
 [XMR](https://mdz-analytics.com/altcoins/XMR/tsi_trading_XMR.html).
 
-#### Stochastic oscillator
+#### **Stochastic oscillator**
 
 The [Stochastic oscillator](https://www.investopedia.com/terms/s/stochasticoscillator.asp) stoch for short,
 is yet another momentum indicator and provided oversold and overbought signals which can be used for entry and exits.
@@ -109,7 +109,7 @@ In the following analysis, I test different stochastic intervals and parameters 
 Backtesting: [BTC](crypto/stoch_trading_btc.html), [ETH](crypto/stoch_trading_eth.html) and
 [XMR](https://mdz-analytics.com/altcoins/XMR/stoch_trading_XMR.html).
 
-#### Double RSI
+#### **Double RSI**
 
 The [Double RSI](https://www.trendfollowingsystem.com/double-rsi-trading-system/) is a
 specific application of the relative strength indicator involving a short term and a longer term RSI line.
@@ -119,9 +119,7 @@ In the following analysis, I test different periods for RSI calculation to see w
 Backtesting: [BTC](crypto/rsi2_trading_btc.html), [ETH](crypto/rsi2_trading_eth.html) and
 [XMR](https://mdz-analytics.com/altcoins/XMR/rsi2_trading_XMR.html).
 
-<hr>
-
-## Other indicators
+#### **Other indicators**
 
 * [Bitcoin risk index: a good measure for market temperature? (also ETH & XMR)](crypto/risk_index.html)
 
@@ -129,7 +127,7 @@ Backtesting: [BTC](crypto/rsi2_trading_btc.html), [ETH](crypto/rsi2_trading_eth.
 
 * [Weekly, biweekly and monthly RSI indicator for BTC, ETH & XMR](crypto/rsi_watch.html)
 
-* [Is bitcoin volatility diminishing over time and can it predict bull markets?](https://mdz-analytics.com/crypto/volatility_size.html)
+* [Is Bitcoin volatility diminishing over time and can it predict bull markets?](https://mdz-analytics.com/crypto/volatility_size.html)
 
 * [Keltner Channels indicator for BTC, ETH & XMR](crypto/keltner_channels.html)
 
