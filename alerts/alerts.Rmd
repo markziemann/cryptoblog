@@ -99,7 +99,6 @@ suppressPackageStartupMessages({
   library("runner")
   library("quantmod")
   library("TTR")
-  library("RPushbullet")
   library("kableExtra")
 })
 
