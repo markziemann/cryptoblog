@@ -104,7 +104,7 @@ Backtesting: [BTC](crypto/tsi_trading_btc.html), [ETH](crypto/tsi_trading_eth.ht
 
 The [Stochastic oscillator](https://www.investopedia.com/terms/s/stochasticoscillator.asp) stoch for short,
 is yet another momentum indicator and provided oversold and overbought signals which can be used for entry and exits.
-In the following analysis, I test different stochastic intervals and parameters to see which strategy work best for BTC and ETH.
+In the following analysis, I test different stochastic intervals and parameters to see which strategy work best.
 
 Backtesting: [BTC](crypto/stoch_trading_btc.html), [ETH](crypto/stoch_trading_eth.html) and
 [XMR](https://mdz-analytics.com/altcoins/XMR/stoch_trading_XMR.html).
@@ -114,7 +114,7 @@ Backtesting: [BTC](crypto/stoch_trading_btc.html), [ETH](crypto/stoch_trading_et
 The [Double RSI](https://www.trendfollowingsystem.com/double-rsi-trading-system/) is a
 specific application of the relative strength indicator involving a short term and a longer term RSI line.
 When the short term line breaks above the long term line it is bullish and vice-versa.
-In the following analysis, I test different periods for RSI calculation to see which strategy work best for BTC and ETH.
+In the following analysis, I test different periods for RSI calculation to see which strategy work best.
 
 Backtesting: [BTC](crypto/rsi2_trading_btc.html), [ETH](crypto/rsi2_trading_eth.html) and
 [XMR](https://mdz-analytics.com/altcoins/XMR/rsi2_trading_XMR.html).
