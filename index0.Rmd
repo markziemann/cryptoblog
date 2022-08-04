@@ -18,8 +18,8 @@ fear and greed, emotions which are detrimental to investor performance.
 
 **It is essential to have a system** that you stick to, so that these emotions don't
 cloud your judgement.
-Here, I provide free indicators and mobile push notifications for Bitcoin and Ethereum, based on years of
-historical price action and careful computational optimisation.
+Here, I provide free indicators and mobile push notifications for Bitcoin, Ethereum and Monero, based on
+careful backtesting of historical price data.
 
 If you want push notifications or customised analysis of
 your favourite alt-coin, please visit the [product page](products.html).
