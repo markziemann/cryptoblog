@@ -249,7 +249,7 @@ message(paste("BTC EMA signal:",btc_signal))
 ```{r, btc_ema_plot,fig.height=8,fig.width=8}
 
 plot(price2$close~as.Date(price2$date),type="l",
-  xlab="Date",ylab="price (USD)",main="BTC SMA")
+  xlab="Date",ylab="price (USD)",main="BTC EMA")
 grid()
 lines(price2$ma~ as.Date(price2$date) ,col="red")
 
@@ -1217,7 +1217,7 @@ message(paste("XMR EMA signal:",xmr_signal))
 ```{r, xmr_ema_plot,fig.height=8,fig.width=8}
 
 plot(price2$close~as.Date(price2$date),type="l",
-  xlab="Date",ylab="price (USD)",main="XMR SMA")
+  xlab="Date",ylab="price (USD)",main="XMR EMA")
 grid()
 lines(price2$ma~ as.Date(price2$date) ,col="red")
 
