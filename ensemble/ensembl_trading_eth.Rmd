@@ -461,6 +461,18 @@ indicators[is.na(indicators)] <- 0
 price3 <- price
 price3$sum <- rowSums(indicators)
 
+colfunc <- colorRampPalette(c("blue", "gray", "red"))(n=max(price3$sum+1))
+
+par(mfrow=c(2,1))
+plot(price3$close ~ as.Date(price3$date),type="p",log="y",
+    col=colfunc[price3$sum+1], pch=19,
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price3$sum ~ as.Date(price3$date),type="l",
+  xlab="Date",ylab="positive indicators",main="Indicator set")
+grid()
+
 price3$higher <- price3$sum >= threshold
 yesterday <- price3$higher
 yesterday <- c(NA,yesterday)
@@ -483,6 +495,17 @@ trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
 
 trades %>% kbl(caption="top strategy trade history") %>%  kable_paper("hover", full_width = F)
+
+price4 <- tail(price3,200)
+par(mfrow=c(2,1))
+plot(price4$close ~ as.Date(price4$date),type="p",log="y",
+    col=colfunc[price4$sum+1], pch=19,
+  xlab="Date",ylab="price (USD)",main="USD price recent action")
+grid()
+
+plot(price4$sum ~ as.Date(price4$date),type="l",
+  xlab="Date",ylab="positive indicators",main="Indicator set")
+grid()
 
 ```
 
