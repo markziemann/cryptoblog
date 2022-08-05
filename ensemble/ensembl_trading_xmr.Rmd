@@ -496,7 +496,10 @@ trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +
 
 trades %>% kbl(caption="top strategy trade history") %>%  kable_paper("hover", full_width = F)
 
+price3 <- price
+price3$sum <- rowSums(indicators)
 price4 <- tail(price3,200)
+
 par(mfrow=c(2,1))
 plot(price4$close ~ as.Date(price4$date),type="p",log="y",
     col=colfunc[price4$sum+1], pch=19,
@@ -506,6 +509,7 @@ grid()
 plot(price4$sum ~ as.Date(price4$date),type="l",
   xlab="Date",ylab="positive indicators",main="Indicator set")
 grid()
+abline(h=threshold,lty=2)
 
 ```
 
