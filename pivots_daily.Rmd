@@ -1,5 +1,5 @@
 ---
-title: "Dily pivot point strategy for BTC"
+title: "Dily pivot point strategy for XMR"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -24,6 +24,14 @@ XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBF
 From Tradingview:
 
 >A pivot point is a technical analysis indicator, or calculations, used to determine the overall trend of the market over different time frames. The pivot point itself is simply the average of the intraday high and low, and the closing price from the previous trading day. On the subsequent day, trading above the pivot point is thought to indicate ongoing bullish sentiment, while trading below the pivot point indicates bearish sentiment.
+
+The purpose of this report is to investigate the possibility of using daily pivot resistance and
+support levels for sel and buy signals respectively.
+
+This will probably work best in a sideways market.
+
+This type of analysis might be better suited to altcoins with thinner volume and larger intraday 
+moves.
 
 This page is designed to be updated daily - today's date is shown below.
 
@@ -82,6 +90,39 @@ R2 line is gren.
 PB and PT are black (dashed)
 
 ```{r,piv_fun}
+
+# this function is more for analysing tabular data
+# Works for 4hr data
+pivots_daily <- function(price) {
+  days <- price$date
+  wl <- lapply(X=unique(days) , FUN=function(w) {
+    rows <- which(days ==w )
+    wdat <- price[rows,]
+    hi <- max(wdat$high)
+    lo <- min(wdat$low)
+    cl <- wdat[nrow(wdat),"close"]
+    d <- wdat[nrow(wdat),"datetime"]
+    wagg <- list("date"=d,"high"=hi,"low"=lo,"close"=cl)
+  }  )
+  wmx <- as.data.frame(do.call(rbind,wl))
+  hlc2 <- matrix(unlist(wmx[,2:4]),ncol=3)
+  colnames(hlc2) <- c("high","low","close")
+  pp <- rowMeans(hlc2)
+  r1 <- 2  * pp - hlc2[,"low"]
+  r2 <- pp + ( hlc2[,"high"] - hlc2[,"low"] )
+  r3 <- pp + 2 * ( hlc2[,"high"]  - hlc2[,"low"] )
+  s1 <- 2 * pp - hlc2[,"high"]
+  s2 <- pp - ( hlc2[,"high"]  - hlc2[,"low"] )
+  s3 <- pp - 2 * ( hlc2[,"high"]  - hlc2[,"low"] )
+  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3))
+  pivots <- pivots[1:(nrow(pivots)-1),]
+  wmx <- wmx[2:nrow(wmx),]
+  res1 <- cbind(wmx,pivots)
+  res1[,2:4] = NULL
+  res1$date <- as.Date.POSIXct(unlist(res1$date))
+  res2 <- merge(price,res1,by="date",all.x=TRUE)
+  return(res2)
+}
 
 # this function is more for analysing tabular data
 pivots_weekly <- function(price) {
@@ -254,209 +295,86 @@ pivots_yearly <- function(price) {
 }
 #pivm <- pivots_yearly(price)
 
-# this function is more for plotting the pivots nicely
-pivots_weekly2 <- function(price) {
-  weeks <- paste(year(price$date),week(price$date))
-  res <- lapply(X=unique(weeks) , FUN=function(m) {
-    rows <- which(weeks == m )
-    mdat <- price[rows,]
-    hi <- max(mdat$high)
-    lo <- min(mdat$low)
-    cl <- mdat[nrow(mdat),"close"]
-    pp <- mean(c(hi, lo, cl))
-    r1 <- ( 2  * pp ) - lo
-    r2 <- pp + ( hi - lo )
-    r3 <- pp + ( 2 * ( hi - lo ) )
-    s1 <- ( 2 * pp ) - hi
-    s2 <- pp - ( hi  - lo )
-    s3 <- pp - ( 2 * ( hi - lo ) )
-    pb = ( hi + lo ) / 2
-    pt = ( pp - pb ) + pp
-    d0 <- mdat[1,"date"]
-    d1 <- as.Date(d0)+7
-    d2 <- d1+6
-    magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
-      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3, "pb"=pb, "pt"=pt)
-  }  )
-  res
-}
-
-# this function is more for plotting the pivots nicely
-pivots_monthly2 <- function(price) {
-  months <- paste(year(price$date),month(price$date))
-  res <- lapply(X=unique(months) , FUN=function(m) {
-    rows <- which(months == m )
-    mdat <- price[rows,]
-    hi <- max(mdat$high)
-    lo <- min(mdat$low)
-    cl <- mdat[nrow(mdat),"close"]
-    pp <- mean(c(hi, lo, cl))
-    r1 <- ( 2  * pp ) - lo
-    r2 <- pp + ( hi - lo )
-    r3 <- pp + ( 2 * ( hi - lo ) )
-    s1 <- ( 2 * pp ) - hi
-    s2 <- pp - ( hi  - lo )
-    s3 <- pp - ( 2 * ( hi - lo ) )
-    pb = ( hi + lo ) / 2
-    pt = ( pp - pb ) + pp
-    d <- mdat[nrow(mdat),"date"]
-    yr <- year(d)
-    mo <- month(d) +1
-    if ( mo > 12 ) { mo=1 ; yr <- yr +1 }
-    d1 <- as.Date(paste(yr,mo,"01",sep="-"))
-    yr <- year(d)
-    mo <- month(d) +2
-    if ( mo > 13 ) { mo=2 ; yr <- yr +1 }
-    if ( mo > 12 ) { mo=1 ; yr <- yr +1 }
-    d2 <- as.Date(paste(yr,mo,"01",sep="-"))-1
-    magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
-      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3, "pb"=pb, "pt"=pt)
-  }  )
-  res
-}
-
-
-# this function is more for plotting the pivots nicely
-pivots_quarterly2 <- function(price) {
-  quarters <- paste(year(price$date),quarter(price$date))
-  res <- lapply(X=unique(quarters) , FUN=function(m) {
-    rows <- which(quarters == m )
-    mdat <- price[rows,]
-    hi <- max(mdat$high)
-    lo <- min(mdat$low)
-    cl <- mdat[nrow(mdat),"close"]
-    pp <- mean(c(hi, lo, cl))
-    r1 <- ( 2  * pp ) - lo
-    r2 <- pp + ( hi - lo )
-    r3 <- pp + ( 2 * ( hi - lo ) )
-    s1 <- ( 2 * pp ) - hi
-    s2 <- pp - ( hi  - lo )
-    s3 <- pp - ( 2 * ( hi - lo ) )
-    pb = ( hi + lo ) / 2
-    pt = ( pp - pb ) + pp
-    d <- as.Date(mdat[1,"date"])
-    y1 <- year(d)
-    q <- quarter(d)
-    m0 <- (q*3)-3
-    m1 <- (q*3) + 1
-    if ( m1 > 12 ) { m1=1 ; y1=y1+1 }
-    d1 <- as.Date(paste(y1,m1,"01",sep="-"))
-    m2 <- m1 + 3
-    y2 <- y1
-    if ( m2 > 12 ) { m2=1 ; y2=y1+1 }
-    d2 <- as.Date(paste(y2,m2,"01",sep="-"))-1
-    magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
-      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3, "pb"=pb, "pt"=pt)
-  }  )
-  res
-}
-
-# this function is more for plotting the pivots nicely
-pivots_yearly2 <- function(price) {
-  years <- year(price$date)
-  res <- lapply(X=unique(years) , FUN=function(m) {
-    rows <- which(years == m )
-    mdat <- price[rows,]
-    hi <- max(mdat$high)
-    lo <- min(mdat$low)
-    cl <- mdat[nrow(mdat),"close"]
-    pp <- mean(c(hi, lo, cl))
-    r1 <- ( 2  * pp ) - lo
-    r2 <- pp + ( hi - lo )
-    r3 <- pp + ( 2 * ( hi - lo ) )
-    s1 <- ( 2 * pp ) - hi
-    s2 <- pp - ( hi  - lo )
-    s3 <- pp - ( 2 * ( hi - lo ) )
-    pb = ( hi + lo ) / 2
-    pt = ( pp - pb ) + pp
-    d1 <- as.Date(paste(m+1,"-01-01",sep=""))
-    d2 <- as.Date(paste(m+1,"-12-31",sep=""))
-    magg <- list("date1"=d1, "date2"=d2, "high"=hi,"low"=lo,"close"=cl ,
-      "pp"=pp, "r1"=r1, "r2"=r2, "r3"=r3, "s1"=s1, "s2"=s2, "s3"=s3, "pb"=pb, "pt"=pt)
-  }  )
-  res
-}
-
 ```
 
-## Fetch BTC data
+## Fetch XMR data
 
-Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
+Obtaining historical data (daily) from CoinMarketCap.com from 2015 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&time_period=hourly&interval=4h&time_start=2021-04-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&time_period=hourly&interval=4h&time_start=2021-04-01&time_end=",mydate,sep="")
 
-download.file(URL,destfile="btcdat.txt")
+download.file(URL,destfile="xmrdat.txt")
 
-dat <- fromJSON("btcdat.txt")
+dat <- fromJSON("xmrdat.txt")
 price <- dat$data$quotes
+
 price <- data.frame(price$time_close, as.Date(price$time_close), price$quote$USD$high,
-  price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
-colnames(price) <- c("datetime","date","high","low","close")
+  price$quote$USD$low, price$quote$USD$close, price$quote$USD$volume , stringsAsFactors=FALSE)
 
 price <- price[1:(nrow(price)-1),]
 
+colnames(price) <- c("datetime","date","high","low","close","volume")
+
+open <- price$close
+open <- c(open[1],open)
+open <- open[1:(length(open)-1)]
+
+price <- data.frame("datetime"=as_datetime(price$datetime),"date"=as_date(price$date),
+  open,"high"=price$high,"low"=price$low,"close"=price$close)
+
 head(price)
+
+tail(price)
+
+xprice <- as.xts(price[,3:6],order.by = price$datetime)
+
+chartSeries(xprice)
+abline(h=200,col="red")
 
 ```
 
+It works, so let's generate the pivots.
+
 ## Generate daily pivots
+
+The range in each 4 hr interval is given.
 
 ```{r,daily1}
 
-
-# this function is more for analysing tabular data
-pivots_daily <- function(price) {
-  days <- price$date
-  wl <- lapply(X=unique(days) , FUN=function(w) {
-    rows <- which(days ==w )
-    wdat <- price[rows,]
-    hi <- max(wdat$high)
-    lo <- min(wdat$low)
-    cl <- wdat[nrow(wdat),"close"]
-    d <- wdat[nrow(wdat),"datetime"]
-    wagg <- c("date"=d,"high"=hi,"low"=lo,"close"=cl)
-  }  )
-  wmx <- as.data.frame(do.call(rbind,wl))
-  wmx$date <- as.Date(wmx$date)
-  wmx$high <- as.numeric(wmx$high)
-  wmx$low <- as.numeric(wmx$low)
-  wmx$close <- as.numeric(wmx$close)
-  hlc2 <- HLC(wmx)
-  pp <- rowMeans(hlc2)
-  r1 <- 2  * pp - hlc2$low
-  r2 <- pp + ( hlc2$high - hlc2$low )
-  r3 <- pp + 2 * ( hlc2$high  - hlc2$low )
-  s1 <- 2 * pp - hlc2$high
-  s2 <- pp - ( hlc2$high  - hlc2$low )
-  s3 <- pp - 2 * ( hlc2$high  - hlc2$low )
-
-  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3))
-  pivots <- pivots[1:(nrow(pivots)-1),]
-  wmx <- wmx[2:nrow(wmx),]
-  res1 <- cbind(wmx,pivots)
-  res1[,2:4] = NULL
-  res2 <- merge(price,res1,by="date",all.x=TRUE)
-  return(res2)
-}
-
 pivd <- pivots_daily(price)
 
-plot(as_datetime(price$datetime) , price$close, log="y", type="l")
+plot(pivd$datetime,pivd$close,cex=0)
 
-lines(as_datetime(pivd$datetime) , pivd$pp, lty=2)
+x <- lapply(1:nrow(pivd), function(i) {
+  x <- pivd[i,]
+  dd <- x[2]
+  lo <- x[5]
+  hi <- x[4]
+  lines(x=c(dd,dd), y=c(lo,hi), cex=2)
+} )
+
 lines(as_datetime(pivd$datetime) , pivd$s1, lty=2, col="blue")
 lines(as_datetime(pivd$datetime) , pivd$s2, lty=2, col="blue")
 lines(as_datetime(pivd$datetime) , pivd$r1, lty=2, col="red")
 lines(as_datetime(pivd$datetime) , pivd$r2, lty=2, col="red")
 
+# now cut down
 price2 <- tail(price,200)
 
 pivd <- pivots_daily(price2)
 
-plot(as_datetime(price2$datetime) , price2$close, log="y", type="l")
+plot(pivd$datetime,pivd$close,cex=0)
+
+x <- lapply(1:nrow(pivd), function(i) {
+  x <- pivd[i,]
+  dd <- x[2]
+  lo <- x[5]
+  hi <- x[4]
+  lines(x=c(dd,dd), y=c(lo,hi), cex=2)
+} )
 
 lines(as_datetime(pivd$datetime) , pivd$pp, lty=2)
 lines(as_datetime(pivd$datetime) , pivd$s1, lty=2, col="blue")
@@ -466,55 +384,32 @@ lines(as_datetime(pivd$datetime) , pivd$r2, lty=2, col="red")
 
 ```
 
+## Trading strategy
+
+Start with 1 USD and keep track of purchases with USD=TRUE/FALSE.
+
+```{r,pivtrade1}
+
+USD=TRUE
+
+pivd <- pivots_daily(price)
+
+pivd <- pivd[which(!is.na(pivd$pp)),]
 
 
+i=1
+x <- pivd[i,]
 
+x$low < x$r1
+if ( x$low < x$r1 ) { USD=FALSE ; BUYPRICE=x$high ; BUYDATE=x$datetime }
 
-
-
-
-
-
-
-
-
-## Weekly Pivot points for BTC
-
-```{r,pivw1}
-
-price2 <- price
-
-pivw <- pivots_weekly(price)
-
-plot(as.Date(pivw$date) , pivw$close, log="y", type="l")
-
-lines(as.Date(pivw$date) , pivw$pp, lty=2)
-lines(as.Date(pivw$date) , pivw$s1, lty=2, col="blue")
-lines(as.Date(pivw$date) , pivw$s2, lty=2, col="blue")
-lines(as.Date(pivw$date) , pivw$r1, lty=2, col="red")
-lines(as.Date(pivw$date) , pivw$r2, lty=2, col="red")
 
 
 ```
 
-Now zoom in on the recent action (past 200 days).
-
-You can see that an estimate of next week's values are shown despite the week not being finished yet.
-
-```{r,pivw2}
-
-pivw <- tail(pivots_weekly(price),100)
-
-plot(as.Date(pivw$date) , pivw$close, log="y", type="l")
-
-lines(as.Date(pivw$date) , pivw$pp, lty=2)
-lines(as.Date(pivw$date) , pivw$s1, lty=2, col="blue")
-lines(as.Date(pivw$date) , pivw$s2, lty=2, col="blue")
-lines(as.Date(pivw$date) , pivw$r1, lty=2, col="red")
-lines(as.Date(pivw$date) , pivw$r2, lty=2, col="red")
 
 
-```
+
 
 
 
