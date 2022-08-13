@@ -1,5 +1,5 @@
 ---
-title: "Trading based on day of week"
+title: "<br>Trading based on day of week"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:

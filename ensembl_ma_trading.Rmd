@@ -1,5 +1,5 @@
 ---
-title: "Trading BTC, ETH and XMR based on an ensemble of MA indicators"
+title: "<br>Trading BTC, ETH and XMR based on an ensemble of MA indicators"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:

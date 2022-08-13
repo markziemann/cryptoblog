@@ -1,5 +1,5 @@
 ---
-title: "Ultimate Ocillator for BTC and ETH"
+title: "<br>Ultimate Ocillator for BTC and ETH"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:

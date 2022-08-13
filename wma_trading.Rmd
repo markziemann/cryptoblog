@@ -1,5 +1,5 @@
 ---
-title: "Trading based on MA and WMA crosses"
+title: "<br>Trading based on MA and WMA crosses"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:

@@ -1,5 +1,5 @@
 ---
-title: "Watching the weekly ETH RSI"
+title: "<br>Watching the weekly ETH RSI"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:

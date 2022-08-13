@@ -1,5 +1,5 @@
 ---
-title: "Using correlations to predict market direction"
+title: "<br>Using correlations to predict market direction"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:

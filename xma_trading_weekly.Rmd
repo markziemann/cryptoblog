@@ -1,5 +1,5 @@
 ---
-title: "Trading BTC based on Weekly Moving Averages"
+title: "<br>Trading BTC based on Weekly Moving Averages"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:

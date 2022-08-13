@@ -1,5 +1,5 @@
 ---
-title: "Testing candlestick charts"
+title: "<br>Testing candlestick charts"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:

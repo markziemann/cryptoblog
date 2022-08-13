@@ -1,5 +1,5 @@
 ---
-title: "Does bitcoin volatility decrease over time?"
+title: "<br>Does bitcoin volatility decrease over time?"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:

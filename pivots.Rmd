@@ -1,5 +1,5 @@
 ---
-title: "Pivot points for BTC, ETH and XMR"
+title: "<br>Pivot points for BTC, ETH and XMR"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:

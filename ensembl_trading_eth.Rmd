@@ -1,5 +1,5 @@
 ---
-title: "Trading ETH based on an ensemble of indicators"
+title: "<br>Trading ETH based on an ensemble of indicators"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:

@@ -1,5 +1,5 @@
 ---
-title: "Trading ETH based on Money Flow Indicator (MFI)"
+title: "<br>Trading ETH based on Money Flow Indicator (MFI)"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
