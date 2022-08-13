@@ -3,13 +3,13 @@ title: "Does bitcoin volatility decrease over time?"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+    rmdformats::downcute:
+        downcute_theme: "chaos"
     toc: true
     toc_float: true
     code_folding: hide
     fig_width: 10
     fig_height: 7
-theme: cosmo
 ---
 
 Source: https://github.com/markziemann/cryptoblog/blob/main/volatility_size.Rmd

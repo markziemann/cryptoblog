@@ -3,13 +3,13 @@ title: "A BTC risk index for measuring the temperature of the market"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+    rmdformats::downcute:
+        downcute_theme: "chaos"
     toc: true
     toc_float: true
     code_folding: hide
     fig_width: 10
     fig_height: 8
-theme: cosmo
 ---
 
 Source: https://github.com/markziemann/cryptoblog/blob/main/risk_index.Rmd

@@ -3,9 +3,13 @@ title: "Trading ETH based on MA and EMA crosses"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+    rmdformats::downcute:
+        downcute_theme: "chaos"
     toc: true
-theme: cosmo
+    toc_float: true
+    code_folding: hide
+    fig_width: 7
+    fig_height: 7
 ---
 
 ## Intro

@@ -1,15 +1,15 @@
 ---
-title: "Daily trade alerts for BTC and ETH"
+title: "<br>Daily trade alerts for BTC and ETH"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+    rmdformats::downcute:
+        downcute_theme: "chaos"
     toc: true
     toc_float: true
     code_folding: hide
     fig_width: 7
     fig_height: 7
-theme: cosmo
 ---
 
 Source: https://github.com/markziemann/cryptoblog/blob/main/alerts.Rmd
