@@ -1,7 +1,7 @@
 ---
 title: "<br>A sane person's guide to building a cryptocurrency portfolio"
 author: "Mark Ziemann https://mdz-analytics.com"
-date: "`r Sys.Date()`"
+date: "2022-02-16"
 output:
     rmdformats::downcute:
         downcute_theme: "chaos"

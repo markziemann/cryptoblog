@@ -1,7 +1,7 @@
 ---
 title: "<br>Bitcoin's fatal flaw"
 author: "Mark Ziemann https://mdz-analytics.com"
-date: "`r Sys.Date()`"
+date: "2022-03-08"
 output:
     rmdformats::downcute:
         downcute_theme: "chaos"
