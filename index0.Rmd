@@ -1,5 +1,5 @@
 ---
-title: "MDZ Analytics"
+title: "<br>MDZ Analytics"
 author: "Mark Ziemann"
 output:
     rmdformats::downcute:
@@ -11,7 +11,7 @@ output:
     fig_height: 7
 ---
 
-## Welcome
+<br>
 
 In the cryptocurrency markets, inexperienced investors get caught up in
 fear and greed, emotions which are detrimental to investor performance.

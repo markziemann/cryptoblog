@@ -1,0 +1,29 @@
+name: "MDZ Analytics"
+output_dir: "."
+navbar:
+  title: "MDZ Analytics"
+  type: inverse
+  right:
+    - text: "Home"
+      icon: fa-house-o
+      href: https://mdz-analytics.com
+    - text: "Email"
+      icon: fa-envelope-o
+      href: mark.ziemann@gmail.com
+    - text: "GitHub"
+      icon: fa-github
+      href: https://github.com/markziemann/cryptoblog
+    - text: "Alerts"
+      icon: fa-bell
+      href: https://mdz-analytics.com/crypto/alerts.html
+    - text: "Products"
+      icon: fa-rocket
+      href: https://mdz-analytics.com/products.html
+output:
+    rmdformats::downcute:
+        self_contained: true
+        default_style: "dark"
+        downcute_theme: "default"
+    toc: true
+    toc_float: true
+    code_folding: hide

@@ -1,6 +1,5 @@
 ---
-title: "MDZ Analytics: Products"
-author: "Mark Ziemann"
+title: "<br>Products"
 output:
     rmdformats::downcute:
         downcute_theme: "chaos"
@@ -11,12 +10,12 @@ output:
     fig_height: 7
 ---
 
-## Products
+<br>
 
 We offer three types of services, (1) altcoin push notifications, (2) altcoin analysis,
 and (3) custom data analytics.
 
-## 1. Altcoin push notifications
+## <br>1. Altcoin push notifications
 
 The market indicators shown on this site are developed using advanced data analysis,
 which is optimised for maximum profit.
@@ -26,16 +25,17 @@ momentum, then notifications are sent.
 These notifications are sent to your mobile device via Pushbullet, which is nice
 because you won't need to check the home page every day.
 
-Push notifications for bitcoin and eth are provided for free.
-The price for altcoin push notifications is USD$100 per calendar year, but is free for the first 50 customers.
+Push notifications for bitcoin, ethereum and monero are provided for free.
+The price for altcoin push notifications is USD$100 per calendar year, but is free for 2022.
 Get in touch via email to arrange access: mark.ziemann{αt}gmail.com
 
 ## 2. Altcoin analysis
 
-I can provide indicator analysis for your favourite altcoin projects, including optimised values
+We provide indicator analysis for your favourite altcoin, including optimised values
 for moving averages, TSI, DMI, stoch and double RSI.
 
-This service costs USD$100 per request, but the first 50 customers can get their first altcoin report for free.
+This service costs USD$100 per request, but the first 50 customers in 2022 can get their first altcoin 
+report for free.
 
 Get in touch via email for your free request: mark.ziemann{αt}gmail.com
 
@@ -44,8 +44,8 @@ Get in touch via email for your free request: mark.ziemann{αt}gmail.com
 Have a trading idea you'd like to have backtested?
 Our highly skilled team will put your trading strategies through their paces, and perform optimisation to get the best results.
 
-This service normally costs USD$60 per hour, but the first 20 customers will receive up to five hours of analytical services 
-at the discounted rate of USD$10 per hour.
+This service normally costs USD$60 per hour, but the first 10 customers in 2022 will receive up to five
+hours of analytical services at the discounted rate of USD$10 per hour.
 
 Get in touch for a free quote: mark.ziemann{αt}gmail.com
 
@@ -55,6 +55,3 @@ Get in touch for a free quote: mark.ziemann{αt}gmail.com
 
 Although these indicators have shown excellent historical performance, there is no guarantee of future returns.
 Consult your financial advisor for personalised advice.
-
-## [Home](index.html)
-
