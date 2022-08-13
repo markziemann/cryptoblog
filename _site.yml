@@ -9,7 +9,7 @@ navbar:
       href: https://mdz-analytics.com
     - text: "Email"
       icon: fa-envelope-o
-      href: mark.ziemann@gmail.com
+      href: mailto:mark.ziemann@gmail.com
     - text: "GitHub"
       icon: fa-github
       href: https://github.com/markziemann/cryptoblog
