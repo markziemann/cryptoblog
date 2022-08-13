@@ -1,5 +1,5 @@
 ---
-title: "A sane person's guide to building a cryptocurrency portfolio"
+title: "<br>A sane person's guide to building a cryptocurrency portfolio"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:

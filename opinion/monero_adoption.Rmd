@@ -1,5 +1,5 @@
 ---
-title: "The case for Monero adoption"
+title: "<br>The case for Monero adoption"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:

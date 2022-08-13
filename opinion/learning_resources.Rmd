@@ -1,5 +1,5 @@
 ---
-title: "Crypto 101: Why bother with digital currencies?"
+title: "<br>Crypto 101: Why bother with digital currencies?"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
