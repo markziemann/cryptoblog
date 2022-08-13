@@ -72,6 +72,11 @@ https://www.pushbullet.com/channel?tag=eth_signal
 <a class="pushbullet-subscribe-widget" data-channel="eth_signal" data-widget="button" data-size="small"></a>
 <script type="text/javascript">(function(){var a=document.createElement('script');a.type='text/javascript';a.async=true;a.src='https://widget.pushbullet.com/embed.js';var b=document.getElementsByTagName('script')[0];b.parentNode.insertBefore(a,b);})();</script>
 
+https://www.pushbullet.com/channel?tag=xmr_signal
+
+<a class="pushbullet-subscribe-widget" data-channel="xmr_signal" data-widget="button" data-size="small"></a>
+<script type="text/javascript">(function(){var a=document.createElement('script');a.type='text/javascript';a.async=true;a.src='https://widget.pushbullet.com/embed.js';var b=document.getElementsByTagName('script')[0];b.parentNode.insertBefore(a,b);})();</script>
+
 If you need some help to design your own trading signals/strategies, I am happy to help for a fee.
 email me at mark.ziemann{αt}gmail.com for any enquiries/suggestions/feedback.
 
@@ -144,7 +149,7 @@ close <- price2[nrow(price2),4]
 
 df <- data.frame(date=mydate,high=high,low=low,close=close,stringsAsFactors=FALSE)
 price <- rbind(price,df)
-tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 if ( TESTING == TRUE) {
   price[nrow(price),"close"] <- price[nrow(price),"close"] * 2
@@ -173,7 +178,7 @@ n <- as.numeric(params[params$indicator == "SMA",2])
 
 price2$ma <- SMA(Cl(price2),n=n)
 price2$signal <- price2$close > price2$ma
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -220,7 +225,7 @@ n <- as.numeric(params[params$indicator == "EMA",2])
 
 price2$ma <- EMA(Cl(price2),n=n)
 price2$signal <- price2$close > price2$ma
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -271,7 +276,7 @@ price2$ma1 <- SMA(Cl(price2),n=n1)
 price2$ma2 <- SMA(Cl(price2),n=n2)
 
 price2$signal <- price2$ma2 > price2$ma1
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -323,7 +328,7 @@ price2$ma1 <- EMA(Cl(price2),n=n1)
 price2$ma2 <- EMA(Cl(price2),n=n2)
 
 price2$signal <- price2$ma2 > price2$ma1
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -370,7 +375,7 @@ n <- as.numeric(params[params$indicator == "DMI",2])
 dmi.adx <- ADX(price[,c("high","low","close")],n=n)
 price2 <- cbind(price,dmi.adx)
 price2$signal <- dmi.adx[,1] > dmi.adx[,2]
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -443,7 +448,7 @@ colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
 price2$signal <- tsi[,1] > tsi[,2]
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -500,7 +505,7 @@ sto <- stoch(HLC(price), nFastK=n1 , nFastD=n2 , nSlowD=n2 , bounded = TRUE, smo
 price2 <- cbind(price,sto)
 price2$signal <- price2$fastK > price2$fastD
 
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -557,7 +562,7 @@ rsi2 <- RSI(price$close,n=n2,maType=EMA)
 price2 <- cbind(price,rsi1,rsi2)
 price2$signal <- price2$rsi1 > price2$rsi2
 
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -637,7 +642,7 @@ close <- price2[nrow(price2),4]
 
 df <- data.frame(date=Sys.Date(),high=high,low=low,close=close,stringsAsFactors=FALSE)
 price <- rbind(price,df)
-tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 if ( TESTING == TRUE) {
   price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
@@ -666,7 +671,7 @@ n <- as.numeric(params[params$indicator == "SMA",2])
 
 price2$ma <- SMA(Cl(price2),n=n)
 price2$signal <- price2$close > price2$ma
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -713,7 +718,7 @@ n <- as.numeric(params[params$indicator == "EMA",2])
 
 price2$ma <- EMA(Cl(price2),n=n)
 price2$signal <- price2$close > price2$ma
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -764,7 +769,7 @@ price2$ma1 <- SMA(Cl(price2),n=n1)
 price2$ma2 <- SMA(Cl(price2),n=n2)
 
 price2$signal <- price2$ma2 > price2$ma1
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -816,7 +821,7 @@ price2$ma1 <- EMA(Cl(price2),n=n1)
 price2$ma2 <- EMA(Cl(price2),n=n2)
 
 price2$signal <- price2$ma2 > price2$ma1
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -861,7 +866,7 @@ n <- as.numeric(params[params$indicator == "DMI",2])
 dmi.adx <- ADX(price[,c("high","low","close")],n=n)
 price2 <- cbind(price,dmi.adx)
 price2$signal <- dmi.adx[,1] > dmi.adx[,2]
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -917,7 +922,7 @@ colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
 price2$signal <- tsi[,1] > tsi[,2]
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -974,7 +979,7 @@ sto <- stoch(HLC(price), nFastK=n1 , nFastD=n2 , nSlowD=n2 , bounded = TRUE, smo
 price2 <- cbind(price,sto)
 price2$signal <- price2$fastK > price2$fastD
 
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -1031,7 +1036,7 @@ rsi2 <- RSI(price$close,n=n2,maType=EMA)
 price2 <- cbind(price,rsi1,rsi2)
 price2$signal <- price2$rsi1 > price2$rsi2
 
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -1112,7 +1117,7 @@ close <- price2[nrow(price2),4]
 
 df <- data.frame(date=mydate,high=high,low=low,close=close,stringsAsFactors=FALSE)
 price <- rbind(price,df)
-tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 if ( TESTING == TRUE) {
   price[nrow(price),"close"] <- price[nrow(price),"close"] * 2
@@ -1141,7 +1146,7 @@ n <- as.numeric(params[params$indicator == "SMA",2])
 
 price2$ma <- SMA(Cl(price2),n=n)
 price2$signal <- price2$close > price2$ma
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -1188,7 +1193,7 @@ n <- as.numeric(params[params$indicator == "EMA",2])
 
 price2$ma <- EMA(Cl(price2),n=n)
 price2$signal <- price2$close > price2$ma
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -1239,7 +1244,7 @@ price2$ma1 <- SMA(Cl(price2),n=n1)
 price2$ma2 <- SMA(Cl(price2),n=n2)
 
 price2$signal <- price2$ma2 > price2$ma1
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -1291,7 +1296,7 @@ price2$ma1 <- EMA(Cl(price2),n=n1)
 price2$ma2 <- EMA(Cl(price2),n=n2)
 
 price2$signal <- price2$ma2 > price2$ma1
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -1338,7 +1343,7 @@ n <- as.numeric(params[params$indicator == "DMI",2])
 dmi.adx <- ADX(price[,c("high","low","close")],n=n)
 price2 <- cbind(price,dmi.adx)
 price2$signal <- dmi.adx[,1] > dmi.adx[,2]
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -1411,7 +1416,7 @@ colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
 price2$signal <- tsi[,1] > tsi[,2]
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -1468,7 +1473,7 @@ sto <- stoch(HLC(price), nFastK=n1 , nFastD=n2 , nSlowD=n2 , bounded = TRUE, smo
 price2 <- cbind(price,sto)
 price2$signal <- price2$fastK > price2$fastD
 
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -1525,7 +1530,7 @@ rsi2 <- RSI(price$close,n=n2,maType=EMA)
 price2 <- cbind(price,rsi1,rsi2)
 price2$signal <- price2$rsi1 > price2$rsi2
 
-tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]

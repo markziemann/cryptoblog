@@ -73,8 +73,6 @@ MYNOTE = NULL
 
 ```{r,time}
 
-#system("DATE=$(date -u) ; sed \"s/MYTIME/${DATE}/\" index0.html > index1.html")
-
 mydate <- Sys.time()
 attr(mydate, "tzone") <- "UTC"
 mydate <- as.Date(mydate)
@@ -86,7 +84,7 @@ mydate <- as.Date(mydate)
 ```{r,params}
 
 params <- read.table("https://mdz-analytics.com/altcoins/TRX/TRX_dat.txt", header=TRUE)
-params %>% kbl(caption="optimised backtested parameters") %>%  kable_paper("hover", full_width = F)
+params %>% kbl(caption="optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -116,7 +114,7 @@ close <- price2[nrow(price2),4]
 
 df <- data.frame(date=mydate,high=high,low=low,close=close,stringsAsFactors=FALSE)
 price <- rbind(price,df)
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
 
 if ( TESTING == TRUE) {
   price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
@@ -136,7 +134,7 @@ n <- as.numeric(params[params$indicator == "SMA",2])
 
 price2$ma <- SMA(Cl(price2),n=n)
 price2$signal <- price2$close > price2$ma
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -149,14 +147,6 @@ if (today_signal != previous_signal ) {
 } else {
 trx_signal <- "NONE"
 }
-
-#if (today_signal==TRUE) {
-# system("sed -i 's/TRX_SMA_DAILY/BULLISH/' index1.html")
-# system("sed -i 's/TRX_SMA_COL/green/' index1.html")
-#} else {
-# system("sed -i 's/TRX_SMA_DAILY/BEARISH/' index1.html")
-# system("sed -i 's/TRX_SMA_COL/red/' index1.html")
-#}
 
 message(paste("TRX SMA signal:",trx_signal))
 
@@ -195,7 +185,7 @@ price2$ma1 <- SMA(Cl(price2),n=n1)
 price2$ma2 <- SMA(Cl(price2),n=n2)
 
 price2$signal <- price2$ma2 > price2$ma1
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -208,14 +198,6 @@ if (today_signal != previous_signal ) {
 } else {
 trx_signal <- "NONE"
 }
-
-#if (today_signal==TRUE) {
-# system("sed -i 's/TRX_SMA_CROSS_DAILY/BULLISH/' index1.html")
-# system("sed -i 's/TRX_SMA_CROSS_COL/green/' index1.html")
-#} else {
-# system("sed -i 's/TRX_SMA_CROSS_DAILY/BEARISH/' index1.html")
-# system("sed -i 's/TRX_SMA_CROSS_COL/red/' index1.html")
-#}
 
 message(paste("TRX SMA cross signal:",trx_signal))
 
@@ -251,7 +233,7 @@ n <- as.numeric(params[params$indicator == "DMI",2])
 dmi.adx <- ADX(price[,c("high","low","close")],n=n)
 price2 <- cbind(price,dmi.adx)
 price2$signal <- dmi.adx[,1] > dmi.adx[,2]
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -265,14 +247,6 @@ if (today_signal != previous_signal ) {
 } else {
   trx_signal <- "NONE"
 }
-
-#if (today_signal==TRUE) {
-# system("sed -i 's/TRX_DMI_DAILY/BULLISH/' index1.html")
-# system("sed -i 's/TRX_DMI_COL/green/' index1.html")
-#} else {
-# system("sed -i 's/TRX_DMI_DAILY/BEARISH/' index1.html")
-# system("sed -i 's/TRX_DMI_COL/red/' index1.html")
-#}
 
 message(paste("TRX DMI signal:",trx_signal))
 
@@ -335,7 +309,7 @@ colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
 price2$signal <- tsi[,1] > tsi[,2]
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -349,14 +323,6 @@ if (today_signal != previous_signal ) {
 } else {
   trx_signal <- "NONE"
 }
-
-#if (today_signal==TRUE) {
-# system("sed -i 's/TRX_TSI_DAILY/BULLISH/' index1.html")
-# system("sed -i 's/TRX_TSI_COL/green/' index1.html")
-#} else {
-# system("sed -i 's/TRX_TSI_DAILY/BEARISH/' index1.html")
-# system("sed -i 's/TRX_TSI_COL/red/' index1.html")
-#}
 
 message(paste("TRX TSI signal:",trx_signal))
 
@@ -403,7 +369,7 @@ sto <- stoch(HLC(price), nFastK=n1 , nFastD=n2 , nSlowD=n2 , bounded = TRUE, smo
 price2 <- cbind(price,sto)
 price2$signal <- price2$fastK > price2$fastD
 
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -417,14 +383,6 @@ if (today_signal != previous_signal ) {
 } else {
   trx_signal <- "NONE"
 }
-
-#if (today_signal==TRUE) {
-# system("sed -i 's/TRX_STOCH_DAILY/BULLISH/' index1.html")
-# system("sed -i 's/TRX_STOCH_COL/green/' index1.html")
-#} else {
-# system("sed -i 's/TRX_STOCH_DAILY/BEARISH/' index1.html")
-# system("sed -i 's/TRX_STOCH_COL/red/' index1.html")
-#}
 
 message(paste("TRX stoch signal:",trx_signal))
 
@@ -470,7 +428,7 @@ rsi2 <- RSI(price$close,n=n2,maType=EMA)
 price2 <- cbind(price,rsi1,rsi2)
 price2$signal <- price2$rsi1 > price2$rsi2
 
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -484,14 +442,6 @@ if (today_signal != previous_signal ) {
 } else {
   trx_signal <- "NONE"
 }
-
-#if (today_signal==TRUE) {
-# system("sed -i 's/TRX_RSI_DAILY/BULLISH/' index1.html")
-# system("sed -i 's/TRX_RSI_COL/green/' index1.html")
-#} else {
-# system("sed -i 's/TRX_RSI_DAILY/BEARISH/' index1.html")
-# system("sed -i 's/TRX_RSI_COL/red/' index1.html")
-#}
 
 message(paste("TRX RSI signal:",trx_signal))
 
