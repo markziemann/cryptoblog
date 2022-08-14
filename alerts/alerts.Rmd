@@ -5,9 +5,9 @@ date: "`r Sys.Date()`"
 output:
     rmdformats::downcute:
         downcute_theme: "chaos"
-        code_folding: hide
     toc: true
     toc_float: true
+    code_folding: hide
     fig_width: 7
     fig_height: 7
 ---
