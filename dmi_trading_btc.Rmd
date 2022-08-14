@@ -156,7 +156,7 @@ res <-  as.data.frame(res)
 res$mean <- res$returns^(1/res$trades)
 res <- cbind(rownames(res),res,stringsAsFactors=FALSE)
 colnames(res)[1] <- "period"
-res %>% kbl() %>%  kable_paper("hover", full_width = F)
+res %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -242,7 +242,7 @@ message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
-trades %>% kbl() %>%  kable_styling()
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -295,7 +295,7 @@ message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
-trades %>% kbl() %>%  kable_styling()
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -347,7 +347,7 @@ message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
-trades %>% kbl() %>%  kable_styling()
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
