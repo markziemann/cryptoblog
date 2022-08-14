@@ -2,14 +2,6 @@
 title: "<br>Daily trade alerts for TRX"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
-output:
-    rmdformats::downcute:
-        downcute_theme: "chaos"
-    toc: true
-    toc_float: true
-    code_folding: hide
-    fig_width: 7
-    fig_height: 7
 ---
 
 Source: https://github.com/markziemann/cryptoblog/blob/main/alerts_TRX.Rmd
