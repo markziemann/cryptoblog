@@ -241,7 +241,7 @@ These don't occur frequently, but when they do, it gives a solid return.
 
 ```{r,res1}
 
-head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$mean),],20) %>% kbl(row.names=FALSE) %>% kable_styling("hover", full_width = F)
 
 ```
 
@@ -250,7 +250,7 @@ Strategies with the highest returns.
 ```{r,res2}
 
 res2 <- res2[order(-res2$returns),]
-head(res2,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2,20) %>% kbl(row.names=FALSE) %>% kable_styling("hover", full_width = F)
 
 ```
 
@@ -303,7 +303,7 @@ Here are the highest returning strategies with fewer than 200 trades.
 
 res3 <- res2[order(-res2$returns),]
 
-head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res3,20) %>% kbl(row.names=FALSE) %>% kable_styling("hover", full_width = F)
 
 ```
 
@@ -364,7 +364,7 @@ lines(as.Date(price$date), sto[,2]  , col="red"  )
 grid()
 par(mfrow=c(1,1))
 
-trades %>% kbl() %>%  kable_paper("hover", full_width = F)
+trades %>% kbl(row.names=FALSE) %>% kable_styling("hover", full_width = F)
 
 ```
 
