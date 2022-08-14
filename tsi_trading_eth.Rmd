@@ -217,7 +217,7 @@ These opportunities don't arise often but could be potential opportunities for l
 
 ```{r,backtest_res1}
 
-head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$mean),],20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -228,7 +228,7 @@ This is less optimal if trades are executed manually.
 ```{r,backtest_res2}
 
 res2 <- res2[order(-res2$returns),]
-head(res2,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2,20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -287,7 +287,7 @@ These opportunities don't arise often but could be potential opportunities for l
 
 ```{r,backtest_res4}
 
-head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$mean),],20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -299,7 +299,7 @@ This is less optimal if trades are executed manually.
 
 res2 <- res2[order(-res2$returns),]
 
-head(res2,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2,20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -346,7 +346,7 @@ message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
-trades %>% kbl() %>%  kable_styling()
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 HEADER="TSI"
 par(mfrow=c(2,1))
