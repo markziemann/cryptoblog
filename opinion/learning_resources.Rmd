@@ -19,8 +19,6 @@ This document is distributed for FREE under the [MIT licence](https://github.com
 but if you find it useful, consider a small tip.
 
 
-XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
-
 ## Preface
 
 The world of cryptocurrency can be an intimidating place, with frequent negative
