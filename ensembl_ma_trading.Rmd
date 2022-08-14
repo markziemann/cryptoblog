@@ -2,14 +2,6 @@
 title: "<br>Trading BTC, ETH and XMR based on an ensemble of MA indicators"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
-output:
-    rmdformats::downcute:
-        downcute_theme: "chaos"
-    toc: true
-    toc_float: true
-    code_folding: hide
-    fig_width: 10
-    fig_height: 10
 ---
 
 ## Intro

@@ -1,13 +1,5 @@
 ---
 title: "<br>Products"
-output:
-    rmdformats::downcute:
-        downcute_theme: "chaos"
-    toc: true
-    toc_float: true
-    code_folding: hide
-    fig_width: 7
-    fig_height: 7
 ---
 
 <br>

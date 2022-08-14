@@ -2,14 +2,6 @@
 title: "<br>Trading BTC based on double RSI"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
-output:
-    rmdformats::downcute:
-        downcute_theme: "chaos"
-    toc: true
-    toc_float: true
-    code_folding: hide
-    fig_width: 7
-    fig_height: 7
 ---
 
 Source: https://github.com/markziemann/cryptoblog/blob/main/rsi2_trading.Rmd
@@ -17,8 +9,7 @@ Source: https://github.com/markziemann/cryptoblog/blob/main/rsi2_trading.Rmd
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
-
-XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
 
 ## Intro
 

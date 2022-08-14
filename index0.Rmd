@@ -1,14 +1,6 @@
 ---
 title: "<br>MDZ Analytics"
 author: "Mark Ziemann"
-output:
-    rmdformats::downcute:
-        downcute_theme: "chaos"
-    toc: true
-    toc_float: true
-    code_folding: hide
-    fig_width: 7
-    fig_height: 7
 ---
 
 <br>
@@ -154,9 +146,7 @@ Backtesting: [BTC](crypto/rsi2_trading_btc.html), [ETH](crypto/rsi2_trading_eth.
 If you find this resource useful, consider a small tip.
 It will help fund more research and analysis.
 
-XMR: 4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
-
-<a href="https://www.bitcoinqrcodemaker.com"><img src="https://www.bitcoinqrcodemaker.com/api/?style=monero&amp;address=4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD" alt="Monero QR Code Generator" height="300" width="300" border="0" /></a>
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
 
 For subscription to notifications and custom backtesting analysis, please visit the [product page](products.html).
 

@@ -2,14 +2,6 @@
 title: "<br>Trading based on Directional Movement Index (DMI)"
 author: "Mark Ziemann"
 date: "`r Sys.Date()`"
-output:
-    rmdformats::downcute:
-        downcute_theme: "chaos"
-    toc: true
-    toc_float: true
-    code_folding: hide
-    fig_width: 7
-    fig_height: 7
 ---
 
 ## Intro

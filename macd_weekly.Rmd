@@ -1,0 +1,217 @@
+---
+title: "Trading based on MA and EMA crosses"
+author: "Mark Ziemann"
+date: "`r Sys.Date()`"
+---
+
+## Intro
+
+Trading off moving averages, exponenial moving averages and crosses between these is a popular method for timing entry and exit of positions.
+In this blog post I will be trilaing simple moving averages to find the one which performs the best.
+
+```{r,lib}
+
+library("jsonlite")
+library("tidyverse")
+library("runner")
+library("quantmod")
+library("TTR")
+library("vioplot")
+library("reshape2")
+library("gplots")
+library("parallel")
+
+NUMCORES=detectCores()
+
+```
+
+## Get data
+
+Obtaining BTC historical data (daily).
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=weekly&time_start=2013-06-01&time_end=",mydate,sep="")
+
+if ( ! file.exists("btcdat.txt") ) {
+
+  download.file(URL,destfile="btcdat.txt")
+
+}
+
+btcdat <- fromJSON("btcdat.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","Close")
+price$date <- sapply(strsplit(price$date,"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),2][2] 
+mystart <- price[c(1,nrow(price)),2][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+
+## Moving average function
+
+Assuming 0.1% trading fee, as per binance current rate.
+
+```{r,sma}
+
+
+n1=12
+n2=26
+sig=9
+
+macd_sma <- function(price,n,fee,sig) {
+n1=myparams[n,1]
+n2=myparams[n,2]
+if (n1 < n2) { 
+  macd1 <- MACD(Cl(price),nFast=n1,nSlow=n2,nSig=sig,maType="SMA")
+  price2 <- cbind(price,macd1)
+  price2$higher <- price2$macd > price2$signal
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(prod(trades$diff))
+} else {
+  return(1)
+}
+}
+
+```
+
+## Exponential moving average function
+
+
+```{r,ema}
+
+macd_ema <- function(price,n,fee,sig) {
+n1=myparams[n,1]
+n2=myparams[n,2]
+if (n1 < n2) {
+  macd1 <- MACD(Cl(price),nFast=n1,nSlow=n2,nSig=sig,maType="EMA")
+  price2 <- cbind(price,macd1)
+  price2$higher <- price2$macd > price2$signal
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(prod(trades$diff))
+} else {
+  return(1)
+}
+}
+
+```
+
+## Backtesting
+
+```{r,backtest}
+
+fee=0.005
+
+myparams <- expand.grid(4:100,4:100)
+
+# SMA approach
+bigres <- sapply(4:50,function(sig) {
+  res_sma <- mclapply(1:nrow(myparams),function(n) {
+    macd_sma(price,n,fee,sig) 
+  } , mc.cores=NUMCORES)
+  mas1 <- as.data.frame(myparams,stringsAsFactors=FALSE)
+  mas1$returns <- unlist(res_sma)
+  head(mas1[order(-mas1$returns),],1)[,3]
+})
+
+bigres <- c(rep(1,3), bigres )
+plot(bigres,main="MACD with SMAs")
+grid()
+
+sig=27
+res_sma <- mclapply(1:nrow(myparams),function(n) {
+  macd_sma(price,n,fee,sig)
+} , mc.cores=NUMCORES)
+mas1 <- as.data.frame(myparams,stringsAsFactors=FALSE)
+mas1$returns <- unlist(res_sma)
+head(mas1[order(-mas1$returns),])
+
+
+# EMA approach
+bigres <- sapply(4:50,function(sig) {
+  res_ema <- mclapply(1:nrow(myparams),function(n) {
+    macd_ema(price,n,fee,sig)
+  } , mc.cores=NUMCORES)
+  mas1 <- as.data.frame(myparams,stringsAsFactors=FALSE)
+  mas1$returns <- unlist(res_ema)
+  head(mas1[order(-mas1$returns),],1)[,3]
+})
+
+bigres <- c(rep(1,3), bigres )
+plot(bigres,main="MACD with EMAs")
+grid()
+
+sig=24
+res_sma <- mclapply(1:nrow(myparams),function(n) {
+  macd_sma(price,n,fee,sig)
+} , mc.cores=NUMCORES)
+mas1 <- as.data.frame(myparams,stringsAsFactors=FALSE)
+mas1$returns <- unlist(res_sma)
+head(mas1[order(-mas1$returns),])
+
+```
+
+## Conclusion
+
+Here I looked at the using the MACD for entry and exit signals. 
+This is not that much better than using the simplest MA and is on a shorter timeframe and requires many more trades.
+For this reason I'm not going to explore this any more.
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
