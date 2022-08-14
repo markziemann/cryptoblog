@@ -2,15 +2,6 @@
 title: "<br>The case for Monero adoption"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
-output:
-    rmdformats::downcute:
-        downcute_theme: "chaos"
-    toc: true
-    toc_float: true
-    code_folding: hide
-    fig_width: 7
-    fig_height: 7
-theme: cosmo
 ---
 
 Source: https://github.com/markziemann/cryptoblog/tree/main/opinion/monero_adoption.Rmd

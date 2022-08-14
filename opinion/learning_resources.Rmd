@@ -2,15 +2,6 @@
 title: "<br>Crypto 101: Why bother with digital currencies?"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "2022-01-09"
-output:
-    rmdformats::downcute:
-        downcute_theme: "chaos"
-    toc: true
-    toc_float: true
-    code_folding: hide
-    fig_width: 7
-    fig_height: 7
-theme: cosmo
 ---
 
 Source: https://github.com/markziemann/cryptoblog/blob/main/learning_resources.Rmd
