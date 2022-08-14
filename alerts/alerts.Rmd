@@ -85,15 +85,6 @@ but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
 
-```{r,qr,fig.height=2,fig.width=2}
-
-library(png)
-library(grid)
-img <- readPNG("../images/donations.png")
-grid.raster(img)
-
-```
-
 Reminder: this analysis is not financial advice.
 
 ```{r,lib,warning=FALSE}
