@@ -72,7 +72,7 @@ These have been optimised with backtesting.
 
 params <- read.table("https://mdz-analytics.com/altcoins/BTC/BTC_dat.txt", header=TRUE)
 
-params %>% kbl(caption="optimised backtested parameters") %>%  kable_paper("hover", full_width = F)
+params %>% kbl(caption="optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -237,7 +237,7 @@ colnames(res) <- c("totalROI","n_trades","xhodl")
 res <- as.data.frame(res)
 res$pos_indicator <- myrange
 res <- res[,c(4,2,1,3)]
-res %>% kbl(caption="backtesting results with minimum postive indicators") %>%  kable_paper("hover", full_width = F)
+res %>% kbl(caption="backtesting results with minimum postive indicators") %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -272,7 +272,7 @@ These have been optimised with backtesting.
 
 params <- read.table("https://mdz-analytics.com/altcoins/ETH/ETH_dat.txt", header=TRUE)
 
-params %>% kbl(caption="optimised backtested parameters") %>%  kable_paper("hover", full_width = F)
+params %>% kbl(caption="optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -413,7 +413,7 @@ colnames(res) <- c("totalROI","n_trades","xhodl")
 res <- as.data.frame(res)
 res$pos_indicator <- myrange
 res <- res[,c(4,2,1,3)]
-res %>% kbl(caption="backtesting results with minimum postive indicators") %>%  kable_paper("hover", full_width = F)
+res %>% kbl(caption="backtesting results with minimum postive indicators") %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -448,7 +448,7 @@ These have been optimised with backtesting.
 
 params <- read.table("https://mdz-analytics.com/altcoins/XMR/XMR_dat.txt", header=TRUE)
 
-params %>% kbl(caption="optimised backtested parameters") %>%  kable_paper("hover", full_width = F)
+params %>% kbl(caption="optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -589,7 +589,7 @@ colnames(res) <- c("totalROI","n_trades","xhodl")
 res <- as.data.frame(res)
 res$pos_indicator <- myrange
 res <- res[,c(4,2,1,3)]
-res %>% kbl(caption="backtesting results with minimum postive indicators") %>%  kable_paper("hover", full_width = F)
+res %>% kbl(caption="backtesting results with minimum postive indicators") %>%  kable_styling("hover", full_width = F)
 
 ```
 

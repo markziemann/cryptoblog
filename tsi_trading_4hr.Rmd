@@ -226,7 +226,7 @@ These opportunities don't arise often but could be potential opportunities for l
 
 ```{r,backtest_res1}
 
-head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -236,7 +236,7 @@ This is less optimal if trades are executed manually.
 
 ```{r,backtest_res2}
 
-head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -246,7 +246,7 @@ Now look at the strategies with mean ROI>1.1 and highest overall returns.
 
 res3 <- subset(res2,mean>=1.1)
 res3 <- res3[order(-res3$returns),]
-head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res3,20) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -311,7 +311,7 @@ These opportunities don't arise often but could be potential opportunities for l
 
 ```{r,backtest_res4}
 
-head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -321,7 +321,7 @@ This is less optimal if trades are executed manually.
 
 ```{r,backtest_res5}
 
-head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -331,7 +331,7 @@ Now look at the strategies with mean ROI>1.1 and highest overall returns.
 
 res3 <- subset(res2,mean>=1.1)
 res3 <- res3[order(-res3$returns),]
-head(res3,20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res3,20) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 

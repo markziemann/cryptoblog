@@ -83,7 +83,7 @@ btcdat <- fromJSON("btcdat.txt")
 price <- btcdat$data$quotes
 price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -97,7 +97,7 @@ btcdat <- fromJSON("btcdat.txt")
 price2 <- btcdat$data$quotes
 price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price2) <- c("date","high","low","close")
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 high <- max(price2[,2])
 low <-  min(price2[,3])
@@ -105,7 +105,7 @@ close <- price2[nrow(price2),4]
 
 df <- data.frame(date=Sys.Date(),high=high,low=low,close=close,stringsAsFactors=FALSE)
 price <- rbind(price,df)
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 if ( TESTING == TRUE) {
   price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
@@ -123,7 +123,7 @@ price2 <- price
 
 price2$ma <- SMA(Cl(price2),n=43)
 price2$signal <- price2$close > price2$ma
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -182,7 +182,7 @@ price2$ma1 <- SMA(Cl(price2),n=21)
 price2$ma2 <- SMA(Cl(price2),n=12)
 
 price2$signal <- price2$ma2 > price2$ma1
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -241,7 +241,7 @@ DMI using a 32 day interval gives returns similar to than the 43D SMA strategy.
 dmi.adx <- ADX(price[,c("high","low","close")],n=32)
 price2 <- cbind(price,dmi.adx)
 price2$signal <- dmi.adx[,1] > dmi.adx[,2]
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -323,7 +323,7 @@ colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
 price2$signal <- tsi[,1] > tsi[,2]
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -391,7 +391,7 @@ sto <- stoch(HLC(price), nFastK=7 , nFastD=45 , nSlowD=45 , bounded = TRUE, smoo
 price2 <- cbind(price,sto)
 price2$signal <- price2$fastK > price2$fastD
 
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -460,7 +460,7 @@ rsi2 <- RSI(price$close,n=122,maType=EMA)
 price2 <- cbind(price,rsi1,rsi2)
 price2$signal <- price2$rsi1 > price2$rsi2
 
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -534,7 +534,7 @@ if (weekdays(Sys.Date() == "Sunday" ) {
   price <- btcdat$data$quotes
   price <- data.frame( as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
   colnames(price) <- c("date","high","low","close")
-  tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+  tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
   URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=hourly&time_period=hourly&time_start=",Sys.Date()-1,"&time_end=",Sys.Date(),sep="")
   download.file(URL,destfile="btcdat.txt")
@@ -542,7 +542,7 @@ if (weekdays(Sys.Date() == "Sunday" ) {
   price2 <- btcdat$data$quotes
   price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
   colnames(price2) <- c("date","high","low","close")
-  tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+  tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
   high <- max(price2[,2])
   low <-  min(price2[,3])
@@ -550,7 +550,7 @@ if (weekdays(Sys.Date() == "Sunday" ) {
 
   df <- data.frame(date=Sys.Date(),high=high,low=low,close=close,stringsAsFactors=FALSE)
   price <- rbind(price,df)
-  tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+  tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
   if ( TESTING == TRUE) {
     price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
@@ -560,7 +560,7 @@ if (weekdays(Sys.Date() == "Sunday" ) {
 
   price2$ma <- SMA(Cl(price2),n=6)
   price2$signal <- price2$close > price2$ma
-  tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+  tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
   today_signal <- price2[nrow(price2),"signal"]
   previous_signal <- price2[(nrow(price2)-1),"signal"]
   if (today_signal != previous_signal ) {
@@ -616,7 +616,7 @@ ethdat <- fromJSON("ethdat.txt")
 price <- ethdat$data$quotes
 price <- data.frame( as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -630,7 +630,7 @@ ethdat <- fromJSON("ethdat.txt")
 price2 <- ethdat$data$quotes
 price2 <- data.frame( as.Date(price2$time_close)  , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price2) <- c("date","high","low","close")
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 high <- max(price2[,2])
 low <- min(price2[,3])
@@ -638,7 +638,7 @@ close <- price2[nrow(price2),4]
 
 df <- data.frame(date=Sys.Date(),high=high,low=low,close=close,stringsAsFactors=FALSE)
 price <- rbind(price,df)
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 if ( TESTING == TRUE) {
   price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
@@ -656,7 +656,7 @@ price2 <- price
 
 price2$ma <- SMA(Cl(price2),n=34)
 price2$signal <- price2$close > price2$ma
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -715,7 +715,7 @@ price2$ma1 <- SMA(Cl(price2),n=27)
 price2$ma2 <- SMA(Cl(price2),n=5)
 
 price2$signal <- price2$ma2 > price2$ma1
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -772,7 +772,7 @@ For ETH, the 16 day interval DMI gave a good return.
 dmi.adx <- ADX(price[,c("high","low","close")],n=16)
 price2 <- cbind(price,dmi.adx)
 price2$signal <- dmi.adx[,1] > dmi.adx[,2]
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -837,7 +837,7 @@ colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
 price2$signal <- tsi[,1] > tsi[,2]
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -905,7 +905,7 @@ sto <- stoch(HLC(price), nFastK=20 , nFastD=7 , nSlowD=7 , bounded = TRUE, smoot
 price2 <- cbind(price,sto)
 price2$signal <- price2$fastK > price2$fastD
 
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -974,7 +974,7 @@ rsi2 <- RSI(price$close,n=107,maType=EMA)
 price2 <- cbind(price,rsi1,rsi2)
 price2$signal <- price2$rsi1 > price2$rsi2 
 
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -1048,7 +1048,7 @@ if (weekdays(Sys.Date() == "Sunday" ) {
   price <- ethdat$data$quotes
   price <- data.frame( as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
   colnames(price) <- c("date","high","low","close")
-  tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+  tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
   URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=hourly&time_period=hourly&time_start=",Sys.Date()-1,"&time_end=",Sys.Date(),sep="")
   download.file(URL,destfile="ethdat.txt")
@@ -1056,7 +1056,7 @@ if (weekdays(Sys.Date() == "Sunday" ) {
   price2 <- ethdat$data$quotes
   price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
   colnames(price2) <- c("date","high","low","close")
-  tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+  tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
   high <- max(price2[,2])
   low <-  min(price2[,3])
@@ -1064,7 +1064,7 @@ if (weekdays(Sys.Date() == "Sunday" ) {
 
   df <- data.frame(date=Sys.Date(),high=high,low=low,close=close,stringsAsFactors=FALSE)
   price <- rbind(price,df)
-  tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+  tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
   if ( TESTING == TRUE) {
     price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
@@ -1074,7 +1074,7 @@ if (weekdays(Sys.Date() == "Sunday" ) {
 
   price2$ma <- EMA(Cl(price2),n=5)
   price2$signal <- price2$close > price2$ma
-  tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+  tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
   today_signal <- price2[nrow(price2),"signal"]
   previous_signal <- price2[(nrow(price2)-1),"signal"]
   if (today_signal != previous_signal ) {

@@ -142,7 +142,7 @@ coindata <- t(coindata)
 
 df <- merge(coindata,cmcdf,by="id")
 
-subset(df,macross==1 & ma==1) %>% kbl() %>% kable_paper()
+subset(df,macross==1 & ma==1) %>% kbl() %>% kable_styling()
 
 ```
 
@@ -150,7 +150,7 @@ Here is the full table.
 
 ```{r, table2}
 
-df %>% kbl() %>% kable_paper()
+df %>% kbl() %>% kable_styling()
 
 ```
 

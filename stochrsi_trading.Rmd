@@ -241,7 +241,7 @@ These don't occur frequently, but when they do, it gives a solid return.
 
 ```{r,res1}
 
-head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -249,7 +249,7 @@ Strategies with the highest returns - these are too frequent and each trade has 
 
 ```{r,res2}
 
-head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -260,7 +260,7 @@ returns.
 
 res3 <- subset(res2,trades<200)
 
-head(res3[order(-res3$returns),],50) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res3[order(-res3$returns),],50) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -289,7 +289,7 @@ Here's the table of results for the strategies with ROI of >10,000X and mean tra
 ```{r,res4}
 
 res5 <- subset(res2,returns > 1E5 & mean > 1.10 )
-res5 %>% kbl() %>%  kable_paper("hover", full_width = F)
+res5 %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -327,7 +327,7 @@ Here are the highest returning strategies with fewer than 200 trades.
 res3 <- subset(res2,trades<200)
 res3 <- res3[order(-res3$returns),]
 
-head(res3,10) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res3,10) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -390,7 +390,7 @@ lines(as.Date(price$date), sto[,2]  , col="red"  )
 grid()
 par(mfrow=c(1,1))
 
-trades %>% kbl() %>%  kable_paper("hover", full_width = F)
+trades %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 

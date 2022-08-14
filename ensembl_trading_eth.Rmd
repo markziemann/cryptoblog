@@ -186,7 +186,7 @@ rownames(res) <- c(1,2,3)
 xhodl <- t(t(as.numeric(res[, 1]/hodl)))
 res <- cbind(res,xhodl)
 colnames(res) <- c("totalROI","n_trades","xhodl")
-res %>% kbl(caption="backtesting results with minimum of 1,2,3 postive indicators") %>%  kable_paper("hover", full_width = F)
+res %>% kbl(caption="backtesting results with minimum of 1,2,3 postive indicators") %>%  kable_styling("hover", full_width = F)
 
 ```
 

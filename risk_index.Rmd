@@ -120,7 +120,7 @@ daily$ratio <- daily$MA50d / daily$MA50w
 
 tail(daily) %>%
   kbl() %>%
-  kable_paper("hover", full_width = F)
+  kable_styling("hover", full_width = F)
 
 ratio<-daily[which(!is.na(daily$ratio)),"ratio"]
 rat_min <- min(ratio)
@@ -225,7 +225,7 @@ Now we can see the figures for the past 10 days to see how hot/cold the market i
 
 ```{r,tbl1}
 
-tail(daily) %>% kbl() %>% kable_paper("hover", full_width = F)
+tail(daily) %>% kbl() %>% kable_styling("hover", full_width = F)
 
 ```
 
@@ -275,7 +275,7 @@ daily$ratio <- daily$MA50d / daily$MA50w
 
 tail(daily) %>%
   kbl() %>%
-  kable_paper("hover", full_width = F)
+  kable_styling("hover", full_width = F)
 
 ratio<-daily[which(!is.na(daily$ratio)),"ratio"]
 rat_min <- min(ratio)
@@ -333,7 +333,7 @@ daily$ratio <- daily$MA50d / daily$MA50w
 
 tail(daily) %>%
   kbl() %>%
-  kable_paper("hover", full_width = F)
+  kable_styling("hover", full_width = F)
 
 ratio<-daily[which(!is.na(daily$ratio)),"ratio"]
 rat_min <- min(ratio)

@@ -280,7 +280,7 @@ These opportunities don't arise often but could be potential opportunities for l
 
 ```{r,backtest_res1}
 
-head(res2[order(-res2$mean),],20) %>% kbl(caption="highest mean ROI strategies") %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$mean),],20) %>% kbl(caption="highest mean ROI strategies") %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -291,7 +291,7 @@ This is less optimal if trades are executed manually.
 ```{r,backtest_res2}
 
 res2 <- res2[order(-res2$returns),]
-head(res2,20) %>% kbl(caption="highest overall ROI strategies") %>%  kable_paper("hover", full_width = F)
+head(res2,20) %>% kbl(caption="highest overall ROI strategies") %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -328,7 +328,7 @@ trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +
 
 prod(trades$diff)
 
-trades %>% kbl(caption="highest overall ROI strategy") %>%  kable_paper("hover", full_width = F)
+trades %>% kbl(caption="highest overall ROI strategy") %>%  kable_styling("hover", full_width = F)
 
 ```
 

@@ -163,7 +163,7 @@ colnames(res) <- c("returns","trades")
 res <-  as.data.frame(res)
 res$mean <- res$returns^(1/res$trades)
 res <- cbind(params,res,stringsAsFactors=FALSE)
-#res %>% kbl() %>%  kable_paper("hover", full_width = F)
+#res %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -175,13 +175,13 @@ res2 <- res[order(-res$returns),]
 
 head(res2,20) %>% 
   kbl(caption="highest returning strategies") %>%
-  kable_paper("hover", full_width = F)
+  kable_styling("hover", full_width = F)
 
 res2 <- res[order(-res$mean),]
 
 head(res2,20) %>%
   kbl(caption="highest mean return strategies") %>%
-  kable_paper("hover", full_width = F)
+  kable_styling("hover", full_width = F)
 
 res2 <- res[order(-res$returns),]
 
@@ -189,13 +189,13 @@ res2 <- subset(res2,trades<200)
 
 head(res2,20) %>%
   kbl(caption="highest returning strategies with fewer than 200 trades") %>%
-  kable_paper("hover", full_width = F)
+  kable_styling("hover", full_width = F)
 
 res2 <- subset(res2,mean>1.08)
 
 head(res2,20) %>%
   kbl(caption="highest returning strategies with fewer than 200 trades and mean ROI > 1.1") %>%
-  kable_paper("hover", full_width = F)
+  kable_styling("hover", full_width = F)
 
 ```
 
@@ -246,7 +246,7 @@ top <- subset(res,mean>1.08 & returns>2000)
 top <- top[order(-top$returns),]
 top %>%
   kbl(caption="optimal strategies with high mean ROI and high returns") %>%
-  kable_paper("hover", full_width = F)
+  kable_styling("hover", full_width = F)
 
 
 ```
@@ -366,7 +366,7 @@ grid()
 
 tail(price ,20) %>%
   kbl(caption="Last 20 days") %>%
-  kable_paper("hover", full_width = F)
+  kable_styling("hover", full_width = F)
 
 
 ```

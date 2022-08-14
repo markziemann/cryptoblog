@@ -175,7 +175,7 @@ colnames(res_rsi_sig) <- c("RSIperiod","RSIentry","RSIexit","ntrades","totalROI"
 
 res_rsi_sig <- res_rsi_sig[order(-res_rsi_sig$totalROI),]
 
-head( res_rsi_sig ,20) %>% kbl(caption="Highest ROI strategies") %>% kable_paper("hover", full_width = F)
+head( res_rsi_sig ,20) %>% kbl(caption="Highest ROI strategies") %>% kable_styling("hover", full_width = F)
 
 ```
 

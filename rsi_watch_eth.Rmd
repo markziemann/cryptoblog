@@ -59,7 +59,7 @@ Firstly to the weekly RSI.
 
 price$rsi <- RSI(price$Close,n=14)
 
-tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
+tail(price) %>% kbl() %>% kable_styling("hover", full_width = F)
 
 par(mfrow=c(2,1))
 plot(price$Close ~ as.Date(price$date),type="l",log="y",
@@ -88,7 +88,7 @@ price <- price[idx,]
 
 price$rsi <- RSI(price$Close,n=14)
 
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 par(mfrow=c(2,1))
 plot(price$Close ~ as.Date(price$date),type="l",log="y",
@@ -126,7 +126,7 @@ These can be used to spot market cycle tops.
 
 price$rsi <- RSI(price$Close,n=14)
 
-tail(price) %>% kbl() %>% kable_paper("hover", full_width = F)
+tail(price) %>% kbl() %>% kable_styling("hover", full_width = F)
 
 par(mfrow=c(2,1))
 plot(price$Close ~ as.Date(price$date),type="l",log="y",

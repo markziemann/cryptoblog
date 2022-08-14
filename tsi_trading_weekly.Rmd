@@ -214,7 +214,7 @@ These opportunities don't arise often but could be potential opportunities for l
 
 ```{r,backtest_res1}
 
-head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -224,7 +224,7 @@ This is less optimal if trades are executed manually.
 
 ```{r,backtest_res2}
 
-head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -263,7 +263,7 @@ res4$meanroirank <- rank(res4$mean)
 res4$returnsrank <- rank(res4$returns)
 res4$ranksum <- res4$meanroirank + res4$returnsrank
 res4 <- res4[order(-res4$ranksum),]
-head(res4) %>% kbl() %>%  kable_paper("hover", full_width = F)
+head(res4) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 

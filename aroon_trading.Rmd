@@ -155,7 +155,7 @@ res <-  as.data.frame(res)
 res$mean <- res$returns^(1/res$trades)
 res <- cbind(rownames(res),res,stringsAsFactors=FALSE)
 colnames(res)[1] <- "period"
-res %>% kbl() %>%  kable_paper("hover", full_width = F)
+res %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 

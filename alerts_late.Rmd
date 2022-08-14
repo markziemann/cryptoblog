@@ -81,7 +81,7 @@ btcdat <- fromJSON("btcdat.txt")
 price <- btcdat$data$quotes
 price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -95,7 +95,7 @@ price2 <- price
 
 price2$ma <- SMA(Cl(price2),n=43)
 price2$signal <- price2$close > price2$ma
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -154,7 +154,7 @@ price2$ma1 <- SMA(Cl(price2),n=21)
 price2$ma2 <- SMA(Cl(price2),n=12)
 
 price2$signal <- price2$ma2 > price2$ma1
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -204,7 +204,7 @@ DMI using a 26 day interval gives returns 4x better than the 43D SMA approach.
 dmi.adx <- ADX(price[,c("high","low","close")],n=26)
 price2 <- cbind(price,dmi.adx)
 price2$signal <- dmi.adx[,1] > dmi.adx[,2]
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -286,7 +286,7 @@ colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
 price2$signal <- tsi[,1] > tsi[,2]
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -355,7 +355,7 @@ sto <- stoch(HLC(price), nFastK=43 , nFastD=47 , nSlowD=47 ,
 price2 <- cbind(price,sto)
 price2$signal <- price2$fastK > price2$fastD
 
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -424,7 +424,7 @@ rsi2 <- RSI(price$close,n=95,maType=EMA)
 price2 <- cbind(price,rsi1,rsi2)
 price2$signal <- price2$rsi1 > price2$rsi2
 
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -493,7 +493,7 @@ ethdat <- fromJSON("ethdat.txt")
 price <- ethdat$data$quotes
 price <- data.frame( as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -507,7 +507,7 @@ price2 <- price
 
 price2$ma <- SMA(Cl(price2),n=34)
 price2$signal <- price2$close > price2$ma
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -566,7 +566,7 @@ price2$ma1 <- SMA(Cl(price2),n=27)
 price2$ma2 <- SMA(Cl(price2),n=5)
 
 price2$signal <- price2$ma2 > price2$ma1
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
 if (today_signal != previous_signal ) {
@@ -615,7 +615,7 @@ For ETH, the 19 day interval DMI gave a good return.
 dmi.adx <- ADX(price[,c("high","low","close")],n=19)
 price2 <- cbind(price,dmi.adx)
 price2$signal <- dmi.adx[,1] > dmi.adx[,2]
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -680,7 +680,7 @@ colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
 price2$signal <- tsi[,1] > tsi[,2]
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -749,7 +749,7 @@ sto <- stoch(HLC(price), nFastK=46 , nFastD=25 , nSlowD=25 ,
 price2 <- cbind(price,sto)
 price2$signal <- price2$fastK > price2$fastD
 
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -818,7 +818,7 @@ rsi2 <- RSI(price$close,n=72,maType=EMA)
 price2 <- cbind(price,rsi1,rsi2)
 price2$signal <- price2$rsi1 > price2$rsi2 
 
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
@@ -885,7 +885,7 @@ xmrdat <- fromJSON("xmrdat.txt")
 price <- xmrdat$data$quotes
 price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
 colnames(price) <- c("date","high","low","close")
-tail(price) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -918,7 +918,7 @@ colnames(tsi) <- c("tsi","sig")
 
 price2 <- cbind(price,tsi)
 price2$signal <- tsi[,1] > tsi[,2]
-tail(price2) %>% kbl() %>%  kable_paper("hover", full_width = F)
+tail(price2) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"signal"]
 previous_signal <- price2[(nrow(price2)-1),"signal"]
