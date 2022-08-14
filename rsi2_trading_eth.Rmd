@@ -187,28 +187,28 @@ Here is a table of results.
 res2 <- res[order(-res$returns),]
 
 head(res2,20) %>% 
-  kbl(caption="highest returning strategies") %>%
-  kable_paper("hover", full_width = F)
+  kbl(row.names=FALSE,caption="highest returning strategies") %>%
+  kable_styling("hover", full_width = F)
 
 res2 <- res[order(-res$mean),]
 
 head(res2,20) %>%
-  kbl(caption="highest mean return strategies") %>%
-  kable_paper("hover", full_width = F)
+  kbl(row.names=FALSE,caption="highest mean return strategies") %>%
+  kable_styling("hover", full_width = F)
 
 res2 <- res[order(-res$returns),]
 
 res2 <- subset(res2,trades<200)
 
 head(res2,20) %>%
-  kbl(caption="highest returning strategies with fewer than 200 trades") %>%
-  kable_paper("hover", full_width = F)
+  kbl(row.names=FALSE,caption="highest returning strategies with fewer than 200 trades") %>%
+  kable_styling("hover", full_width = F)
 
 res2 <- subset(res2,mean>1.08)
 
 head(res2,20) %>%
-  kbl(caption="highest returning strategies with fewer than 200 trades and mean ROI > 1.1") %>%
-  kable_paper("hover", full_width = F)
+  kbl(row.names=FALSE,caption="highest returning strategies with fewer than 200 trades and mean ROI > 1.1") %>%
+  kable_styling("hover", full_width = F)
 
 ```
 
@@ -258,8 +258,8 @@ Based on this we can do some filtering for mean>1.08 and returns>2000.
 top <- subset(res,mean>1.08 & returns>2000)
 top <- top[order(-top$returns),]
 head(top,20) %>%
-  kbl(caption="optimal strategies with high mean ROI and high returns") %>%
-  kable_paper("hover", full_width = F)
+  kbl(row.names=FALSE,caption="optimal strategies with high mean ROI and high returns") %>%
+  kable_styling("hover", full_width = F)
 
 ```
 
@@ -303,7 +303,7 @@ message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
-trades %>% kbl() %>%  kable_styling()
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 HEADER=paste("n1:",best_n1,"n2:",best_n2)
 par(mfrow=c(2,1))
@@ -388,8 +388,8 @@ grid()
 par(mfrow=c(1,1))
 
 tail(price ,20) %>%
-  kbl(caption="Last 20 days") %>%
-  kable_paper("hover", full_width = F)
+  kbl(row.names=FALSE,caption="Last 20 days") %>%
+  kable_styling("hover", full_width = F)
 
 
 ```
