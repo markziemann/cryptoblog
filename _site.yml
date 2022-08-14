@@ -21,9 +21,7 @@ navbar:
       href: https://mdz-analytics.com/products.html
 output:
     rmdformats::downcute:
-        self_contained: true
-        default_style: "dark"
-        downcute_theme: "default"
+        downcute_theme: "chaos"
+        code_folding: hide
     toc: true
     toc_float: true
-    code_folding: hide
