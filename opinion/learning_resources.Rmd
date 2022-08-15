@@ -4,7 +4,7 @@ author: "Mark Ziemann https://mdz-analytics.com"
 date: "2022-01-09"
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/learning_resources.Rmd
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/learning_resources.Rmd)
 
 This document is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.

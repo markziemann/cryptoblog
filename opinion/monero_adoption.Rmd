@@ -4,7 +4,7 @@ author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 
-Source: https://github.com/markziemann/cryptoblog/tree/main/opinion/monero_adoption.Rmd
+[Source code](https://github.com/markziemann/cryptoblog/tree/main/opinion/monero_adoption.Rmd)
 
 This document is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
