@@ -4,7 +4,7 @@ author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/tsi_trading.Rmd
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/tsi_trading_weekly_btc.Rmd)
 
 If you find this resource useful, consider a small tip.
 

@@ -4,7 +4,7 @@ author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/rsi2_trading.Rmd
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/rsi2_trading_btc.Rmd)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.

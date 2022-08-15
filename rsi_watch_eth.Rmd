@@ -4,7 +4,7 @@ author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/rsi_watch_eth.Rmd
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/rsi_watch_eth.Rmd)
 
 If you find this resource useful, consider a small tip.
 

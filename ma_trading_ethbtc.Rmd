@@ -4,7 +4,7 @@ author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading_ethbtc.Rmd
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/ma_trading_ethbtc.Rmd)
 
 If you find this resource useful, consider a small tip.
 

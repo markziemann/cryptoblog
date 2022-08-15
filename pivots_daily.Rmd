@@ -7,7 +7,7 @@ output:
     fig_height: 12
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/pivots.Rmd
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/pivots_daily.Rmd)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
