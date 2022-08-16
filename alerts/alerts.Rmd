@@ -16,7 +16,7 @@ file.copy("../images/banner1.png", "banner.png")
 <img src="banner.png" alt="banner" width=700" height="100"/>
 </a>
 
-Source code: https://github.com/markziemann/cryptoblog/blob/main/alerts/alerts.Rmd
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/alerts/alerts.Rmd)
 
 ## Intro
 
