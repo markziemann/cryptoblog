@@ -88,7 +88,7 @@ Rscript -e "rmarkdown::render('ensembl_ma_trading.Rmd')" && \
   scp -P 21098 ensembl_ma_trading.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('ma_temporal2.Rmd')" && \
-  scp -P 21098 temporal_change/ma_temporal2.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+  scp -P 21098 ma_temporal2.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 cd coin_script
 Rscript -e "rmarkdown::render('coin_script.Rmd')" && \
