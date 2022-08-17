@@ -2,21 +2,14 @@
 title: "Temporal changes to performance of BTC based on MAs signals over time."
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
-output:
-  html_document:
-    toc: true
-    toc_float: true
-    code_folding: hide
-theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading.Rmd
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/ma_temporal2.Rmd.Rmd)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
-
-XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
 
 ## Intro
 
@@ -80,8 +73,8 @@ midpoint <- round(nrow(price)/2)
 price0 <- price[1:midpoint,]
 price1 <- price[midpoint:nrow(price),]
 
-price0[c(1:5,(nrow(price0)-5):nrow(price0)),]  %>% kbl(caption="period0 range") %>%  kable_paper("hover", full_width = F)
-price1[c(1:5,(nrow(price1)-5):nrow(price1)),]  %>% kbl(caption="period1 range") %>%  kable_paper("hover", full_width = F)
+price0[c(1:5,(nrow(price0)-5):nrow(price0)),]  %>% kbl(row.names=FALSE,caption="period0 range") %>%  kable_styling("hover", full_width = F)
+price1[c(1:5,(nrow(price1)-5):nrow(price1)),]  %>% kbl(row.names=FALSE,caption="period1 range") %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -211,7 +204,7 @@ res_sma1$xhodl1 <- res_sma1$returns1 / hodl1
 # join
 res_sma <- cbind(res_sma0,res_sma1)
 
-res_sma %>% kbl(caption="SMA trading strategies in period 0 and 1") %>%  kable_paper("hover", full_width = F)
+res_sma %>% kbl(row.names=FALSE,caption="SMA trading strategies in period 0 and 1") %>%  kable_styling("hover", full_width = F)
 
 # ema old
 res <- sapply(myrange,function(n) { ema(price0,n,fee) } )
@@ -236,7 +229,7 @@ res_ema1$xhodl1 <- res_ema1$returns1 / hodl1
 # join
 res_ema <- cbind(res_ema0,res_ema1)
 
-res_ema %>% kbl(caption="EMA trading strategies in period 0 and 1") %>%  kable_paper("hover", full_width = F)
+res_ema %>% kbl(row.names=FALSE,caption="EMA trading strategies in period 0 and 1") %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -328,9 +321,9 @@ grid()
 text(res_sma$mean1,res_sma$returns1 , cex=1, labels=res_sma$ma1)
 abline(h=hodl1,col="red")
 
-head(res_sma[order(-res_sma$returns0),],10) %>% kbl(caption="Highest total ROI SMA strategy") %>%  kable_styling()
+head(res_sma[order(-res_sma$returns0),],10) %>% kbl(row.names=FALSE,caption="Highest total ROI SMA strategy") %>%  kable_styling()
 
-head(res_sma[order(-res_sma$mean0),],10) %>% kbl(caption="Highest Mean ROI SMA strategy for period1") %>%  kable_styling()
+head(res_sma[order(-res_sma$mean0),],10) %>% kbl(row.names=FALSE,caption="Highest Mean ROI SMA strategy for period1") %>%  kable_styling()
 
 par(mfrow=c(2,1))
 plot(res_ema$mean0,res_ema$returns0, main="EMA period0",
@@ -345,9 +338,9 @@ grid()
 text(res_ema$mean1,res_ema$returns1 , cex=1, labels=res_ema$ma1)
 abline(h=hodl1,col="red")
 
-head(res_ema[order(-res_ema$returns0),],10) %>% kbl(caption="Highest total ROI EMA strategy") %>%  kable_styling()
+head(res_ema[order(-res_ema$returns0),],10) %>% kbl(row.names=FALSE,caption="Highest total ROI EMA strategy") %>%  kable_styling()
 
-head(res_ema[order(-res_ema$mean0),],10) %>% kbl(caption="Highest Mean ROI EMA strategy for period1") %>%  kable_styling()
+head(res_ema[order(-res_ema$mean0),],10) %>% kbl(row.names=FALSE,caption="Highest Mean ROI EMA strategy for period1") %>%  kable_styling()
 
 ```
 
@@ -396,12 +389,12 @@ and bias for indicators with good recent performance.
 res_sma$xhodl_mean <- (res_sma$xhodl0 + res_sma$xhodl1 + res_sma$xhodl1) / 3
 
 head(res_sma[order(-res_sma$xhodl_mean),],10) %>% 
-  kbl(caption="Highest mean ROI SMA strategy for period0 and period1") %>%  kable_styling()
+  kbl(row.names=FALSE,caption="Highest mean ROI SMA strategy for period0 and period1") %>%  kable_styling()
 
 res_ema$xhodl_mean <- (res_ema$xhodl0 + res_ema$xhodl1 + res_ema$xhodl1) / 3
 
 head(res_ema[order(-res_ema$xhodl_mean),],10) %>% 
-  kbl(caption="Highest mean ROI EMA strategy for period0 and period1") %>%  kable_styling()
+  kbl(row.names=FALSE,caption="Highest mean ROI EMA strategy for period0 and period1") %>%  kable_styling()
 
 
 ```
