@@ -462,7 +462,7 @@ Current values
 ```{r,pivw3}
 
 piv <- pivots_weekly(price2)
-tail(piv) %>% kbl(caption="Recent price action and weekly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and weekly pivots") %>%  kable_styling()
 
 ```
 
@@ -531,7 +531,7 @@ Current values
 ```{r,pivm3}
 
 piv <- pivots_monthly(price)
-tail(piv) %>% kbl(caption="Recent price action and monthly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and monthly pivots") %>%  kable_styling()
 
 ```
 
@@ -600,7 +600,7 @@ Current values
 ```{r,pivq3}
 
 piv <- pivots_quarterly(price)
-tail(piv) %>% kbl(caption="Recent price action and quarterly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and quarterly pivots") %>%  kable_styling()
 
 ```
 
@@ -639,7 +639,7 @@ Current values
 ```{r,pivy2}
 
 piv <- pivots_yearly(price)
-tail(piv) %>% kbl(caption="Recent price action and yearly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and yearly pivots") %>%  kable_styling()
 
 ```
 
@@ -729,7 +729,7 @@ Current values
 ```{r,pivw3e}
 
 piv <- pivots_weekly(price2)
-tail(piv) %>% kbl(caption="Recent price action and weekly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and weekly pivots") %>%  kable_styling()
 
 ```
 
@@ -798,7 +798,7 @@ Current values
 ```{r,pivm3e}
 
 piv <- pivots_monthly(price)
-tail(piv) %>% kbl(caption="Recent price action and monthly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and monthly pivots") %>%  kable_styling()
 
 ```
 
@@ -867,7 +867,7 @@ Current values
 ```{r,pivq3e}
 
 piv <- pivots_quarterly(price)
-tail(piv) %>% kbl(caption="Recent price action and quarterly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and quarterly pivots") %>%  kable_styling()
 
 ```
 
@@ -906,7 +906,7 @@ Current values
 ```{r,pivy2e}
 
 piv <- pivots_yearly(price)
-tail(piv) %>% kbl(caption="Recent price action and yearly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and yearly pivots") %>%  kable_styling()
 
 ```
 
@@ -996,7 +996,7 @@ Current values
 ```{r,pivw3x}
 
 piv <- pivots_weekly(price2)
-tail(piv) %>% kbl(caption="Recent price action and weekly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and weekly pivots") %>%  kable_styling()
 
 ```
 
@@ -1065,7 +1065,7 @@ Current values
 ```{r,pivm3x}
 
 piv <- pivots_monthly(price)
-tail(piv) %>% kbl(caption="Recent price action and monthly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and monthly pivots") %>%  kable_styling()
 
 ```
 
@@ -1134,7 +1134,7 @@ Current values
 ```{r,pivq3x}
 
 piv <- pivots_quarterly(price)
-tail(piv) %>% kbl(caption="Recent price action and quarterly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and quarterly pivots") %>%  kable_styling()
 
 ```
 
@@ -1173,7 +1173,7 @@ Current values
 ```{r,pivy2x}
 
 piv <- pivots_yearly(price)
-tail(piv) %>% kbl(caption="Recent price action and yearly pivots") %>%  kable_styling()
+tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and yearly pivots") %>%  kable_styling()
 
 ```
 
