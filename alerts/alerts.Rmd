@@ -177,7 +177,7 @@ btc_signal <- "NONE"
 
 if (today_signal==TRUE) {
  system("sed -i 's/BTC_SMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_SMA_COL/green/' ../index1.html")
+ system("sed -i 's/BTC_SMA_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/BTC_SMA_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/BTC_SMA_COL/red/' ../index1.html")
@@ -224,7 +224,7 @@ btc_signal <- "NONE"
 
 if (today_signal==TRUE) {
  system("sed -i 's/BTC_EMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_EMA_COL/green/' ../index1.html")
+ system("sed -i 's/BTC_EMA_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/BTC_EMA_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/BTC_EMA_COL/red/' ../index1.html")
@@ -275,7 +275,7 @@ btc_signal <- "NONE"
 
 if (today_signal==TRUE) {
  system("sed -i 's/BTC_SMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_SMACROSS_COL/green/' ../index1.html")
+ system("sed -i 's/BTC_SMACROSS_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/BTC_SMACROSS_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/BTC_SMACROSS_COL/red/' ../index1.html")
@@ -327,7 +327,7 @@ btc_signal <- "NONE"
 
 if (today_signal==TRUE) {
  system("sed -i 's/BTC_EMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_EMACROSS_COL/green/' ../index1.html")
+ system("sed -i 's/BTC_EMACROSS_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/BTC_EMACROSS_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/BTC_EMACROSS_COL/red/' ../index1.html")
@@ -375,7 +375,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/BTC_DMI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_DMI_COL/green/' ../index1.html")
+ system("sed -i 's/BTC_DMI_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/BTC_DMI_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/BTC_DMI_COL/red/' ../index1.html")
@@ -448,7 +448,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/BTC_TSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_TSI_COL/green/' ../index1.html")
+ system("sed -i 's/BTC_TSI_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/BTC_TSI_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/BTC_TSI_COL/red/' ../index1.html")
@@ -505,7 +505,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/BTC_STOCH_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_STOCH_COL/green/' ../index1.html")
+ system("sed -i 's/BTC_STOCH_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/BTC_STOCH_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/BTC_STOCH_COL/red/' ../index1.html")
@@ -562,7 +562,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/BTC_RSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_RSI_COL/green/' ../index1.html")
+ system("sed -i 's/BTC_RSI_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/BTC_RSI_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/BTC_RSI_COL/red/' ../index1.html")
@@ -670,7 +670,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/ETH_SMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_SMA_COL/green/' ../index1.html")
+ system("sed -i 's/ETH_SMA_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/ETH_SMA_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/ETH_SMA_COL/red/' ../index1.html")
@@ -717,7 +717,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/ETH_EMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_EMA_COL/green/' ../index1.html")
+ system("sed -i 's/ETH_EMA_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/ETH_EMA_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/ETH_EMA_COL/red/' ../index1.html")
@@ -768,7 +768,7 @@ eth_signal <- "NONE"
 
 if (today_signal==TRUE) {
  system("sed -i 's/ETH_SMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_SMACROSS_COL/green/' ../index1.html")
+ system("sed -i 's/ETH_SMACROSS_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/ETH_SMACROSS_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/ETH_SMACROSS_COL/red/' ../index1.html")
@@ -820,7 +820,7 @@ eth_signal <- "NONE"
 
 if (today_signal==TRUE) {
  system("sed -i 's/ETH_EMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_EMACROSS_COL/green/' ../index1.html")
+ system("sed -i 's/ETH_EMACROSS_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/ETH_EMACROSS_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/ETH_EMACROSS_COL/red/' ../index1.html")
@@ -866,7 +866,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/ETH_DMI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_DMI_COL/green/' ../index1.html")
+ system("sed -i 's/ETH_DMI_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/ETH_DMI_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/ETH_DMI_COL/red/' ../index1.html")
@@ -922,7 +922,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/ETH_TSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_TSI_COL/green/' ../index1.html")
+ system("sed -i 's/ETH_TSI_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/ETH_TSI_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/ETH_TSI_COL/red/' ../index1.html")
@@ -979,7 +979,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/ETH_STOCH_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_STOCH_COL/green/' ../index1.html")
+ system("sed -i 's/ETH_STOCH_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/ETH_STOCH_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/ETH_STOCH_COL/red/' ../index1.html")
@@ -1036,7 +1036,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/ETH_RSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_RSI_COL/green/' ../index1.html")
+ system("sed -i 's/ETH_RSI_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/ETH_RSI_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/ETH_RSI_COL/red/' ../index1.html")
@@ -1145,7 +1145,7 @@ xmr_signal <- "NONE"
 
 if (today_signal==TRUE) {
  system("sed -i 's/XMR_SMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_SMA_COL/green/' ../index1.html")
+ system("sed -i 's/XMR_SMA_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/XMR_SMA_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/XMR_SMA_COL/red/' ../index1.html")
@@ -1192,7 +1192,7 @@ xmr_signal <- "NONE"
 
 if (today_signal==TRUE) {
  system("sed -i 's/XMR_EMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_EMA_COL/green/' ../index1.html")
+ system("sed -i 's/XMR_EMA_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/XMR_EMA_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/XMR_EMA_COL/red/' ../index1.html")
@@ -1243,7 +1243,7 @@ xmr_signal <- "NONE"
 
 if (today_signal==TRUE) {
  system("sed -i 's/XMR_SMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_SMACROSS_COL/green/' ../index1.html")
+ system("sed -i 's/XMR_SMACROSS_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/XMR_SMACROSS_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/XMR_SMACROSS_COL/red/' ../index1.html")
@@ -1295,7 +1295,7 @@ xmr_signal <- "NONE"
 
 if (today_signal==TRUE) {
  system("sed -i 's/XMR_EMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_EMACROSS_COL/green/' ../index1.html")
+ system("sed -i 's/XMR_EMACROSS_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/XMR_EMACROSS_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/XMR_EMACROSS_COL/red/' ../index1.html")
@@ -1343,7 +1343,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/XMR_DMI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_DMI_COL/green/' ../index1.html")
+ system("sed -i 's/XMR_DMI_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/XMR_DMI_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/XMR_DMI_COL/red/' ../index1.html")
@@ -1416,7 +1416,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/XMR_TSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_TSI_COL/green/' ../index1.html")
+ system("sed -i 's/XMR_TSI_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/XMR_TSI_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/XMR_TSI_COL/red/' ../index1.html")
@@ -1473,7 +1473,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/XMR_STOCH_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_STOCH_COL/green/' ../index1.html")
+ system("sed -i 's/XMR_STOCH_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/XMR_STOCH_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/XMR_STOCH_COL/red/' ../index1.html")
@@ -1530,7 +1530,7 @@ if (today_signal != previous_signal ) {
 
 if (today_signal==TRUE) {
  system("sed -i 's/XMR_RSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_RSI_COL/green/' ../index1.html")
+ system("sed -i 's/XMR_RSI_COL/limegreen/' ../index1.html")
 } else {
  system("sed -i 's/XMR_RSI_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/XMR_RSI_COL/red/' ../index1.html")
