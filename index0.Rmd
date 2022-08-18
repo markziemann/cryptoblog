@@ -95,6 +95,8 @@ Current state if the indicators as at MYTIME:
 <img src="images/banner1.png" alt="banner" width=600" height="80"/>
 </a>
 
+<iframe src="https://discordapp.com/widget?id=1009650524544565433&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+
 ## News and updates
 
 * *2022/08/04* - Added XMR/Monero alerts to the front page.
