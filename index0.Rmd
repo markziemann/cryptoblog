@@ -20,7 +20,7 @@ No material here should be considered financial advice.
 
 <hr>
 
-## Daily alerts for BTC, ETH and XMR
+## <br>Daily alerts for BTC, ETH and XMR
 
 At the daily open, a script checks for changes in market momentum indicators.
 These include the simple moving average, directional movement index, true strength index and the stochastic oscillator.
@@ -95,9 +95,7 @@ Current state if the indicators as at MYTIME:
 <img src="images/banner1.png" alt="banner" width=600" height="80"/>
 </a>
 
-<iframe src="https://discordapp.com/widget?id=1009650524544565433&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
-
-## News and updates
+## <br>News and updates
 
 * *2022/08/04* - Added XMR/Monero alerts to the front page.
 
@@ -109,7 +107,7 @@ Current state if the indicators as at MYTIME:
 
 <hr>
 
-## Our indicators
+## <br>Our indicators
 
 #### **Moving averages**
 
@@ -185,7 +183,7 @@ Backtesting: [BTC](crypto/rsi2_trading_btc.html), [ETH](crypto/rsi2_trading_eth.
 
 <hr>
 
-## Blog posts (opinion and perspectives)
+## <br>Blog posts (opinion and perspectives)
 
 * [Crypto 101: Why bother with digital currencies?](crypto/learning_resources.html)
 
@@ -195,20 +193,27 @@ Backtesting: [BTC](crypto/rsi2_trading_btc.html), [ETH](crypto/rsi2_trading_eth.
 
 <hr>
 
-## Support this site
+## <br>Discussion
+
+Join the discussion on Discord.
+
+<iframe src="https://discordapp.com/widget?id=1009650524544565433&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+
+## <br>Suggestions and feedback
+
+Mail me mark.ziemann{αt}gmail.com or raise an issue at the [GitHub repo](https://github.com/markziemann/cryptoblog).
+
+## <br>Support this site
 
 If you find this resource useful, consider a small tip.
 It will help fund more research and analysis.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
 
-For subscription to notifications and custom backtesting analysis, please visit the [product page](products.html).
+For subscription to notifications and custom backtesting analysis, please visit the [product page](products.h
 
-## Suggestions and feedback
 
-Mail me mark.ziemann{αt}gmail.com or raise an issue at the [GitHub repo](https://github.com/markziemann/cryptoblog).
-
-## License and source code
+## <br>License and source code
 
 This website and materials are distributed in accordance with the [MIT License](https://github.com/markziemann/cryptoblog/blob/main/LICENSE).
 Underlying code for this work and other experimental work can be found on my [GitHub repo](https://github.com/markziemann/cryptoblog).
