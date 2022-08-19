@@ -93,7 +93,7 @@ Rscript -e "rmarkdown::render('ma_temporal2.Rmd')" && \
 Rscript -e "rmarkdown::render('ensemble/ensembl_trading_btc.Rmd')" && \
 Rscript -e "rmarkdown::render('ensemble/ensembl_trading_eth.Rmd')" && \
 Rscript -e "rmarkdown::render('ensemble/ensembl_trading_xmr.Rmd')" && \
-  scp -P 21098 ensembl/ensembl_trading_*.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto/
+  scp -P 21098 ensemble/ensembl_trading_*.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto/
 
 cd coin_script
 Rscript -e "rmarkdown::render('coin_script.Rmd')" && \
