@@ -177,7 +177,7 @@ Backtesting: [BTC](crypto/rsi2_trading_btc.html), [ETH](crypto/rsi2_trading_eth.
 
 * [Weekly and Monthy pivot points for BTC, ETH & XMR](crypto/pivots.html)
 
-* [Testing ensembl indicators for BTC, ETH & XMR](crypto/ensembl_ma_trading.html)
+* Testing ensembl indicators for [BTC](ensembl_trading_btc.html), [ETH](ensembl_trading_eth.html) & [XMR](ensembl_trading_xmr.html)
 
 * [Does MA/EMA indicator performance change over time?](crypto/ma_temporal2.html)
 
