@@ -121,7 +121,7 @@ pivots_daily <- function(price) {
 
 ```
 
-## Fetch XMR data
+## Fetch data
 
 Obtaining historical data (daily) from CoinMarketCap.com from 2015 to present.
 
@@ -149,9 +149,9 @@ open <- open[1:(length(open)-1)]
 price <- data.frame("datetime"=as_datetime(price$datetime),"date"=as_date(price$date),
   open,"high"=price$high,"low"=price$low,"close"=price$close)
 
-head(price)
+head(price) %>% kbl(row.names=FALSE) %>% kable_styling()
 
-tail(price)
+tail(price) %>% kbl(row.names=FALSE) %>% kable_styling()
 
 xprice <- as.xts(price[,3:6],order.by = price$datetime)
 
@@ -255,11 +255,20 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
-prod(res$diff)
-nrow(res)
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade1b}
+
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
+
+<br></p></details><br>
 
 Buy at S2 and sell at R2
 
@@ -293,11 +302,20 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
-prod(res$diff)
-nrow(res)
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p> 
+
+```{r,pivtrade2b}
+
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
+
+<br></p></details><br>
 
 BUY at R1 and SELL at S1
 
@@ -331,15 +349,24 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
-prod(res$diff)
-nrow(res)
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade3ab}
+
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
+<br></p></details><br>
+
 BUY at R2 and SELL at S2
 
-```{r,pivtrade3b}
+```{r,pivtrade3}
 
 fee = 0.002
 
@@ -369,11 +396,20 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
-prod(res$diff)
-nrow(res)
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade3b}
+
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
+
+<br></p></details><br>
 
 BUY at R2 and SELL at S1
 
@@ -407,11 +443,20 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
-prod(res$diff)
-nrow(res)
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade4b}
+
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
+
+<br></p></details><br>
 
 BUY at R2 and SELL at PIV
 
@@ -445,11 +490,20 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
-prod(res$diff)
-nrow(res)
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade5b}
+
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
+
+<br></p></details><br>
 
 BUY at R1 and SELL at PIV
 
@@ -483,11 +537,20 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
-prod(res$diff)
-nrow(res)
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade6b}
+
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
+
+<br></p></details><br>
 
 ## Session information
 

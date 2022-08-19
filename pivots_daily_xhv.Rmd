@@ -1,5 +1,5 @@
 ---
-title: "<br>Daily pivot point strategy for BTC"
+title: "<br>Daily pivot point strategy for XHV"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
@@ -128,11 +128,11 @@ Obtaining historical data (daily) from CoinMarketCap.com from 2015 to present.
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&time_period=hourly&interval=4h&time_start=2021-01-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XHV&convert=USD&time_period=hourly&interval=4h&time_start=2021-01-01&time_end=",mydate,sep="")
 
-download.file(URL,destfile="btcdat.txt")
+download.file(URL,destfile="xhvdat.txt")
 
-dat <- fromJSON("btcdat.txt")
+dat <- fromJSON("xhvdat.txt")
 price <- dat$data$quotes
 
 price <- data.frame(price$time_close, as.Date(price$time_close), price$quote$USD$high,
