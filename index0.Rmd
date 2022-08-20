@@ -97,6 +97,8 @@ Current state if the indicators as at MYTIME:
 
 ## <br>News and updates
 
+* *2022/08/20* - New ensembl indicator analysis - see below.
+
 * *2022/08/04* - Added XMR/Monero alerts to the front page.
 
 * *2022/07/26* - Added interactive plots into the Bitcoin risk index and some other indicators.
@@ -116,14 +118,14 @@ Among the simplest approaches is to rely on market momentum by buying when price
 and sell when price goes below.
 
 Backtesting (daily): [BTC](crypto/ma_trading_btc.html), [ETH](crypto/ma_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/ma_trading_XMR.html).
+[XMR](altcoins/XMR/ma_trading_XMR.html).
 
 Backtesting (weekly): [BTC](crypto/ma_trading_weekly_btc.html) and [ETH](crypto/ma_trading_eth.html).
 
 Another useful approach is to use crosses of moving average lines.
 Buy when the short interval line rises above longer interval line and sell when it goes below.
 Backtesting: [BTC](crypto/ma_cross_btc.html), [ETH](crypto/ma_cross_eth.html)
-and [XMR](https://mdz-analytics.com/altcoins/XMR/ma_cross_XMR.html).
+and [XMR](altcoins/XMR/ma_cross_XMR.html).
 
 #### **Directional movement indicator**
 
@@ -133,7 +135,7 @@ that quantifies the positive and negative momentum which we can take advantage o
 In the following analysis, I test different DMI intervals to see which ones work best.
 
 Backtesting: [BTC](crypto/dmi_trading_btc.html), [ETH](crypto/dmi_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/dmi_trading_XMR.html).
+[XMR](altcoins/XMR/dmi_trading_XMR.html).
 
 #### **True strength index**
 
@@ -142,7 +144,7 @@ it measures momentum on two timeframes and so it is very sensitive to early chan
 In the following analysis, I test different TSI intervals to see which ones work best.
 
 Backtesting: [BTC](crypto/tsi_trading_btc.html), [ETH](crypto/tsi_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/tsi_trading_XMR.html).
+[XMR](altcoins/XMR/tsi_trading_XMR.html).
 
 #### **Stochastic oscillator**
 
@@ -151,7 +153,7 @@ is yet another momentum indicator and provided oversold and overbought signals w
 In the following analysis, I test different stochastic intervals and parameters to see which strategy work best.
 
 Backtesting: [BTC](crypto/stoch_trading_btc.html), [ETH](crypto/stoch_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/stoch_trading_XMR.html).
+[XMR](altcoins/XMR/stoch_trading_XMR.html).
 
 #### **Double RSI**
 
@@ -161,7 +163,7 @@ When the short term line breaks above the long term line it is bullish and vice-
 In the following analysis, I test different periods for RSI calculation to see which strategy work best.
 
 Backtesting: [BTC](crypto/rsi2_trading_btc.html), [ETH](crypto/rsi2_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/rsi2_trading_XMR.html).
+[XMR](altcoins/XMR/rsi2_trading_XMR.html).
 
 #### **Other indicators**
 
@@ -171,13 +173,13 @@ Backtesting: [BTC](crypto/rsi2_trading_btc.html), [ETH](crypto/rsi2_trading_eth.
 
 * [Weekly, biweekly and monthly RSI indicator for BTC, ETH & XMR](crypto/rsi_watch.html)
 
-* [Is Bitcoin volatility diminishing over time and can it predict bull markets?](https://mdz-analytics.com/crypto/volatility_size.html)
+* [Is Bitcoin volatility diminishing over time and can it predict bull markets?](crypto/volatility_size.html)
 
 * [Keltner Channels indicator for BTC, ETH & XMR](crypto/keltner_channels.html)
 
 * [Weekly and Monthy pivot points for BTC, ETH & XMR](crypto/pivots.html)
 
-* Testing ensembl indicators for [BTC](ensembl_trading_btc.html), [ETH](ensembl_trading_eth.html) & [XMR](ensembl_trading_xmr.html)
+* Testing ensembl indicators for [BTC](crypto/ensembl_trading_btc.html), [ETH](crypto/ensembl_trading_eth.html) & [XMR](crypto/ensembl_trading_xmr.html)
 
 * [Does MA/EMA indicator performance change over time?](crypto/ma_temporal2.html)
 
