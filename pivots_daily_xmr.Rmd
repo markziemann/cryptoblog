@@ -223,7 +223,7 @@ lines(as_datetime(pivd$datetime) , pivd$r2, lty=2, col="red")
 
 Start with 1 USD and keep track of purchases with USD=TRUE/FALSE.
 
-Buy at S1 and sell at R1
+### Buy at S1 and sell at R1
 
 ```{r,pivtrade1}
 
@@ -255,6 +255,16 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
+<<<<<<< HEAD
+prod(res$diff)
+nrow(res)
+
+```
+
+<details><summary>Open to view all trades </summary>
+
+```{r,pivtrde1t}
+=======
 paste("totalROI:",signif(prod(res$diff),3))
 paste("numTrades:",nrow(res))
 
@@ -263,14 +273,21 @@ paste("numTrades:",nrow(res))
 <br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
 
 ```{r,pivtrade1b}
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
+<<<<<<< HEAD
+</details>
+
+### Buy at S2 and sell at R2
+=======
 <br></p></details><br>
 
 Buy at S2 and sell at R2
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 ```{r,pivtrade2}
 
@@ -302,6 +319,16 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
+<<<<<<< HEAD
+prod(res$diff)
+nrow(res)
+
+```
+
+<details><summary>Open to view all trades </summary>
+
+```{r,pivtrde2t}
+=======
 paste("totalROI:",signif(prod(res$diff),3))
 paste("numTrades:",nrow(res))
 
@@ -310,14 +337,21 @@ paste("numTrades:",nrow(res))
 <br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p> 
 
 ```{r,pivtrade2b}
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
+<<<<<<< HEAD
+</details>
+
+### BUY at R1 and SELL at S1
+=======
 <br></p></details><br>
 
 BUY at R1 and SELL at S1
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 ```{r,pivtrade3a}
 
@@ -349,6 +383,16 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
+<<<<<<< HEAD
+prod(res$diff)
+nrow(res)
+
+```
+
+<details><summary>Open to view all trades </summary>
+
+```{r,pivtrde3at}
+=======
 paste("totalROI:",signif(prod(res$diff),3))
 paste("numTrades:",nrow(res))
 
@@ -357,15 +401,23 @@ paste("numTrades:",nrow(res))
 <br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
 
 ```{r,pivtrade3ab}
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
+<<<<<<< HEAD
+</details>
+
+### BUY at R2 and SELL at S2
+
+=======
 <br></p></details><br>
 
 BUY at R2 and SELL at S2
 
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 ```{r,pivtrade3}
 
 fee = 0.002
@@ -396,6 +448,16 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
+<<<<<<< HEAD
+prod(res$diff)
+nrow(res)
+
+```
+
+<details><summary>Open to view all trades </summary>
+
+```{r,pivtrde3t}
+=======
 paste("totalROI:",signif(prod(res$diff),3))
 paste("numTrades:",nrow(res))
 
@@ -404,14 +466,21 @@ paste("numTrades:",nrow(res))
 <br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
 
 ```{r,pivtrade3b}
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
+<<<<<<< HEAD
+</details>
+
+### BUY at R2 and SELL at S1
+=======
 <br></p></details><br>
 
 BUY at R2 and SELL at S1
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 ```{r,pivtrade4}
 
@@ -443,6 +512,16 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
+<<<<<<< HEAD
+prod(res$diff)
+nrow(res)
+
+```
+
+<details><summary>Open to view all trades </summary>
+
+```{r,pivtrde4t}
+=======
 paste("totalROI:",signif(prod(res$diff),3))
 paste("numTrades:",nrow(res))
 
@@ -451,14 +530,21 @@ paste("numTrades:",nrow(res))
 <br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
 
 ```{r,pivtrade4b}
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
+<<<<<<< HEAD
+</details>
+
+### BUY at R2 and SELL at PIV
+=======
 <br></p></details><br>
 
 BUY at R2 and SELL at PIV
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 ```{r,pivtrade5}
 
@@ -490,6 +576,16 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
+<<<<<<< HEAD
+prod(res$diff)
+nrow(res)
+
+```
+
+<details><summary>Open to view all trades </summary>
+
+```{r,pivtrde5t}
+=======
 paste("totalROI:",signif(prod(res$diff),3))
 paste("numTrades:",nrow(res))
 
@@ -498,14 +594,21 @@ paste("numTrades:",nrow(res))
 <br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
 
 ```{r,pivtrade5b}
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
+<<<<<<< HEAD
+</details>
+
+### BUY at R1 and SELL at PIV
+=======
 <br></p></details><br>
 
 BUY at R1 and SELL at PIV
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 ```{r,pivtrade6}
 
@@ -537,6 +640,16 @@ res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
 
 res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
 
+<<<<<<< HEAD
+prod(res$diff)
+nrow(res)
+
+```
+
+<details><summary>Open to view all trades </summary>
+
+```{r,pivtrde6t}
+=======
 paste("totalROI:",signif(prod(res$diff),3))
 paste("numTrades:",nrow(res))
 
@@ -545,12 +658,17 @@ paste("numTrades:",nrow(res))
 <br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
 
 ```{r,pivtrade6b}
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
+<<<<<<< HEAD
+</details>
+=======
 <br></p></details><br>
+>>>>>>> b8d2d252a69a1c41c946a2d5e2bf0a969e6af770
 
 ## Session information
 
