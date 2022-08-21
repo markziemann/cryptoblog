@@ -223,7 +223,7 @@ lines(as_datetime(pivd$datetime) , pivd$r2, lty=2, col="red")
 
 Start with 1 USD and keep track of purchases with USD=TRUE/FALSE.
 
-Buy at S1 and sell at R1
+### Buy at S1 and sell at R1
 
 ```{r,pivtrade1}
 
@@ -268,13 +268,13 @@ res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
-<br></p></details><br>
+</details>
+
+### Buy at S2 and sell at R2
 
 Buy at S2 and sell at R2
 
 ```{r,pivtrade2}
-
-fee = 0.002
 
 pivd <- pivots_daily(price)
 pivd <- pivd[which(!is.na(pivd$pp)),]
@@ -307,7 +307,7 @@ paste("numTrades:",nrow(res))
 
 ```
 
-<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p> 
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
 
 ```{r,pivtrade2b}
 
@@ -315,19 +315,19 @@ res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
-<br></p></details><br>
+</details>
+
+### BUY at R1 and SELL at S1
 
 BUY at R1 and SELL at S1
 
 ```{r,pivtrade3a}
 
-fee = 0.002
-
 pivd <- pivots_daily(price)
 pivd <- pivd[which(!is.na(pivd$pp)),]
 
-pivd$buy <- pivd$low > pivd$s1
-pivd$sell <- pivd$high < pivd$r1
+pivd$buy <- pivd$high > pivd$r1
+pivd$sell <- pivd$low < pivd$s1
 pivd$diff <- pivd$buy - pivd$sell
 pivd2 <- pivd[which(pivd$diff != 0),]
 pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
@@ -362,19 +362,19 @@ res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
-<br></p></details><br>
+</details>
+
+### BUY at R2 and SELL at S2
 
 BUY at R2 and SELL at S2
 
 ```{r,pivtrade3}
 
-fee = 0.002
-
 pivd <- pivots_daily(price)
 pivd <- pivd[which(!is.na(pivd$pp)),]
 
-pivd$buy <- pivd$low > pivd$s2
-pivd$sell <- pivd$high < pivd$r2
+pivd$buy <- pivd$high > pivd$r2
+pivd$sell <- pivd$low < pivd$s2
 pivd$diff <- pivd$buy - pivd$sell
 pivd2 <- pivd[which(pivd$diff != 0),]
 pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
@@ -409,19 +409,19 @@ res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
-<br></p></details><br>
+</details>
+
+### BUY at R2 and SELL at S1
 
 BUY at R2 and SELL at S1
 
 ```{r,pivtrade4}
 
-fee = 0.002
-
 pivd <- pivots_daily(price)
 pivd <- pivd[which(!is.na(pivd$pp)),]
 
-pivd$buy <- pivd$low > pivd$s1
-pivd$sell <- pivd$high < pivd$r2
+pivd$buy <- pivd$high > pivd$r2
+pivd$sell <- pivd$low < pivd$s1
 pivd$diff <- pivd$buy - pivd$sell
 pivd2 <- pivd[which(pivd$diff != 0),]
 pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
@@ -456,19 +456,19 @@ res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
-<br></p></details><br>
+</details>
+
+### BUY at R2 and SELL at PIV
 
 BUY at R2 and SELL at PIV
 
 ```{r,pivtrade5}
 
-fee = 0.002
-
 pivd <- pivots_daily(price)
 pivd <- pivd[which(!is.na(pivd$pp)),]
 
-pivd$buy <- pivd$low > pivd$pp
-pivd$sell <- pivd$high < pivd$r2
+pivd$buy <- pivd$high > pivd$r2
+pivd$sell <- pivd$low < pivd$pp
 pivd$diff <- pivd$buy - pivd$sell
 pivd2 <- pivd[which(pivd$diff != 0),]
 pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
@@ -503,19 +503,19 @@ res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
-<br></p></details><br>
+</details>
+
+### BUY at R1 and SELL at PIV
 
 BUY at R1 and SELL at PIV
 
 ```{r,pivtrade6}
 
-fee = 0.002
-
 pivd <- pivots_daily(price)
 pivd <- pivd[which(!is.na(pivd$pp)),]
 
-pivd$buy <- pivd$low > pivd$pp
-pivd$sell <- pivd$high < pivd$r1
+pivd$buy <- pivd$high > pivd$r1
+pivd$sell <- pivd$low < pivd$pp
 pivd$diff <- pivd$buy - pivd$sell
 pivd2 <- pivd[which(pivd$diff != 0),]
 pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
@@ -550,7 +550,7 @@ res %>% kbl(row.names=FALSE) %>% kable_styling()
 
 ```
 
-<br></p></details><br>
+</details>
 
 ## Session information
 
