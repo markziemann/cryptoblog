@@ -1,0 +1,181 @@
+---
+title: "<br>Does bitcoin volatility decrease over time?"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+    fig_width: 10
+    fig_height: 7
+---
+
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/volatility_size.Rmd)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+As a market grows, it is thought that volatility reduces. Lets see if this is the case with bitcoin.
+
+Historical data from https://www.investing.com/indices/investing.com-btc-usd-historical-data
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+  library(anytime)
+})
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Here I will be analysing the weekly trading range as a proxy for volatility.
+Data are from https://www.investing.com/indices/investing.com-btc-usd-historical-data
+
+The data is in CSV format and the dates need to be cleaned a bit.
+
+```{r,historicaldata}
+
+weekly <- read.csv("BitcoinHistoricalData_weekly.csv",stringsAsFactors=FALSE)
+weekly <- weekly[nrow(weekly):1,]
+weekly <- apply(weekly,2,function(x) { gsub(",","",x) } )
+
+weekly <- as.data.frame(weekly,stringsAsFactors=FALSE)
+
+weekly$Price <- as.numeric(weekly$Price)
+weekly$Open <- as.numeric(weekly$Open)
+weekly$High <- as.numeric(weekly$High)
+weekly$Low <- as.numeric(weekly$Low)
+
+weekly$Date <- anydate(weekly$Date)
+
+weekly <- weekly[,c("Date","High","Low","Open")]
+weekly <- weekly[grep("2021",weekly$Date,invert=TRUE),]
+
+```
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=weekly&time_start=2021-01-01&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat_weekly.txt")
+btcdat <- fromJSON("btcdat_weekly.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$open,stringsAsFactors=FALSE)
+colnames(price) <- c("Date","High","Low","Open")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+
+price$Date <- anydate(price$Date)
+
+weekly <- rbind(weekly,price)
+
+```
+
+## Volatility on the weekly
+
+Plotting the weekly trading range as a volatility metric.
+
+```{r,weekly1}
+
+weekly$vix <- ( weekly$High - weekly$Low ) / weekly$Open * 100
+
+plot(weekly$Date,weekly$vix,
+ xlab="", ylab="VIX", main="weekly trading range / opening price" )
+
+mylm <- lm(weekly$vix ~ weekly$Date)
+
+abline(mylm,col="red",lwd=2)
+
+```
+
+Hmm, this looks okay but we expect volatility to taper off, not just linearly go to zero.
+
+Now try log regression
+
+
+```{r,logreg1}
+
+model <- lm(weekly$vix ~ log(as.numeric(weekly$Date)))
+
+plot(weekly$Date,weekly$vix,xlim=c(weekly$Date[1],weekly$Date[nrow(weekly)]+1000),
+ xlab="", ylab="VIX", main="weekly trading range / opening price" )
+
+# generate points
+x <- seq(from=as.numeric(weekly$Date)[1],
+  to=as.numeric(weekly$Date)[nrow(weekly)]+1000,
+  length.out=nrow(weekly) )
+
+y <- predict(model,newdata=list(x=x), interval="confidence")
+
+matlines(x,y, lwd=2)
+
+summary(model)
+
+```
+
+With a trimmed y axis.
+
+```{r,logreg2}
+
+plot(weekly$Date,weekly$vix,
+  xlim=c(weekly$Date[1],weekly$Date[nrow(weekly)]+1000),
+  ylim=c(0,50) ,
+  xlab="", ylab="VIX", main="weekly trading range / opening price" )
+grid()
+
+
+# generate frecast points
+x <- seq(from=as.numeric(weekly$Date)[1],
+  to=as.numeric(weekly$Date)[nrow(weekly)]+1000,
+  length.out=nrow(weekly) )
+
+y <- predict(model,newdata=list(x=x), interval="confidence")
+
+matlines(x,y, lwd=2)
+
+```
+
+It is quite interesting that the logarithmic regression yielded a more or less linear curve,
+indicating that volatility is decreasing in a constant fashion.
+
+Also interesting to see the increasing volatility at the the peak bubble years incl 2013, 2017, 2020, and lower volatility in 2016 and in 2021 
+which could be possible described as reaccumulation phases with historically low volatility.
+
+```{r,logreg3}
+
+plot(weekly$Date,weekly$vix,
+  xlim=c(weekly$Date[1],weekly$Date[nrow(weekly)]+1000),
+  ylim=c(0,50) ,col="gray", pch=19,
+  xlab="", ylab="VIX", main="weekly trading range / opening price" )
+grid()
+mtext("red line = 20 wk moving average")
+lines(SMA(weekly$vix,n=20) ~ weekly$Date ,col="red",lwd=3)
+
+```
+
+The chart definitely shows that Q3/Q4 2021 have printed very low volatility, is this a precursor to a bull run, just like 2016?
+
+## Session information
+
+For reproducibility
+
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
+
+</details>
