@@ -432,8 +432,12 @@ The stochastic gave moderate returns with 4x hodl which was lower than 6x for th
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>

@@ -404,8 +404,12 @@ Overall the EMA strategies gave poorer results than the SMA strategy.
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>

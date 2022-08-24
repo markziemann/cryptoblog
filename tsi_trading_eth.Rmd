@@ -428,8 +428,12 @@ but better than the best moving average strategy (3.4x hodl) with roughly the sa
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>

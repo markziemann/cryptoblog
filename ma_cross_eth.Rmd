@@ -487,8 +487,12 @@ Subscribing to alerts costs 0.0005 BTC per year.
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>

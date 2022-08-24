@@ -1181,8 +1181,12 @@ tail(piv) %>% kbl(row.names=FALSE, caption="Recent price action and yearly pivot
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>

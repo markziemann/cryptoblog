@@ -505,8 +505,12 @@ lines(as.Date(price2$date) ,  kc2[,"up"] , col="red")
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>

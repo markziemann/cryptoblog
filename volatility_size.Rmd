@@ -170,8 +170,12 @@ The chart definitely shows that Q3/Q4 2021 have printed very low volatility, is 
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>

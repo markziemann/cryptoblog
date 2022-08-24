@@ -360,8 +360,12 @@ These alerts are sent before the daily close and will assist you in sticking to 
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>
