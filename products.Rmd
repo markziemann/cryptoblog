@@ -6,7 +6,7 @@ title: "<br>Products"
 
 We offer two types of services, (1) access to altcoin indicators and push notifications, and (2) custom data analytics.
 
-## <br>1. Altcoin indicators and push notifications
+## <br> Altcoin indicators and push notifications
 
 The market indicators shown on this site are developed using advanced data analysis,
 which is optimised for maximum profit.
@@ -29,7 +29,7 @@ Membership to the altcoin group is free for the rest of 2022.
 
 Get in touch via email to arrange access: mark.ziemann{αt}gmail.com
 
-## 3. Custom data services
+## <br> Custom data services
 
 Have a trading idea you'd like to have backtested?
 Our highly skilled team will put your trading strategies through their paces, and perform optimisation to get the best results.
