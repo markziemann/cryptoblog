@@ -1,0 +1,190 @@
+---
+title: "Trading based on MA and EMA multiples"
+author: "Mark Ziemann"
+date: "`r Sys.Date()`"
+---
+
+## Intro
+
+Trading off moving averages, exponenial moving averages and crosses between these is a popular method for timing entry and exit of positions.
+In this blog post I will be trilaing simple moving averages to find the one which performs the best.
+
+```{r,lib}
+
+library("jsonlite")
+library("tidyverse")
+library("runner")
+library("quantmod")
+library("TTR")
+library("vioplot")
+
+```
+
+## Get data
+
+Obtaining BTC historical data (daily).
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+
+download.file(URL,destfile="btcdat.txt")
+
+btcdat <- fromJSON("btcdat.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","Close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),2][2] 
+mystart <- price[c(1,nrow(price)),2][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## Moving average function
+
+Assuming 0.1% trading fee, as per binance current rate.
+
+n=number of periods
+
+m=multiple
+
+```{r,sma}
+
+
+sma <- function(price,n,m,fee) {
+ma <- m * SMA(Cl(price),n=n)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$Close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( nrow(price2) == 0 ) { return(c(0,0)) }
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c(1,2)]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c(1,2)]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(c(prod(trades$diff),nrow(trades)))
+}
+
+
+```
+
+## Exponential moving average function
+
+
+```{r,ema}
+
+ema <- function(price,n,m,fee) {
+ma <- m * EMA(Cl(price),n=n)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$Close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( nrow(price2) == 0 ) { return(c(0,0)) }
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c(1,2)]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c(1,2)]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(c(prod(trades$diff),nrow(trades)))
+}
+
+```
+
+## Backtesting
+
+```{r,backtest}
+
+fee=0.001
+
+myrange <- 3:700
+res <- sapply(myrange,function(n) { sma(price,n,1,fee) } )
+colnames(res) <- myrange
+res <- t(res)
+colnames(res) <- c("returns","trades")
+res <- as.data.frame(res)
+res$mean <- res$returns^(1/res$trades)
+res_sma1 <- res
+
+m=1.2
+myrange <- 3:700
+res <- sapply(myrange,function(n) { sma(price,n,m,fee) } )
+colnames(res) <- myrange
+res <- t(res)
+colnames(res) <- c("returns","trades")
+res <- as.data.frame(res)
+res$mean <- res$returns^(1/res$trades)
+res_sma2 <- res
+subset(res_sma2,returns>100)
+
+res <- sapply(myrange,function(n) { ema(price,n,1,fee) } )
+colnames(res) <- myrange
+res <- t(res)
+colnames(res) <- c("returns","trades")
+res <- as.data.frame(res)
+res$mean <- res$returns^(1/res$trades)
+res_ema <- res
+res_ema
+
+m=0.8
+res <- sapply(myrange,function(n) { ema(price,n,m,fee) } )
+colnames(res) <- myrange
+res <- t(res)
+colnames(res) <- c("returns","trades")
+res <- as.data.frame(res)
+res$mean <- res$returns^(1/res$trades)
+res_ema2 <- res
+subset(res_ema2,returns>100)
+
+```
+
+## Conclusion
+
+Not successful
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```

@@ -1,0 +1,611 @@
+---
+title: "<br>Trading BTC, ETH and XMR based on an ensemble of MA indicators"
+author: "Mark Ziemann"
+date: "`r Sys.Date()`"
+---
+
+## Intro
+
+In this report I will be looking at whether a combination of MA derived indicators and RSI  works better than
+each on their own. 
+The theory is that there is a chance that combining them will reduce false positives.
+
+The indicators I will be using are:
+
+1. Optimal simple moving average (SMA).
+
+2. Optimal SMA cross
+
+3. Optimal exponential moving average (EMA)
+
+4. Optimal EMA cross
+
+5. RSI (21d timeframe)
+
+
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("parallel")
+  library("kableExtra")
+})
+
+knitr::opts_chunk$set(fig.width=8, fig.height=8) 
+
+```
+
+## Get BTC data
+
+Obtaining BTC historical data (daily).
+
+```{r,getdata_btc}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+
+download.file(URL,destfile="btcdat.txt")
+
+dat <- fromJSON("btcdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,
+  price$quote$USD$volume, stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close","volume")
+price$date <- as.Date(sapply(strsplit(as.character(price$date),"T"),"[[",1))
+
+price2 <- price
+
+```
+
+## Fetch BTC optimised parameters
+
+These have been optimised with backtesting.
+
+```{r,params_btc}
+
+params <- read.table("https://mdz-analytics.com/altcoins/BTC/BTC_dat.txt", header=TRUE)
+
+params %>% kbl(caption="optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
+
+```
+
+## Calculate hodl returns
+
+This is the benchmark we use for judging the performance of an indicator.
+Any strategy with total returns under this value is considered bad.
+
+```{r,hodl_btc}
+
+myend <- price[c(1,nrow(price)),2][2]
+mystart <- price[c(1,nrow(price)),2][1]
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+### SMA analysis
+
+Fetching the optimal SMA value and comparing it to price action.
+
+```{r,sma_btc}
+
+best_sma = as.numeric(params[which(params$indicator == "SMA"),"parameter"])
+ma <- SMA(Cl(price),n=best_sma)
+price2$sma <- price2$close > ma
+
+```
+
+### SMA cross analysis
+
+Fetching the optimal SMA cross values.
+
+```{r,sma_cross_btc}
+
+best_sma_cross = params[which(params$indicator == "SMAcross"),"parameter"]
+
+best_sma_cross1 <- as.numeric(unlist(strsplit(best_sma_cross,","))[1])
+best_sma_cross2 <- as.numeric(unlist(strsplit(best_sma_cross,","))[2])
+
+sma1 <- SMA(Cl(price),n=best_sma_cross1)
+sma2 <- SMA(Cl(price),n=best_sma_cross2)
+
+price2$sma_cross <- sma2>sma1
+
+```
+
+### EMA analysis
+
+Fetching the optimal EMA value and comparing it to price action.
+
+```{r,ema_btc}
+
+best_ema = as.numeric(params[which(params$indicator == "EMA"),"parameter"])
+ema <- EMA(Cl(price),n=best_ema)
+price2$ema <- price2$close > ema
+
+```
+
+### EMA cross analysis
+
+Fetching the optimal EMA cross values.
+
+```{r,ema_cross_btc}
+
+best_ema_cross = params[which(params$indicator == "EMAcross"),"parameter"]
+
+best_ema_cross1 <- as.numeric(unlist(strsplit(best_ema_cross,","))[1])
+best_ema_cross2 <- as.numeric(unlist(strsplit(best_ema_cross,","))[2])
+
+ema1 <- EMA(Cl(price),n=best_ema_cross1)
+ema2 <- EMA(Cl(price),n=best_ema_cross2)
+
+price2$ema_cross <- ema2>ema1
+
+```
+
+### RSI analysis
+
+The idea here is to enter when  RSI recovers the 50 level.
+
+Previously we showed that a period of 36 days gave good performance with an entry and exit at the 40 level.
+
+```{r,rsi_btc}
+
+n_rsi <- 36
+
+rsi <- RSI(Cl(price),n=n_rsi)
+
+price2$rsi <- rsi>50
+
+```
+
+## Ensemble trading
+
+Now that the indicators have each been calculated, we can open a trade when X indicators are positive and sell when only Y are positive.
+
+In order to decide on X and Y, we should look at the data first.
+
+```{r,ensembl1_btc}
+
+price2[is.na(price2)] <- 0
+price2$sum <- price2$sma + price2$sma_cross + price2$ema + price2$ema_cross + price2$rsi
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$sum ~ as.Date(price2$date),type="l",
+  xlab="Date",ylab="positive indicators",main="Indicator set")
+grid()
+
+par(mfrow=c(1,1))
+
+plot(price2$close ~ as.Date(price2$date),type="p",log="y", pch=19,cex=0.5,
+  col=price2$sum+1,
+  xlab="Date",ylab="price (USD)",main="USD price coloured by num indicators")
+  mtext("black=0,red=1,green=2,blue=3,red=4,purple=5")
+grid()
+
+```
+
+Now that we've calculated the number of indicators that are positive and negative at each timepoint,
+we can assess what good entry and exit points are.
+
+```{r,backtest1_btc}
+
+ensembl <- function(price2,threshold,fee) {
+  price2$higher <- price2$sum >= threshold
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c("date","close")]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c("date","close")]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+}
+
+myrange=1:5
+res <- t( sapply(myrange,function(i) {
+  ensembl(price2,threshold=i,fee=0.002)
+}) )
+
+rownames(res) <- myrange
+xhodl <- t(t(as.numeric(res[, 1]/hodl)))
+res <- cbind(res,xhodl)
+colnames(res) <- c("totalROI","n_trades","xhodl")
+res <- as.data.frame(res)
+res$pos_indicator <- myrange
+res <- res[,c(4,2,1,3)]
+res %>% kbl(caption="backtesting results with minimum postive indicators") %>%  kable_styling("hover", full_width = F)
+
+```
+
+## Get ETH data
+
+Obtaining ETH historical data (daily).
+
+```{r,getdata_eth}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+
+download.file(URL,destfile="ethdat.txt")
+
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,
+  price$quote$USD$volume, stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close","volume")
+price$date <- as.Date(sapply(strsplit(as.character(price$date),"T"),"[[",1))
+
+price2 <- price
+
+```
+
+## Fetch ETH optimised parameters
+
+These have been optimised with backtesting.
+
+```{r,params_eth}
+
+params <- read.table("https://mdz-analytics.com/altcoins/ETH/ETH_dat.txt", header=TRUE)
+
+params %>% kbl(caption="optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
+
+```
+
+## Calculate hodl returns
+
+This is the benchmark we use for judging the performance of an indicator. 
+Any strategy with total returns under this value is considered bad.
+
+```{r,hodl_eth}
+
+myend <- price[c(1,nrow(price)),2][2] 
+mystart <- price[c(1,nrow(price)),2][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+### SMA analysis
+
+Fetching the optimal SMA value and comparing it to price action.
+
+```{r,sma_eth}
+
+best_sma = as.numeric(params[which(params$indicator == "SMA"),"parameter"])
+ma <- SMA(Cl(price),n=best_sma)
+price2$sma <- price2$close > ma
+
+```
+
+### SMA cross analysis
+
+Fetching the optimal SMA cross values.
+
+```{r,sma_cross_eth}
+
+best_sma_cross = params[which(params$indicator == "SMAcross"),"parameter"]
+
+best_sma_cross1 <- as.numeric(unlist(strsplit(best_sma_cross,","))[1])
+best_sma_cross2 <- as.numeric(unlist(strsplit(best_sma_cross,","))[2])
+
+sma1 <- SMA(Cl(price),n=best_sma_cross1)
+sma2 <- SMA(Cl(price),n=best_sma_cross2)
+
+price2$sma_cross <- sma2>sma1
+
+```
+
+### EMA analysis
+
+Fetching the optimal EMA value and comparing it to price action.
+
+```{r,ema_eth}
+
+best_ema = as.numeric(params[which(params$indicator == "EMA"),"parameter"])
+ema <- EMA(Cl(price),n=best_ema)
+price2$ema <- price2$close > ema
+
+```
+
+### EMA cross analysis
+
+Fetching the optimal EMA cross values.
+
+```{r,ema_cross_eth}
+
+best_ema_cross = params[which(params$indicator == "EMAcross"),"parameter"]
+
+best_ema_cross1 <- as.numeric(unlist(strsplit(best_ema_cross,","))[1])
+best_ema_cross2 <- as.numeric(unlist(strsplit(best_ema_cross,","))[2])
+
+ema1 <- EMA(Cl(price),n=best_ema_cross1)
+ema2 <- EMA(Cl(price),n=best_ema_cross2)
+
+price2$ema_cross <- ema2>ema1
+
+```
+
+### RSI analysis
+
+The idea here is to enter when  RSI recovers the 50 level.
+
+Previously we showed that a period of 21 days gave good performance with an entry at 49 and exit at 54.
+
+```{r,rsi_eth}
+
+n_rsi <- 21
+
+rsi <- RSI(Cl(price),n=n_rsi)
+
+price2$rsi <- rsi>50
+
+```
+
+## Ensemble trading
+
+Now that the indicators have each been calculated, we can open a trade when X indicators are positive and sell when only Y are positive.
+
+In order to decide on X and Y, we should look at the data first.
+
+```{r,ensembl1_eth}
+
+price2[is.na(price2)] <- 0
+price2$sum <- price2$sma + price2$sma_cross + price2$ema + price2$ema_cross + price2$rsi
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$sum ~ as.Date(price2$date),type="l",
+  xlab="Date",ylab="positive indicators",main="Indicator set")
+grid()
+
+par(mfrow=c(1,1))
+
+plot(price2$close ~ as.Date(price2$date),type="p",log="y", pch=19,cex=0.5,
+  col=price2$sum+1,
+  xlab="Date",ylab="price (USD)",main="USD price coloured by num indicators")
+  mtext("black=0,red=1,green=2,blue=3,red=4,purple=5")
+grid()
+
+```
+
+Now that we've calculated the number of indicators that are positive and negative at each timepoint,
+we can assess what good entry and exit points are.
+
+```{r,backtest1_eth}
+
+myrange=1:5
+res <- t( sapply(myrange,function(i) {
+  ensembl(price2,threshold=i,fee=0.002)
+}) )
+
+rownames(res) <- myrange
+xhodl <- t(t(as.numeric(res[, 1]/hodl)))
+res <- cbind(res,xhodl)
+colnames(res) <- c("totalROI","n_trades","xhodl")
+res <- as.data.frame(res)
+res$pos_indicator <- myrange
+res <- res[,c(4,2,1,3)]
+res %>% kbl(caption="backtesting results with minimum postive indicators") %>%  kable_styling("hover", full_width = F)
+
+```
+
+## Get XMR data
+
+Obtaining XMR historical data (daily).
+
+```{r,getdata_xmr}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+
+download.file(URL,destfile="xmrdat.txt")
+
+dat <- fromJSON("xmrdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,
+  price$quote$USD$volume, stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close","volume")
+price$date <- as.Date(sapply(strsplit(as.character(price$date),"T"),"[[",1))
+
+price2 <- price
+
+```
+
+## Fetch XMR optimised parameters
+
+These have been optimised with backtesting.
+
+```{r,params_xmr}
+
+params <- read.table("https://mdz-analytics.com/altcoins/XMR/XMR_dat.txt", header=TRUE)
+
+params %>% kbl(caption="optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
+
+```
+
+## Calculate hodl returns
+
+This is the benchmark we use for judging the performance of an indicator. 
+Any strategy with total returns under this value is considered bad.
+
+```{r,hodl_xmr}
+
+myend <- price[c(1,nrow(price)),2][2] 
+mystart <- price[c(1,nrow(price)),2][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+### SMA analysis
+
+Fetching the optimal SMA value and comparing it to price action.
+
+```{r,sma_xmr}
+
+best_sma = as.numeric(params[which(params$indicator == "SMA"),"parameter"])
+ma <- SMA(Cl(price),n=best_sma)
+price2$sma <- price2$close > ma
+
+```
+
+### SMA cross analysis
+
+Fetching the optimal SMA cross values.
+
+```{r,sma_cross_xmr}
+
+best_sma_cross = params[which(params$indicator == "SMAcross"),"parameter"]
+
+best_sma_cross1 <- as.numeric(unlist(strsplit(best_sma_cross,","))[1])
+best_sma_cross2 <- as.numeric(unlist(strsplit(best_sma_cross,","))[2])
+
+sma1 <- SMA(Cl(price),n=best_sma_cross1)
+sma2 <- SMA(Cl(price),n=best_sma_cross2)
+
+price2$sma_cross <- sma2>sma1
+
+```
+
+### EMA analysis
+
+Fetching the optimal EMA value and comparing it to price action.
+
+```{r,ema_xmr}
+
+best_ema = as.numeric(params[which(params$indicator == "EMA"),"parameter"])
+ema <- EMA(Cl(price),n=best_ema)
+price2$ema <- price2$close > ema
+
+```
+
+### EMA cross analysis
+
+Fetching the optimal EMA cross values.
+
+```{r,ema_cross_xmr}
+
+best_ema_cross = params[which(params$indicator == "EMAcross"),"parameter"]
+
+best_ema_cross1 <- as.numeric(unlist(strsplit(best_ema_cross,","))[1])
+best_ema_cross2 <- as.numeric(unlist(strsplit(best_ema_cross,","))[2])
+
+ema1 <- EMA(Cl(price),n=best_ema_cross1)
+ema2 <- EMA(Cl(price),n=best_ema_cross2)
+
+price2$ema_cross <- ema2>ema1
+
+```
+
+### RSI analysis
+
+The idea here is to enter when  RSI recovers the 50 level.
+
+Previously we showed that a period of 21 days gave good performance with an entry at 49 and exit at 54.
+
+```{r,rsi_xmr}
+
+n_rsi <- 21
+
+rsi <- RSI(Cl(price),n=n_rsi)
+
+price2$rsi <- rsi>50
+
+```
+
+## Ensemble trading
+
+Now that the indicators have each been calculated, we can open a trade when X indicators are positive and sell when only Y are positive.
+
+In order to decide on X and Y, we should look at the data first.
+
+```{r,ensembl1_xmr}
+
+price2[is.na(price2)] <- 0
+price2$sum <- price2$sma + price2$sma_cross + price2$ema + price2$ema_cross + price2$rsi
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$sum ~ as.Date(price2$date),type="l",
+  xlab="Date",ylab="positive indicators",main="Indicator set")
+grid()
+
+par(mfrow=c(1,1))
+
+plot(price2$close ~ as.Date(price2$date),type="p",log="y", pch=19,cex=0.5,
+  col=price2$sum+1,
+  xlab="Date",ylab="price (USD)",main="USD price coloured by num indicators")
+  mtext("black=0,red=1,green=2,blue=3,red=4,purple=5")
+grid()
+
+```
+
+Now that we've calculated the number of indicators that are positive and negative at each timepoint,
+we can assess what good entry and exit points are.
+
+```{r,backtest1_xmr}
+
+myrange=1:5
+res <- t( sapply(myrange,function(i) {
+  ensembl(price2,threshold=i,fee=0.002)
+}) )
+
+rownames(res) <- myrange
+xhodl <- t(t(as.numeric(res[, 1]/hodl)))
+res <- cbind(res,xhodl)
+colnames(res) <- c("totalROI","n_trades","xhodl")
+res <- as.data.frame(res)
+res$pos_indicator <- myrange
+res <- res[,c(4,2,1,3)]
+res %>% kbl(caption="backtesting results with minimum postive indicators") %>%  kable_styling("hover", full_width = F)
+
+```
+
+
+
+## Conclusion
+
+This analysis indicates that using a basket of simple indicators tends to work better than the
+individual indicators separately.
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```

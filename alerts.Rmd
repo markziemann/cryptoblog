@@ -1,0 +1,1576 @@
+---
+title: "<br>Daily trade alerts for BTC, ETH and XMR"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+---
+
+```{r,banner,fig.height=2,fig.width=8,results='hide'}
+
+unlink("banner.png")
+
+file.copy("../images/banner1.png", "banner.png")
+
+```
+
+<a href="https://mdz-analytics.com/">
+<img src="banner.png" alt="banner" width=700" height="100"/>
+</a>
+
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/alerts/alerts.Rmd)
+
+## Intro
+
+In the backtesting analysis, I have established these profitable strategies for timing entry/exits.
+Click on the hyperlinks below to see how these signals were identified.
+
+1. Simple and exponential moving averages for [BTC](https://mdz-analytics.com/crypto/ma_trading_btc.html),
+[ETH](https://mdz-analytics.com/crypto/ma_trading_eth.html) and
+[XMR](https://mdz-analytics.com/altcoins/XMR/ma_trading_XMR.html).
+
+2. Moving average crosses for [BTC](https://mdz-analytics.com/crypto/ma_cross_btc.html),
+[ETH](https://mdz-analytics.com/crypto/ma_cross_eth.html) and
+[XMR](https://mdz-analytics.com/altcoins/XMR/ma_cross_XMR.html).
+
+3. Directional movement index (DMI) for [BTC](https://mdz-analytics.com/crypto/dmi_trading_btc.html),
+[ETH](https://mdz-analytics.com/crypto/dmi_trading_eth.html) and
+[XMR](https://mdz-analytics.com/altcoins/XMR/dmi_trading_XMR.html).
+
+4. True strength index (TSI) for [BTC](https://mdz-analytics.com/crypto/tsi_trading_btc.html),
+[ETH](https://mdz-analytics.com/crypto/tsi_trading_eth.html) and
+[XMR](https://mdz-analytics.com/altcoins/XMR/tsi_trading_XMR.html).
+
+5. Stochastic oscillator (stoch) for [BTC](https://mdz-analytics.com/crypto/stoch_trading_btc.html),
+[ETH](https://mdz-analytics.com/crypto/stoch_trading_eth.html) and
+[XMR](https://mdz-analytics.com/altcoins/XMR/stoch_trading_XMR.html).
+
+6. Double RSI and [BTC](https://mdz-analytics.com/crypto/rsi2trading_btc.html),
+[ETH](https://mdz-analytics.com/crypto/rsi2_trading_eth.html) and
+[XMR](https://mdz-analytics.com/altcoins/XMR/rsi2_trading_XMR.html).
+
+This script will examine the price action and these trade signals just before the daily close.
+If the signal is TRUE, it is bullish and if FALSE it is bearish.
+When there is a switch from bearish to bullish it is a buy signal and when it switches from bullish to bearish it is a sell signal.
+This HTML is updated just before the daily close each day, but push notifications for any trade signals are also sent by push bullet.
+
+To receive these signals in real-time, subscribe to the following channels - it's free for a limited time!
+
+https://www.pushbullet.com/channel?tag=btc_signal
+
+<a class="pushbullet-subscribe-widget" data-channel="btc_signal" data-widget="button" data-size="small"></a>
+<script type="text/javascript">(function(){var a=document.createElement('script');a.type='text/javascript';a.async=true;a.src='https://widget.pushbullet.com/embed.js';var b=document.getElementsByTagName('script')[0];b.parentNode.insertBefore(a,b);})();</script>
+
+https://www.pushbullet.com/channel?tag=eth_signal
+
+<a class="pushbullet-subscribe-widget" data-channel="eth_signal" data-widget="button" data-size="small"></a>
+<script type="text/javascript">(function(){var a=document.createElement('script');a.type='text/javascript';a.async=true;a.src='https://widget.pushbullet.com/embed.js';var b=document.getElementsByTagName('script')[0];b.parentNode.insertBefore(a,b);})();</script>
+
+https://www.pushbullet.com/channel?tag=xmr_signal
+
+<a class="pushbullet-subscribe-widget" data-channel="xmr_signal" data-widget="button" data-size="small"></a>
+<script type="text/javascript">(function(){var a=document.createElement('script');a.type='text/javascript';a.async=true;a.src='https://widget.pushbullet.com/embed.js';var b=document.getElementsByTagName('script')[0];b.parentNode.insertBefore(a,b);})();</script>
+
+If you need some help to design your own trading signals/strategies, I am happy to help for a fee.
+email me at mark.ziemann{αt}gmail.com for any enquiries/suggestions/feedback.
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+Reminder: this analysis is not financial advice.
+
+```{r,lib,warning=FALSE}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("kableExtra")
+})
+
+TESTING = FALSE
+
+```
+
+```{r,time}
+
+system("DATE=$(date -u) ; sed \"s/MYTIME/${DATE}/\" ../index0.html > ../index1.html")
+
+mydate <- Sys.time()
+attr(mydate, "tzone") <- "UTC"
+mydate <- as.Date(mydate)
+
+```
+
+## Get BTC price data
+
+Obtaining BTC price data (daily) for the last 300 days.
+
+Bitcoin is the oldest and largest cryptocurrency.
+
+```{r,btc_data1}
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&count=300"
+download.file(URL,destfile="btcdat.txt")
+btcdat <- fromJSON("btcdat.txt")
+price <- btcdat$data$quotes
+price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+colnames(price) <- c("date","high","low","close")
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=hourly&time_period=hourly&count=11"
+download.file(URL,destfile="btcdat.txt")
+btcdat <- fromJSON("btcdat.txt")
+price2 <- btcdat$data$quotes
+price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price2) <- c("date","high","low","close")
+
+high <- max(price2[,2])
+low <-  min(price2[,3])
+close <- price2[nrow(price2),4]
+
+df <- data.frame(date=mydate,high=high,low=low,close=close,stringsAsFactors=FALSE)
+price <- rbind(price,df)
+tail(price) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+if ( TESTING == TRUE) {
+  price[nrow(price),"close"] <- price[nrow(price),"close"] * 2
+}
+
+```
+
+Now fetch the backtested parameters.
+
+```{r,btc_params}
+
+params <- read.table("https://mdz-analytics.com/altcoins/BTC/BTC_dat.txt", header=TRUE)
+params %>% kbl(caption="BTC optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
+
+```
+
+## BTC SMA indicator
+
+Now to determine whether BTC has crossed the SMA line.
+
+```{r, btc_sma}
+
+price2 <- price
+
+n <- as.numeric(params[params$indicator == "SMA",2])
+
+price2$ma <- SMA(Cl(price2),n=n)
+price2$signal <- price2$close > price2$ma
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="SELL"
+  }
+} else {
+btc_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_SMA_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/BTC_SMA_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/BTC_SMA_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/BTC_SMA_COL/red/' ../index1.html")
+}
+
+message(paste("BTC SMA signal:",btc_signal))
+
+```
+
+```{r, btc_sma_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="BTC SMA")
+grid()
+lines(price2$ma~ as.Date(price2$date) ,col="red")
+
+```
+
+## BTC EMA indicator
+
+Now to determine whether BTC has crossed the EMA line.
+
+```{r, btc_ema}
+
+price2 <- price
+
+n <- as.numeric(params[params$indicator == "EMA",2])
+
+price2$ma <- EMA(Cl(price2),n=n)
+price2$signal <- price2$close > price2$ma
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="SELL"
+  }
+} else {
+btc_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_EMA_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/BTC_EMA_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/BTC_EMA_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/BTC_EMA_COL/red/' ../index1.html")
+}
+
+message(paste("BTC EMA signal:",btc_signal))
+
+```
+
+```{r, btc_ema_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="BTC EMA")
+grid()
+lines(price2$ma~ as.Date(price2$date) ,col="red")
+
+```
+
+## BTC SMA cross indicator
+
+The SMA cross is a highly profitable strategy.
+
+```{r, btc_cross}
+
+price2 <- price
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "SMAcross",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+price2$ma1 <- SMA(Cl(price2),n=n1)
+price2$ma2 <- SMA(Cl(price2),n=n2)
+
+price2$signal <- price2$ma2 > price2$ma1
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="SELL"
+  }
+} else {
+btc_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_SMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/BTC_SMACROSS_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/BTC_SMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/BTC_SMACROSS_COL/red/' ../index1.html")
+}
+
+message(paste("BTC SMA cross signal is",btc_signal))
+
+```
+
+```{r, btc_cross_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="BTC SMA cross")
+grid()
+lines(price2$ma1~ as.Date(price2$date) ,col="red")
+lines(price2$ma2~ as.Date(price2$date) ,col="blue")
+
+```
+
+## BTC EMA cross indicator
+
+The EMA cross is a moderately profitable strategy.
+
+```{r, btc_ema_cross}
+
+price2 <- price
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "EMAcross",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+price2$ma1 <- EMA(Cl(price2),n=n1)
+price2$ma2 <- EMA(Cl(price2),n=n2)
+
+price2$signal <- price2$ma2 > price2$ma1
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="SELL"
+  }
+} else {
+btc_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_EMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/BTC_EMACROSS_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/BTC_EMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/BTC_EMACROSS_COL/red/' ../index1.html")
+}
+
+message(paste("BTC EMA cross signal is",btc_signal))
+
+```
+
+```{r, btc_ema_cross_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="BTC EMA cross")
+grid()
+lines(price2$ma1~ as.Date(price2$date) ,col="red")
+lines(price2$ma2~ as.Date(price2$date) ,col="blue")
+
+```
+
+## BTC DMI indicator
+
+Directional movement indicator is a good approach to identify trend changes.
+
+```{r,btc_dmi,fig.height=10,fig.width=8}
+
+n <- as.numeric(params[params$indicator == "DMI",2])
+
+dmi.adx <- ADX(price[,c("high","low","close")],n=n)
+price2 <- cbind(price,dmi.adx)
+price2$signal <- dmi.adx[,1] > dmi.adx[,2]
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="SELL"
+  }
+} else {
+  btc_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_DMI_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/BTC_DMI_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/BTC_DMI_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/BTC_DMI_COL/red/' ../index1.html")
+}
+
+message(paste("BTC DMI signal:",btc_signal))
+
+```
+
+```{r,btc_dmi_plot,fig.height=10,fig.width=8}
+
+price2 <- as.data.frame(price2)
+par(mfrow=c(2,1))
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="BTC USD price")
+grid()
+plot(price2$DIp~as.Date(price2$date),type="l", col="blue",
+  xlab="Date",ylab="price (USD)",main="BTC DMI")
+grid()
+lines(price2$DIn ~ as.Date(price2$date) ,col="red")
+
+```
+
+## BTC TSI indicator
+
+Probably the best performing indicator across most price series data.
+
+```{r,btc_tsi,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "TSI",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+ns <- n[3]
+
+TSI <- function(x, n.first = 25, n.second = 13, n.signal = 7) {
+  #True Strength Indicator
+  #https://school.stockcharts.com/doku.php?id=technical_indicators:true_strength_index
+  x <- try.xts(x, error = as.matrix)
+  pc <- x - lag.xts(x, na.pad = T) #force lag.xts to get na padding
+  dspc <- EMA(EMA(pc, n = n.first), n = n.second)
+  dsapc <- EMA(EMA(abs(pc), n = n.first), n = n.second)
+
+  tsi <- 100 * (dspc/dsapc)
+  signal <- EMA(tsi, n = n.signal)
+  r <- cbind(tsi, signal)
+  r <- reclass(r, x)
+  if (!is.null(dim(r))) colnames(r) <- c("tsi", "signal")
+  return(r)
+}
+
+tsi <- TSI(price$close , n.first = n1, n.second = n2, n.signal = ns )
+colnames(tsi) <- c("tsi","sig")
+
+price2 <- cbind(price,tsi)
+price2$signal <- tsi[,1] > tsi[,2]
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="SELL"
+  }
+} else {
+  btc_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_TSI_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/BTC_TSI_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/BTC_TSI_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/BTC_TSI_COL/red/' ../index1.html")
+}
+
+message(paste("BTC TSI signal:",btc_signal))
+
+```
+
+```{r,btc_tsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tsi[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="TSI",main="TSI")
+lines(as.Date(price2$date), tsi[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+## BTC stochastic oscillator indicator
+
+```{r,btc_stoch,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "stoch",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+n3 <- n[3]
+
+sto <- stoch(HLC(price), nFastK=n1 , nFastD=n2 , nSlowD=n2 , bounded = TRUE, smooth=n3)
+
+price2 <- cbind(price,sto)
+price2$signal <- price2$fastK > price2$fastD
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="SELL"
+  }
+} else {
+  btc_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_STOCH_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/BTC_STOCH_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/BTC_STOCH_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/BTC_STOCH_COL/red/' ../index1.html")
+}
+
+message(paste("BTC stoch signal:",btc_signal))
+
+```
+
+```{r,btc_stoch_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$fastK ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="stochastic oscillator")
+lines(as.Date(price2$date), price2$fastD  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+## BTC double RSI indicator
+
+```{r,btc_rsi1,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "RSI2",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+rsi1 <- RSI(price$close,n=n1,maType=EMA)
+rsi2 <- RSI(price$close,n=n2,maType=EMA)
+
+price2 <- cbind(price,rsi1,rsi2)
+price2$signal <- price2$rsi1 > price2$rsi2
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    btc_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    btc_signal="SELL"
+  }
+} else {
+  btc_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_RSI_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/BTC_RSI_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/BTC_RSI_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/BTC_RSI_COL/red/' ../index1.html")
+}
+
+message(paste("BTC RSI signal:",btc_signal))
+
+```
+
+```{r,btc_rsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1 ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="double RSI")
+lines(as.Date(price2$date), price2$rsi2  , col="red"  )
+grid()
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l",
+  xlab="Date",ylab="RSI ratio",main="double RSI")
+grid()
+abline(h=1,lty=2,lwd=2)
+par(mfrow=c(1,1))
+
+```
+
+## Get ETH price data
+
+Obtaining ETH historical data (daily).
+
+Ethereum is the largest and oldest smart contract blockchain network.
+
+```{r,eth1}
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&count=300"
+download.file(URL,destfile="ethdat.txt")
+ethdat <- fromJSON("ethdat.txt")
+price <- ethdat$data$quotes
+price <- data.frame( as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+colnames(price) <- c("date","high","low","close")
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=hourly&time_period=hourly&count=11"
+download.file(URL,destfile="ethdat.txt")
+ethdat <- fromJSON("ethdat.txt")
+price2 <- ethdat$data$quotes
+price2 <- data.frame( as.Date(price2$time_close)  , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price2) <- c("date","high","low","close")
+
+high <- max(price2[,2])
+low <- min(price2[,3])
+close <- price2[nrow(price2),4]
+
+df <- data.frame(date=Sys.Date(),high=high,low=low,close=close,stringsAsFactors=FALSE)
+price <- rbind(price,df)
+tail(price) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+if ( TESTING == TRUE) {
+  price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
+}
+
+```
+
+Fetch backtested parameters.
+
+```{r,eth_params}
+
+params <- read.table("https://mdz-analytics.com/altcoins/ETH/ETH_dat.txt", header=TRUE)
+params %>% kbl(caption="ETH optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
+
+```
+
+## ETH SMA indicator
+
+Now to determine whether ETH has crossed the SMA line.
+
+```{r, eth_sma}
+
+price2 <- price
+
+n <- as.numeric(params[params$indicator == "SMA",2])
+
+price2$ma <- SMA(Cl(price2),n=n)
+price2$signal <- price2$close > price2$ma
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/ETH_SMA_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/ETH_SMA_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/ETH_SMA_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/ETH_SMA_COL/red/' ../index1.html")
+}
+
+message(paste("ETH SMA signal:",eth_signal))
+
+```
+
+```{r, eth_sma_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH SMA")
+grid()
+lines(price2$ma~ as.Date(price2$date) ,col="red")
+
+```
+
+## ETH EMA indicator
+
+Now to determine whether ETH has crossed the EMA line.
+
+```{r, eth_ema}
+
+price2 <- price
+
+n <- as.numeric(params[params$indicator == "EMA",2])
+
+price2$ma <- EMA(Cl(price2),n=n)
+price2$signal <- price2$close > price2$ma
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/ETH_EMA_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/ETH_EMA_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/ETH_EMA_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/ETH_EMA_COL/red/' ../index1.html")
+}
+
+message(paste("ETH EMA signal:",eth_signal))
+
+```
+
+```{r, eth_ema_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH EMA")
+grid()
+lines(price2$ma~ as.Date(price2$date) ,col="red")
+
+```
+
+## ETH SMA cross indicator
+
+The SMA cross is a highly profitable strategy.
+
+```{r, eth_cross}
+
+price2 <- price
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "SMAcross",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+price2$ma1 <- SMA(Cl(price2),n=n1)
+price2$ma2 <- SMA(Cl(price2),n=n2)
+
+price2$signal <- price2$ma2 > price2$ma1
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/ETH_SMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/ETH_SMACROSS_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/ETH_SMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/ETH_SMACROSS_COL/red/' ../index1.html")
+}
+
+message(paste("ETH SMA cross signal:",eth_signal))
+
+```
+
+```{r, eth_cross_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH SMA cross")
+grid()
+lines(price2$ma1~ as.Date(price2$date) ,col="red")
+lines(price2$ma2~ as.Date(price2$date) ,col="blue")
+
+```
+
+## ETH EMA cross indicator
+
+The EMA cross is a highly profitable strategy.
+
+```{r, eth_ema_cross}
+
+price2 <- price
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "EMAcross",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+price2$ma1 <- EMA(Cl(price2),n=n1)
+price2$ma2 <- EMA(Cl(price2),n=n2)
+
+price2$signal <- price2$ma2 > price2$ma1
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/ETH_EMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/ETH_EMACROSS_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/ETH_EMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/ETH_EMACROSS_COL/red/' ../index1.html")
+}
+
+message(paste("ETH EMA cross signal:",eth_signal))
+
+```
+
+```{r, eth_ema_cross_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH EMA cross")
+grid()
+lines(price2$ma1~ as.Date(price2$date) ,col="red")
+lines(price2$ma2~ as.Date(price2$date) ,col="blue")
+
+```
+
+## ETH DMI
+
+```{r,eth_dmi,fig.height=10,fig.width=8}
+
+n <- as.numeric(params[params$indicator == "DMI",2])
+
+dmi.adx <- ADX(price[,c("high","low","close")],n=n)
+price2 <- cbind(price,dmi.adx)
+price2$signal <- dmi.adx[,1] > dmi.adx[,2]
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/ETH_DMI_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/ETH_DMI_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/ETH_DMI_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/ETH_DMI_COL/red/' ../index1.html")
+}
+
+message(paste("ETH DMI signal:",eth_signal))
+
+```
+
+```{r, eth_dmi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH USD price")
+grid()
+plot(price2$DIp~as.Date(price2$date),type="l", col="blue",
+  xlab="Date",ylab="price (USD)",main="ETH DMI")
+grid()
+lines(price2$DIn ~ as.Date(price2$date) ,col="red")
+
+```
+
+## ETH TSI indicator
+
+Best indicator.
+
+```{r,eth_tsi,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "TSI",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+ns <- n[3]
+
+tsi <- TSI(price$close , n.first = n1, n.second = n2, n.signal = ns )
+colnames(tsi) <- c("tsi","sig")
+
+price2 <- cbind(price,tsi)
+price2$signal <- tsi[,1] > tsi[,2]
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/ETH_TSI_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/ETH_TSI_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/ETH_TSI_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/ETH_TSI_COL/red/' ../index1.html")
+}
+
+message(paste("ETH TSI signal:",eth_signal))
+
+```
+
+```{r,eth_tsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tsi[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="TSI",main="TSI")
+lines(as.Date(price2$date), tsi[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+## ETH stochastic oscillator indicator
+
+```{r,eth_stoch,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "stoch",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+n3 <- n[3]
+
+sto <- stoch(HLC(price), nFastK=n1 , nFastD=n2 , nSlowD=n2 , bounded = TRUE, smooth=n3)
+
+price2 <- cbind(price,sto)
+price2$signal <- price2$fastK > price2$fastD
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/ETH_STOCH_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/ETH_STOCH_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/ETH_STOCH_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/ETH_STOCH_COL/red/' ../index1.html")
+}
+
+message(paste("ETH stoch signal:",eth_signal))
+
+```
+
+```{r,eth_stoch_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$fastK ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="stochastic oscillator")
+lines(as.Date(price2$date), price2$fastD  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+## ETH double RSI indicator
+
+```{r,eth_rsi1,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "RSI2",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+rsi1 <- RSI(price$close,n=n1,maType=EMA)
+rsi2 <- RSI(price$close,n=n2,maType=EMA)
+
+price2 <- cbind(price,rsi1,rsi2)
+price2$signal <- price2$rsi1 > price2$rsi2
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/ETH_RSI_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/ETH_RSI_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/ETH_RSI_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/ETH_RSI_COL/red/' ../index1.html")
+}
+
+message(paste("ETH RSI signal:",eth_signal))
+
+```
+
+```{r,eth_rsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1 ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="double RSI")
+lines(as.Date(price2$date), price2$rsi2  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l",
+  xlab="Date",ylab="RSI ratio",main="double RSI")
+grid()
+abline(h=1,lty=2,lwd=2)
+par(mfrow=c(1,1))
+
+```
+
+## Get XMR price data
+
+Obtaining XMR price data (daily) for the last 300 days.
+
+XMR is the ticker for Monero, the largest and oldest private cryptocurrency which aims to be the private p2p cash of the internet.
+
+```{r,xmr_data1}
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&count=300"
+download.file(URL,destfile="xmrdat.txt")
+dat <- fromJSON("xmrdat.txt")
+price <- dat$data$quotes
+price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+colnames(price) <- c("date","high","low","close")
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=hourly&time_period=hourly&count=11"
+download.file(URL,destfile="xmrdat.txt")
+dat <- fromJSON("xmrdat.txt")
+price2 <- dat$data$quotes
+price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price2) <- c("date","high","low","close")
+
+high <- max(price2[,2])
+low <-  min(price2[,3])
+close <- price2[nrow(price2),4]
+
+df <- data.frame(date=mydate,high=high,low=low,close=close,stringsAsFactors=FALSE)
+price <- rbind(price,df)
+tail(price) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+if ( TESTING == TRUE) {
+  price[nrow(price),"close"] <- price[nrow(price),"close"] * 2
+}
+
+```
+
+Now fetch the backtested parameters.
+
+```{r,xmr_params}
+
+params <- read.table("https://mdz-analytics.com/altcoins/XMR/XMR_dat.txt", header=TRUE)
+params %>% kbl(caption="XMR optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
+
+```
+
+## XMR SMA indicator
+
+Now to determine whether XMR has crossed the SMA line.
+
+```{r, xmr_sma}
+
+price2 <- price
+
+n <- as.numeric(params[params$indicator == "SMA",2])
+
+price2$ma <- SMA(Cl(price2),n=n)
+price2$signal <- price2$close > price2$ma
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    xmr_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    xmr_signal="SELL"
+  }
+} else {
+xmr_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/XMR_SMA_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/XMR_SMA_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/XMR_SMA_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/XMR_SMA_COL/red/' ../index1.html")
+}
+
+message(paste("XMR SMA signal:",xmr_signal))
+
+```
+
+```{r, xmr_sma_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="XMR SMA")
+grid()
+lines(price2$ma~ as.Date(price2$date) ,col="red")
+
+```
+
+## XMR EMA indicator
+
+Now to determine whether XMR has crossed the EMA line.
+
+```{r, xmr_ema}
+
+price2 <- price
+
+n <- as.numeric(params[params$indicator == "EMA",2])
+
+price2$ma <- EMA(Cl(price2),n=n)
+price2$signal <- price2$close > price2$ma
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    xmr_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    xmr_signal="SELL"
+  }
+} else {
+xmr_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/XMR_EMA_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/XMR_EMA_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/XMR_EMA_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/XMR_EMA_COL/red/' ../index1.html")
+}
+
+message(paste("XMR EMA signal:",xmr_signal))
+
+```
+
+```{r, xmr_ema_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="XMR EMA")
+grid()
+lines(price2$ma~ as.Date(price2$date) ,col="red")
+
+```
+
+## XMR SMA cross indicator
+
+The SMA cross is a highly profitable strategy.
+
+```{r, xmr_cross}
+
+price2 <- price
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "SMAcross",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+price2$ma1 <- SMA(Cl(price2),n=n1)
+price2$ma2 <- SMA(Cl(price2),n=n2)
+
+price2$signal <- price2$ma2 > price2$ma1
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    xmr_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    xmr_signal="SELL"
+  }
+} else {
+xmr_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/XMR_SMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/XMR_SMACROSS_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/XMR_SMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/XMR_SMACROSS_COL/red/' ../index1.html")
+}
+
+message(paste("XMR SMA cross signal is",xmr_signal))
+
+```
+
+```{r, xmr_cross_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="XMR SMA cross")
+grid()
+lines(price2$ma1~ as.Date(price2$date) ,col="red")
+lines(price2$ma2~ as.Date(price2$date) ,col="blue")
+
+```
+
+## XMR EMA cross indicator
+
+The EMA cross is a moderately profitable strategy.
+
+```{r, xmr_ema_cross}
+
+price2 <- price
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "EMAcross",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+price2$ma1 <- EMA(Cl(price2),n=n1)
+price2$ma2 <- EMA(Cl(price2),n=n2)
+
+price2$signal <- price2$ma2 > price2$ma1
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    xmr_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    xmr_signal="SELL"
+  }
+} else {
+xmr_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/XMR_EMACROSS_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/XMR_EMACROSS_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/XMR_EMACROSS_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/XMR_EMACROSS_COL/red/' ../index1.html")
+}
+
+message(paste("XMR EMA cross signal is",xmr_signal))
+
+```
+
+```{r, xmr_ema_cross_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="XMR EMA cross")
+grid()
+lines(price2$ma1~ as.Date(price2$date) ,col="red")
+lines(price2$ma2~ as.Date(price2$date) ,col="blue")
+
+```
+
+## XMR DMI indicator
+
+Directional movement indicator is a good approach to identify trend changes.
+
+```{r,xmr_dmi,fig.height=10,fig.width=8}
+
+n <- as.numeric(params[params$indicator == "DMI",2])
+
+dmi.adx <- ADX(price[,c("high","low","close")],n=n)
+price2 <- cbind(price,dmi.adx)
+price2$signal <- dmi.adx[,1] > dmi.adx[,2]
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    xmr_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    xmr_signal="SELL"
+  }
+} else {
+  xmr_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/XMR_DMI_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/XMR_DMI_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/XMR_DMI_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/XMR_DMI_COL/red/' ../index1.html")
+}
+
+message(paste("XMR DMI signal:",xmr_signal))
+
+```
+
+```{r,xmr_dmi_plot,fig.height=10,fig.width=8}
+
+price2 <- as.data.frame(price2)
+par(mfrow=c(2,1))
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="XMR USD price")
+grid()
+plot(price2$DIp~as.Date(price2$date),type="l", col="blue",
+  xlab="Date",ylab="price (USD)",main="XMR DMI")
+grid()
+lines(price2$DIn ~ as.Date(price2$date) ,col="red")
+
+```
+
+## XMR TSI indicator
+
+Probably the best performing indicator across most price series data.
+
+```{r,xmr_tsi,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "TSI",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+ns <- n[3]
+
+TSI <- function(x, n.first = 25, n.second = 13, n.signal = 7) {
+  #True Strength Indicator
+  #https://school.stockcharts.com/doku.php?id=technical_indicators:true_strength_index
+  x <- try.xts(x, error = as.matrix)
+  pc <- x - lag.xts(x, na.pad = T) #force lag.xts to get na padding
+  dspc <- EMA(EMA(pc, n = n.first), n = n.second)
+  dsapc <- EMA(EMA(abs(pc), n = n.first), n = n.second)
+
+  tsi <- 100 * (dspc/dsapc)
+  signal <- EMA(tsi, n = n.signal)
+  r <- cbind(tsi, signal)
+  r <- reclass(r, x)
+  if (!is.null(dim(r))) colnames(r) <- c("tsi", "signal")
+  return(r)
+}
+
+tsi <- TSI(price$close , n.first = n1, n.second = n2, n.signal = ns )
+colnames(tsi) <- c("tsi","sig")
+
+price2 <- cbind(price,tsi)
+price2$signal <- tsi[,1] > tsi[,2]
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    xmr_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    xmr_signal="SELL"
+  }
+} else {
+  xmr_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/XMR_TSI_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/XMR_TSI_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/XMR_TSI_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/XMR_TSI_COL/red/' ../index1.html")
+}
+
+message(paste("XMR TSI signal:",xmr_signal))
+
+```
+
+```{r,xmr_tsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tsi[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="TSI",main="TSI")
+lines(as.Date(price2$date), tsi[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+## XMR stochastic oscillator indicator
+
+```{r,xmr_stoch,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "stoch",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+n3 <- n[3]
+
+sto <- stoch(HLC(price), nFastK=n1 , nFastD=n2 , nSlowD=n2 , bounded = TRUE, smooth=n3)
+
+price2 <- cbind(price,sto)
+price2$signal <- price2$fastK > price2$fastD
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    xmr_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    xmr_signal="SELL"
+  }
+} else {
+  xmr_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/XMR_STOCH_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/XMR_STOCH_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/XMR_STOCH_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/XMR_STOCH_COL/red/' ../index1.html")
+}
+
+message(paste("XMR stoch signal:",xmr_signal))
+
+```
+
+```{r,xmr_stoch_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$fastK ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="stochastic oscillator")
+lines(as.Date(price2$date), price2$fastD  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+## XMR double RSI indicator
+
+```{r,xmr_rsi1,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "RSI2",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+rsi1 <- RSI(price$close,n=n1,maType=EMA)
+rsi2 <- RSI(price$close,n=n2,maType=EMA)
+
+price2 <- cbind(price,rsi1,rsi2)
+price2$signal <- price2$rsi1 > price2$rsi2
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    xmr_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    xmr_signal="SELL"
+  }
+} else {
+  xmr_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/XMR_RSI_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/XMR_RSI_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/XMR_RSI_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/XMR_RSI_COL/red/' ../index1.html")
+}
+
+message(paste("XMR RSI signal:",xmr_signal))
+
+```
+
+```{r,xmr_rsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1 ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="double RSI")
+lines(as.Date(price2$date), price2$rsi2  , col="red"  )
+grid()
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l",
+  xlab="Date",ylab="RSI ratio",main="double RSI")
+grid()
+abline(h=1,lty=2,lwd=2)
+par(mfrow=c(1,1))
+
+```
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```

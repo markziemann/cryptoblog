@@ -1,0 +1,436 @@
+---
+title: "Trading based on MA and EMA crosses"
+author: "Mark Ziemann"
+date: "`r Sys.Date()`"
+---
+
+## Intro
+
+Trading off moving averages, exponenial moving averages and crosses between these is a popular method for timing entry and exit of positions.
+In this blog post I will be trilaing simple moving averages to find the one which performs the best.
+
+```{r,lib}
+
+library("jsonlite")
+library("tidyverse")
+library("runner")
+library("quantmod")
+library("TTR")
+library("vioplot")
+
+```
+
+## Get data
+
+Obtaining BTC historical data (daily).
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+
+download.file(URL,destfile="btcdat.txt")
+
+btcdat <- fromJSON("btcdat.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","Close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),2][2] 
+mystart <- price[c(1,nrow(price)),2][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## Multiple indicators
+
+```{r,mi1}
+
+mx <- sapply(1:100,function(n) { SMA(Cl(price),n=n)} )
+colnames(mx) <- 1:100
+mx2 <- mx[100:nrow(mx),]
+price2 <- price[100:nrow(price),]
+
+i=1
+num_ma <- function(i) {
+  p <- price2[i,2]
+  mas <- mx2[i,]
+  my_n <- length(which(p>mas))
+  return(my_n)
+}
+
+price2$count <- sapply(1:nrow(price2),num_ma)
+price2$ma <- SMA(price2$count,n=50)
+
+par(mfrow=c(2,1))
+plot(price2$Close~as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="BTC price")
+grid()
+
+plot(price2$count ~ as.Date(price2$date),type="l",
+  xlab="Date",ylab="MA count",main="MA count")
+grid()
+
+lines(price2$ma~ as.Date(price2$date) ,col="red")
+
+```
+
+## Moving average function
+
+Assuming 0.1% trading fee, as per binance current rate.
+
+```{r,sma}
+
+sma2 <- function(price,n,fee) {
+mx <- sapply(1:100,function(n) { SMA(Cl(price),n=n)} )
+colnames(mx) <- 1:100
+mx2 <- mx[100:nrow(mx),]
+price1 <- price[100:nrow(price),]
+price1$count <- sapply(1:nrow(price1),num_ma)
+price1$ma <- SMA(price1$count,n=n)
+price2 <- price1
+price2$higher <- price2$count > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c(1,2)]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c(1,2)]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(c(prod(trades$diff),nrow(trades)))
+}
+
+sapply(10:50, function(i) {sma2(price,i,0.001) } )
+
+```
+
+## Exponential moving average function
+
+
+```{r,ema}
+
+ema2 <- function(price,n,fee) {
+mx <- sapply(1:100,function(n) { EMA(Cl(price),n=n)} )
+colnames(mx) <- 1:100
+mx2 <- mx[100:nrow(mx),]
+price1 <- price[100:nrow(price),]
+price1$count <- sapply(1:nrow(price1),num_ma)
+price1$ma <- EMA(price1$count,n=n)
+price2 <- price1
+price2$higher <- price2$count > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c(1,2)]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c(1,2)]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(c(prod(trades$diff),nrow(trades)))
+}
+
+sapply(10:50, function(i) {ema2(price,i,0.001) } )
+
+```
+
+## Backtesting
+
+```{r,backtest}
+
+fee=0.001
+
+myrange <- 3:200
+
+res <- sapply(myrange,function(n) { sma(price,n,fee) } )
+colnames(res) <- myrange
+res <- t(res)
+colnames(res) <- c("returns","trades")
+res <- as.data.frame(res)
+res$mean <- res$returns^(1/res$trades)
+res_sma <- res
+
+res <- sapply(myrange,function(n) { ema(price,n,fee) } )
+colnames(res) <- myrange
+res <- t(res)
+colnames(res) <- c("returns","trades")
+res <- as.data.frame(res)
+res$mean <- res$returns^(1/res$trades)
+res_ema <- res
+
+```
+
+## Plots
+
+```{r,plots,fig.height=8,fig.width=8}
+
+plot(x=myrange, y=res_sma$returns, pch=19,
+  xlab="moving average interval (days)",ylab="fold return",main="SMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(x=myrange,y=res_sma$returns, pch=19,
+  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="SMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(x=myrange,y=res_ema$returns, pch=19,
+  xlab="moving average interval (days)",ylab="fold return",main="EMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(x=myrange,y=res_ema$returns, pch=19,
+  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="EMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(res_sma$mean,res_sma$returns, main="SMA",
+  xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
+grid()
+text(res_sma$mean,res_sma$returns , cex=1, labels=rownames(res_sma))
+abline(h=hodl,col="red")
+
+plot(res_ema$mean,res_ema$returns, main="EMA",
+  xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
+grid()
+text(res_ema$mean,res_ema$returns , cex=1, labels=rownames(res_ema))
+abline(h=hodl,col="red")
+
+plot(res_sma$trades,res_sma$returns, main="SMA",
+  xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
+grid()
+text(res_sma$trades,res_sma$returns , cex=1, labels=rownames(res_sma))
+abline(h=hodl,col="red")
+
+plot(res_ema$trades,res_ema$returns, main="SMA",
+  xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
+grid()
+text(res_ema$trades,res_ema$returns , cex=1, labels=rownames(res_ema))
+abline(h=hodl,col="red")
+
+
+```
+
+## Optimisation
+
+```{r,best_sma,fig.width=10,fig.height=8}
+
+best_ema = 28
+n=best_ema
+
+mx <- sapply(1:100,function(n) { EMA(Cl(price),n=n)} )
+colnames(mx) <- 1:100
+mx2 <- mx[100:nrow(mx),]
+price1 <- price[100:nrow(price),]
+price1$count <- sapply(1:nrow(price1),num_ma)
+price1$ma <- EMA(price1$count,n=n)
+price2 <- price1
+price2$higher <- price2$count > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c(1,2)]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c(1,2)]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+trades
+nrow(trades)
+prod(trades$diff)
+mean(trades$diff)
+
+
+
+```
+
+
+```{r,sma43,fig.width=10,fig.height=8}
+
+best_sma = 43
+best_sma
+ma <- SMA(Cl(price),n=best_sma)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$Close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c(1,2)]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c(1,2)]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+sma_trades <- cbind(buy,sell)
+nrow(sma_trades)
+sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trades$buy_price ) +1 - (2 * fee )
+sma_trades
+prod(sma_trades$diff)
+SMA_HEADER=paste(best_sma,"day moving average")
+
+plot(price$Close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=SMA_HEADER)
+grid()
+lines(ma~ as.Date(price$date) ,col="red")
+
+```
+
+
+
+
+```{r,best_ema,fig.width=10,fig.height=8}
+
+best_ema = which(res_ema==max(res_ema))
+best_ema
+ma <- EMA(Cl(price),n=best_ema)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$Close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c(1,2)]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c(1,2)]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+ema_trades <- cbind(buy,sell)
+ema_trades$diff <- ( ( ema_trades$sell_price - ema_trades$buy_price ) / ema_trades$buy_price ) +1 - ( 2 * fee )
+ema_trades
+nrow(ema_trades)
+prod(ema_trades$diff)
+EMA_HEADER=paste(best_ema,"day exponential moving average")
+
+plot(price$Close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=EMA_HEADER)
+grid()
+lines(ma~ as.Date(price$date) ,col="red")
+
+```
+
+
+
+
+## Effect of fees
+
+```{r,fees,fig.width=8,fig.height=7}
+
+fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
+
+res_sma_fees <- sapply(fee_levels,function(x) { sma(price,best_sma,fee=x) } )[1,]
+plot(fee_levels,res_sma_fees ,pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext(SMA_HEADER)
+abline(h=hodl,col="red")
+grid()
+
+res_ema_fees <- sapply(fee_levels,function(x) { ema(price,best_ema,fee=x) } )[1,]
+plot(fee_levels,res_ema_fees ,pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext(EMA_HEADER)
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Trades by year
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+sma_trades$year <- sapply(strsplit(sma_trades[,3],"-"),"[[",1)
+sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,5] } )
+vioplot(sma_yearly)
+
+yr <- sapply(sma_yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+ema_trades$year <- sapply(strsplit(ema_trades[,3],"-"),"[[",1)
+ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,5] } )
+vioplot(ema_yearly)
+
+yr <- sapply(ema_yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+```
+
+
+## Conclusion
+
+Hodling BTC over this period gave a 378 fold return.
+The best simple moving average was 18 days, which gave a 1366 fold return (with fees at 0.1%).
+The best exponential moving average was 16 days, which gave a return of 1680 fold.
+The fee rate strongly affects the fold return, so it is definitely worthwhile to seek lower price exchanges.
+Profitability varies strongly by year with bull market most profitable and bear market least profitable.
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```

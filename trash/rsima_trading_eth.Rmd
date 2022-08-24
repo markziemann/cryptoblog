@@ -1,0 +1,563 @@
+---
+title: "<br>Trading based on RSI"
+author: "Mark Ziemann"
+date: "`r Sys.Date()`"
+---
+
+## Intro
+
+In this blog post I will be trilaing using RSI for entry and exit.
+
+```{r,lib}
+
+library("jsonlite")
+library("tidyverse")
+library("runner")
+library("quantmod")
+library("TTR")
+library("vioplot")
+
+knitr::opts_chunk$set(fig.width=8, fig.height=8) 
+
+```
+
+## Get data
+
+Obtaining ETH historical data (daily).
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+
+if ( ! file.exists("ethdat.txt") ) {
+  download.file(URL,destfile="ethdat.txt")
+}
+
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","close")
+price$date <- sapply(strsplit(price$date,"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),2][2] 
+mystart <- price[c(1,nrow(price)),2][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+
+```
+
+
+## RSI analysis
+
+
+
+FEES: Assuming 0.1% trading fee, as per binance current rate.
+
+The idea here is to enter after RSI recovers from a low point and then recovers to positive territory.
+
+Exit when RSI stops increasing
+
+
+```{r,rsi}
+
+n=14
+window=5
+
+rsi <- RSI(price$close,n=14)
+
+change <- unlist(sapply(window:length(rsi) , function(x) {
+  return( rsi[x] - rsi[(x-5)]) 
+}))
+
+change <- c(rep(NA,nrow(price) - length(change)), change)
+
+price <- data.frame(price,rsi,change,stringsAsFactors=FALSE)
+
+price$low <- change < -20
+price$high <- change > 20
+
+par(mfrow=c(2,1))
+plot(price$close~ as.Date(price$date),type="l",log="y",xlab="",ylab="USD price")
+grid()
+plot(price$rsi ~ as.Date(price$date),type="l",xlab="",ylab="RSI")
+grid()
+abline(h=30,col="red")
+abline(h=70,col="red")
+
+```
+
+
+
+
+
+```{r,rsisma}
+
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","close")
+price$date <- sapply(strsplit(price$date,"T"),"[[",1)
+
+
+rsisma <- function(price,n_ma,n_rsi,fee) {
+rsi <- RSI(Cl(price),n=n_rsi)
+rsima <- SMA(rsi,n=n_ma)
+price2 <- data.frame(price,rsi,rsima,stringsAsFactors=FALSE)
+price2$higher <- price2$rsi > price2$rsima
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(prod(trades$diff))
+}
+
+
+```
+
+## Exponential moving average function
+
+
+```{r,ema}
+
+rsiema <- function(price,n_ma,n_rsi,fee) {
+rsi <- RSI(Cl(price),n=n_rsi)
+rsima <- EMA(rsi,n=n_ma)
+price2 <- data.frame(price,rsi,rsima,stringsAsFactors=FALSE)
+price2$higher <- price2$rsi > price2$rsima
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(prod(trades$diff))
+}
+
+
+```
+
+## Backtesting
+
+```{r,backtest}
+
+fee=0.002
+n_rsi=14
+
+res_sma <- c(0,0,sapply(3:200,function(n) { rsisma(price,n_ma=n,n_rsi=n_rsi,fee) } ) )
+
+res_ema <- c(0,0,sapply(3:200,function(n) { rsiema(price,n_ma=n,n_rsi=n_rsi,fee) } ) )
+
+```
+
+## Plots
+
+```{r,plots,fig.height=8,fig.width=8}
+
+plot(res_sma,pch=19,xlab="moving average interval (days)",ylab="fold return",main="SMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(res_sma,pch=19,xlim=c(70,120),xlab="moving average interval (days)",ylab="fold return",main="SMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(res_ema,pch=19,xlab="moving average interval (days)",ylab="fold return",main="EMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(res_ema,pch=19,xlim=c(70,120),xlab="moving average interval (days)",ylab="fold return",main="EMA")
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## RSI optimisation 1
+
+```{r,rsiopt1}
+
+res_sma_11 <- c(0,0,sapply(3:200,function(n) { rsisma(price,n_ma=n,n_rsi=11,fee) } ) )
+res_sma_14 <- c(0,0,sapply(3:200,function(n) { rsisma(price,n_ma=n,n_rsi=14,fee) } ) )
+res_sma_17 <- c(0,0,sapply(3:200,function(n) { rsisma(price,n_ma=n,n_rsi=17,fee) } ) )
+res_sma_20 <- c(0,0,sapply(3:200,function(n) { rsisma(price,n_ma=n,n_rsi=20,fee) } ) )
+max_sma <- max(c(res_sma_11,res_sma_14,res_sma_17,res_sma_20))
+
+res_ema_11 <- c(0,0,sapply(3:200,function(n) { rsiema(price,n_ma=n,n_rsi=11,fee) } ) )
+res_ema_14 <- c(0,0,sapply(3:200,function(n) { rsiema(price,n_ma=n,n_rsi=14,fee) } ) )
+res_ema_17 <- c(0,0,sapply(3:200,function(n) { rsiema(price,n_ma=n,n_rsi=17,fee) } ) )
+res_ema_20 <- c(0,0,sapply(3:200,function(n) { rsiema(price,n_ma=n,n_rsi=20,fee) } ) )
+max_ema <- max(c(res_ema_11,res_ema_14,res_ema_17,res_ema_20))
+
+#plot sma
+plot(res_sma_11,pch=19,xlab="moving average interval (days)",ylab="fold return",
+  main="RSI SMA",ylim=c(0,max_sma),col="blue")
+points(res_sma_14,pch=19,col="black")
+points(res_sma_17,pch=19,col="red")
+points(res_sma_20,pch=19,col="green")
+legend("topright", 
+  legend = c("11", "14", "17", "20"), 
+  col = c("blue","black","red","green"), 
+  pch = 19, 
+  bty = "y", 
+  pt.cex = 2, 
+  cex = 1.2, 
+  text.col = "black", 
+  horiz = F )
+abline(h=hodl,col="red")
+grid()
+
+#zoom
+plot(res_sma_11,pch=19,xlab="moving average interval (days)",ylab="fold return", 
+  main="RSI SMA",ylim=c(0,max_sma), xlim=c(70,120),col="blue")
+points(res_sma_14,pch=19,col="black")
+points(res_sma_17,pch=19,col="red")
+points(res_sma_20,pch=19,col="green")
+legend("bottomleft",
+  legend = c("11", "14", "17", "20"),
+  col = c("blue","black","red","green"),
+  pch = 19,
+  bty = "y", 
+  pt.cex = 2, 
+  cex = 1.2,
+  text.col = "black",
+  horiz = F )
+abline(h=hodl,col="red")
+grid()
+
+
+#plot ema
+plot(res_ema_11,pch=19,xlab="moving average interval (days)",ylab="fold return",
+  main="RSI EMA",ylim=c(0,max_ema),col="blue")
+points(res_ema_14,pch=19,col="black")
+points(res_ema_17,pch=19,col="red")
+points(res_ema_20,pch=19,col="green")
+legend("topright",
+  legend = c("11", "14", "17", "20"),
+  col = c("blue","black","red","green"),
+  pch = 19,
+  bty = "y", 
+  pt.cex = 2, 
+  cex = 1.2,
+  text.col = "black",
+  horiz = F )
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## RSI optimisation 2
+
+```{r,rsiopt2}
+
+res_sma_12 <- c(0,0,sapply(3:200,function(n) { rsisma(price,n_ma=n,n_rsi=12,fee) } ) )
+res_sma_13 <- c(0,0,sapply(3:200,function(n) { rsisma(price,n_ma=n,n_rsi=13,fee) } ) )
+res_sma_14 <- c(0,0,sapply(3:200,function(n) { rsisma(price,n_ma=n,n_rsi=14,fee) } ) )
+res_sma_15 <- c(0,0,sapply(3:200,function(n) { rsisma(price,n_ma=n,n_rsi=15,fee) } ) )
+res_sma_16 <- c(0,0,sapply(3:200,function(n) { rsisma(price,n_ma=n,n_rsi=16,fee) } ) )
+max_sma <- max(c(res_sma_12,res_sma_13,res_sma_14,res_sma_15,res_sma_16))
+max_sma
+res_ema_12 <- c(0,0,sapply(3:200,function(n) { rsiema(price,n_ma=n,n_rsi=12,fee) } ) )
+res_ema_13 <- c(0,0,sapply(3:200,function(n) { rsiema(price,n_ma=n,n_rsi=13,fee) } ) )
+res_ema_14 <- c(0,0,sapply(3:200,function(n) { rsiema(price,n_ma=n,n_rsi=14,fee) } ) )
+res_ema_15 <- c(0,0,sapply(3:200,function(n) { rsiema(price,n_ma=n,n_rsi=15,fee) } ) )
+res_ema_16 <- c(0,0,sapply(3:200,function(n) { rsiema(price,n_ma=n,n_rsi=16,fee) } ) )
+max_ema <- max(c(res_ema_12,res_ema_13,res_ema_14,res_ema_15,res_ema_16))
+
+#plot sma
+plot(res_sma_12,pch=19,xlab="moving average interval (days)",ylab="fold return",
+  main="RSI SMA",ylim=c(0,max_sma),col="blue")
+points(res_sma_13,pch=19,col="black")
+points(res_sma_14,pch=19,col="red")
+points(res_sma_15,pch=19,col="green")
+points(res_sma_16,pch=19,col="gray")
+
+legend("topright",
+  legend = c("12", "13", "14", "15", "16"),
+  col = c("blue","black","red","green", "gray"),
+  pch = 19,
+  bty = "y",
+  pt.cex = 2,
+  cex = 1.2,
+  text.col = "black",
+  horiz = F )
+abline(h=hodl,col="red")
+grid()
+
+#zoom
+plot(res_sma_12,pch=19,xlab="moving average interval (days)",ylab="fold return",
+  main="RSI SMA",ylim=c(0,max_sma),xlim=c(80,120),col="blue")
+points(res_sma_13,pch=19,col="black")
+points(res_sma_14,pch=19,col="red")
+points(res_sma_15,pch=19,col="green")
+points(res_sma_16,pch=19,col="gray")
+
+legend("bottomleft",
+  legend = c("12", "13", "14", "15", "16"),
+  col = c("blue","black","red","green", "gray"),
+  pch = 19,
+  bty = "y",
+  pt.cex = 2,
+  cex = 1.2,
+  text.col = "black",
+  horiz = F )
+abline(h=hodl,col="red")
+grid()
+
+#plot ema
+plot(res_ema_12,pch=19,xlab="moving average interval (days)",ylab="fold return",
+  main="RSI EMA",ylim=c(0,max_ema),col="blue")
+points(res_ema_13,pch=19,col="black")
+points(res_ema_14,pch=19,col="red")
+points(res_ema_15,pch=19,col="green")
+points(res_ema_16,pch=19,col="gray")
+
+legend("topright",
+  legend = c("12", "13", "14", "15", "16"),
+  col = c("blue","black","red","green", "gray"),
+  pch = 19,
+  bty = "y",
+  pt.cex = 2,
+  cex = 1.2,
+  text.col = "black",
+  horiz = F )
+abline(h=hodl,col="red")
+grid()
+
+#zoom
+plot(res_ema_12,pch=19,xlab="moving average interval (days)",ylab="fold return",
+  main="RSI EMA",ylim=c(0,max_ema),xlim=c(80,120),col="blue")
+points(res_ema_13,pch=19,col="black")
+points(res_ema_14,pch=19,col="red")
+points(res_ema_15,pch=19,col="green")
+points(res_ema_16,pch=19,col="gray")
+
+legend("bottomleft",
+  legend = c("12", "13", "14", "15", "16"),
+  col = c("blue","black","red","green", "gray"),
+  pch = 19,
+  bty = "y",
+  pt.cex = 2,
+  cex = 1.2,
+  text.col = "black",
+  horiz = F )
+abline(h=hodl,col="red")
+grid()
+
+```
+
+
+
+## Show results for best parameters
+
+These data show RSI EMA (14d) is optimum.
+
+Will do same SMA for comparison purposes.
+
+```{r,best_sma,fig.width=10,fig.height=8}
+
+rsisma2 <- function(price,n_ma,n_rsi,fee) {
+rsi <- RSI(Cl(price),n=n_rsi)
+rsima <- SMA(rsi,n=n_ma)
+price2 <- data.frame(price,rsi,rsima,stringsAsFactors=FALSE)
+price2$higher <- price2$rsi > price2$rsima
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(trades)
+}
+
+rsiema2 <- function(price,n_ma,n_rsi,fee) {
+rsi <- RSI(Cl(price),n=n_rsi)
+rsima <- EMA(rsi,n=n_ma)
+price2 <- data.frame(price,rsi,rsima,stringsAsFactors=FALSE)
+price2$higher <- price2$rsi > price2$rsima
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(trades)
+}
+
+
+best_sma_14 = which(res_sma_14==max(res_sma_14))
+best_sma_14
+best_sma_14_trades <- rsisma2(price,n_ma=best_sma_14,n_rsi=14,fee)
+prod(prod(best_sma_14_trades$diff))
+nrow(best_sma_14_trades)
+
+
+par(mfrow=c(2,1))
+SMA_HEADER=paste(best_sma_14,"day RSI cross simple moving average")
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=SMA_HEADER)
+grid()
+
+rsi <- RSI(Cl(price),n=14)
+rsima <- SMA(rsi,n=best_sma_14)
+
+plot(rsi~as.Date(price$date),type="l",
+  xlab="Date",ylab="RSI",main=SMA_HEADER)
+grid()
+lines(rsima~ as.Date(price$date) ,col="red")
+
+
+best_ema_14 = which(res_ema_14==max(res_ema_14))
+best_ema_14
+best_ema_14_trades <- rsiema2(price,n_ma=best_ema_14,n_rsi=14,fee)
+prod(prod(best_ema_14_trades$diff))
+nrow(best_ema_14_trades)
+
+
+par(mfrow=c(2,1))
+EMA_HEADER=paste(best_ema_14,"day RSI cross exponential moving average")
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=EMA_HEADER)
+grid()
+
+rsi <- RSI(Cl(price),n=14)
+rsima <- EMA(rsi,n=best_ema_14)
+
+plot(rsi~as.Date(price$date),type="l", 
+  xlab="Date",ylab="RSI",main=EMA_HEADER)
+grid()
+lines(rsima~ as.Date(price$date) ,col="red")
+
+```
+
+
+## Effect of fees
+
+```{r,fees,fig.width=8,fig.height=7}
+
+fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
+best_sma <- best_sma_14
+res_sma_fees <- sapply(fee_levels,function(x) { rsisma(price,best_sma, n_rsi=14 ,fee=x) } )
+plot(fee_levels,res_sma_fees ,pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext(SMA_HEADER)
+abline(h=hodl,col="red")
+grid()
+
+best_ema <- best_ema_14
+res_ema_fees <- sapply(fee_levels,function(x) { rsiema(price,best_ema,n_rsi=14,fee=x) } )
+plot(fee_levels,res_ema_fees ,pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext(EMA_HEADER)
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Trades by year
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+sma_trades <- best_sma_14_trades
+sma_trades$year <- sapply(strsplit(sma_trades[,3],"-"),"[[",1)
+sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,5] } )
+sma_yearly <- sma_yearly[which(lapply(sma_yearly,length)>0)]
+vioplot(sma_yearly)
+
+yr <- sapply(sma_yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+ema_trades <- best_ema_14_trades
+ema_trades$year <- sapply(strsplit(ema_trades[,3],"-"),"[[",1)
+ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,5] } )
+ema_yearly <- ema_yearly[which(lapply(ema_yearly,length)>0)]
+vioplot(ema_yearly)
+
+yr <- sapply(ema_yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+```
+
+
+## Conclusion
+
+Hodling ETH over this period gave a 378 fold return.
+The best simple moving average was 18 days, which gave a 1366 fold return (with fees at 0.1%).
+The best exponential moving average was 16 days, which gave a return of 1680 fold.
+The fee rate strongly affects the fold return, so it is definitely worthwhile to seek lower price exchanges.
+Profitability varies strongly by year with bull market most profitable and bear market least profitable.
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```

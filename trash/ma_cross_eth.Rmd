@@ -1,0 +1,494 @@
+---
+title: "<br>Trading ETH based on MA and EMA crosses"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+---
+
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/ma_cross_eth.Rmd)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+Trading off simple moving averages (SMAs), exponenial moving averages (EMAs) and crosses between these 
+lines are popular methods for timing entry and exit of positions.
+In this blog post I will be back-testing simple moving averages to find the one which performed the best for
+ETH's price history.
+
+This page is designed to be updated daily - today's date is shown below.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("reshape2")
+  library("gplots")
+  library("parallel")
+  library("kableExtra")
+})
+
+NUMCORES=detectCores()/2
+
+Sys.Date()
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining ETH historical data (daily) from CoinMarketCap.com from August 2015 to present.
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2015-01-01&time_end=",mydate,sep="")
+download.file(URL,destfile="ethdat.txt")
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","Close")
+price$date <- sapply(strsplit(price$date,"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+It's important to calculate the returns for simply holding the asset rather than actively trading.
+
+The number shown here is the fold return on investment.
+ETH has appreciated a lot since 2015!
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),2][2] 
+mystart <- price[c(1,nrow(price)),2][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## Moving average cross function
+
+Here are the functions for trading based on SMA and EMA crosses, buying when line 1 breaks through line2
+and sell when it falls below.
+All trades are executed at the end of the daily session (UTC midnight).
+
+```{r,sma}
+
+smacross <- function(price,n,fee) {
+n1=mas[n,1]
+n2=mas[n,2]
+if (n1 != n2) { 
+  ma1 <- SMA(Cl(price),n=n1)
+  ma2 <- SMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+} else {
+  return(c(1,0))
+}
+}
+
+emacross <- function(price,n,fee) {
+n1=mas[n,1]
+n2=mas[n,2]
+if (n1 != n2) {
+  ma1 <- EMA(Cl(price),n=n1)
+  ma2 <- EMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+} else {
+  return(c(1,0))
+}
+}
+
+```
+
+## Backtesting
+
+Now let's go back in time to test the performance of the different MA cross strategies on the daily
+timeframe, using MA intervals from 4 to 200 days.
+
+Let's assume a 0.1% trading fee, as per binance current rate.
+
+First looking at SMA crosses.
+Below, I show the 20 highest returning indicators.
+
+```{r,backtestsma}
+
+fee=0.002
+
+mas <- expand.grid(5:200,5:200)
+#mas <- expand.grid(4:20,10:30)
+mas <- mas[which( mas$Var2 < mas$Var1) ,]
+
+res_sma <- mclapply(1:nrow(mas),function(n) {
+ smacross(price,n,fee) 
+} , mc.cores=NUMCORES)
+res_sma <- do.call(rbind,res_sma)
+mas1 <- as.data.frame(mas,stringsAsFactors=FALSE)
+res_sma <- cbind(mas1,res_sma)
+colnames(res_sma) <- c("MA1","MA2","returns","trades")
+res_sma$mean <- res_sma$returns^(1/res_sma$trades)
+
+best_sma <- res_sma[order(-res_sma$mean),]
+head(best_sma,20) %>% kbl(caption="Best ROI SMA strategies",row.names=FALSE) %>%  kable_styling()
+best_sma <- head(res_sma[order(-res_sma$returns),],20)
+best_sma %>% kbl(caption="Highest returns SMA strategies",row.names=FALSE) %>%  kable_styling()
+
+```
+
+Now let's take a look at the charts for SMA crosses.
+The darker the colour, the higher the returns.
+
+```{r,plots1,fig.height=8,fig.width=8}
+
+w <- as.matrix(acast(res_sma, MA1~MA2, value.var="returns"))
+
+colfunc <- colorRampPalette(c("white", "yellow" , "orange" , "red" , "darkred"))
+
+colfunc <- colorRampPalette(c("white", "red"))
+
+heatmap.2(w,scale="none",trace="none",dendrogram="none", Rowv=FALSE, Colv=FALSE,
+  col=colfunc(25), main="SMA crosses", xlab="short period", ylab="long period")
+
+heatmap.2(w[7:43,1:20],scale="none",trace="none",dendrogram="none", Rowv=FALSE,
+  Colv=FALSE, col=colfunc(25) , main="SMA crosses",
+  xlab="short period", ylab="long period")
+
+```
+
+Now we'll do the backtesting for EMA crosses.
+Here are the best 20 EMA cross strategies.
+
+```{r,backtestema}
+
+res_ema <- mclapply(1:nrow(mas),function(n) {
+ emacross(price,n,fee)
+} , mc.cores=NUMCORES)
+res_ema <- do.call(rbind,res_ema)
+mas1 <- as.data.frame(mas,stringsAsFactors=FALSE)
+res_ema <- cbind(mas1,res_ema)
+colnames(res_ema) <- c("MA1","MA2","returns","trades")
+res_ema$mean <- res_ema$returns^(1/res_ema$trades)
+
+best_ema <- res_ema[order(-res_ema$mean),]
+head(best_ema,20) %>% kbl(caption="Best ROI EMA strategies",row.names=FALSE) %>%  kable_styling()
+best_ema <- head(res_ema[order(-res_ema$returns),],20)
+best_ema %>% kbl(caption="Highest returns EMA strategies",row.names=FALSE) %>%  kable_styling()
+
+```
+
+Now let's take a look at the charts for EMA crosses.
+
+```{r,plots2,fig.height=8,fig.width=8}
+
+w <- as.matrix(acast(res_ema, MA1~MA2, value.var="returns"))
+
+colfunc <- colorRampPalette(c("white", "yellow" , "orange" , "red" , "darkred"))
+
+colfunc <- colorRampPalette(c("white", "red"))
+
+heatmap.2(w,scale="none",trace="none",dendrogram="none", Rowv=FALSE, Colv=FALSE,
+  col=colfunc(25), main="EMA crosses", xlab="short period", ylab="long period")
+
+heatmap.2(w[7:50,1:30],scale="none",trace="none",dendrogram="none", Rowv=FALSE,
+  Colv=FALSE, col=colfunc(25) , main="EMA crosses",
+  xlab="short period", ylab="long period")
+
+```
+
+## SMA cross optimisation
+
+Now let's take a closer look at the best SMA cross strategy.
+
+```{r,best_sma,fig.width=10,fig.height=8}
+
+n1=best_sma[1,1]
+n2=best_sma[1,2]
+message(paste("Best short SMA period:",n2))
+message(paste("Best long SMA period:",n1))
+if (n1 != n2) {
+  ma1 <- SMA(Cl(price),n=n1)
+  ma2 <- SMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  returns <- prod(trades$diff)
+} else {
+  returns <- 1
+}
+sma_trades <- trades
+message(paste("Number of trades:",nrow(sma_trades)))
+message(paste("Total ROI:",prod(sma_trades$diff)))
+message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
+
+```
+
+Here is a break down of all the trades executed for the best SMA cross strategy.
+
+```{r,best_sma2,fig.width=10,fig.height=8}
+
+sma_trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+Here is a chart showing the SMA cross indicator.
+
+```{r,best_sma3,fig.width=10,fig.height=8}
+SMA_HEADER=paste(n2 , "and", n1 ,"period SMA cross")
+plot(price$Close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=SMA_HEADER)
+grid()
+lines(ma1~ as.Date(price$date) ,col="red")
+lines(ma2~ as.Date(price$date) ,col="blue")
+
+```
+### SMA cross recent action
+
+```{r,sma_recent}
+
+plot(tail(price$Close,200)~tail(as.Date(price$date),200),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=SMA_HEADER)
+grid()
+lines(tail(ma1,200) ~ tail(as.Date(price$date),200) ,col="red")
+lines(tail(ma2,200) ~ tail(as.Date(price$date),200) ,col="blue")
+
+```
+
+## EMA cross optimisation
+
+Same thing for the best EMA cross strategy.
+
+```{r,best_ema,fig.width=10,fig.height=8}
+
+n1=best_ema[1,1]
+n2=best_ema[1,2]
+message(paste("Best short EMA period:",n2))
+message(paste("Best long EMA period:",n1))
+if (n1 != n2) {
+  ma1 <- EMA(Cl(price),n=n1)
+  ma2 <- EMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  returns <- prod(trades$diff)
+} else {
+  returns <- 1
+}
+ema_trades <- trades
+message(paste("Number of trades:",nrow(ema_trades)))
+message(paste("Total ROI:",prod(ema_trades$diff)))
+message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
+
+```
+
+Here is a break down of all the trades executed for the best EMA cross strategy.
+
+```{r,best_ema2,fig.width=10,fig.height=8}
+
+ema_trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+Here is a chart showing the EMA cross indicator.
+
+```{r,best_ema3,fig.width=10,fig.height=8}
+
+EMA_HEADER=paste(n2 , "and", n1 ,"period EMA cross")
+plot(price$Close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=EMA_HEADER)
+grid()
+lines(ma1~ as.Date(price$date) ,col="red")
+lines(ma2~ as.Date(price$date) ,col="blue")
+
+```
+
+### EMA cross recent action
+
+```{r,ema_recent}
+
+plot(tail(price$Close,200)~tail(as.Date(price$date),200),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=EMA_HEADER)
+grid()
+lines(tail(ma1,200) ~ tail(as.Date(price$date),200) ,col="red")
+lines(tail(ma2,200) ~ tail(as.Date(price$date),200) ,col="blue")
+
+```
+
+## Effect of fees
+
+It is important to factor in the effect of fees because higher exchange fees will erode profits.
+
+```{r,fees,fig.width=8,fig.height=7}
+
+fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
+
+res_sma_fees <- sapply(fee_levels,function(x) {
+  smacross(price,rownames(best_sma)[1],fee=x)
+} )
+plot(fee_levels,res_sma_fees[1,] ,pch=19,xlab="fee proportion",ylab="fold return",
+  main="Effect of fees on returns")
+mtext(SMA_HEADER)
+abline(h=hodl,col="red")
+grid()
+
+res_ema_fees <- sapply(fee_levels,function(x) {
+  emacross(price,rownames(best_ema)[1],fee=x)
+} )
+plot(fee_levels,res_ema_fees[1,] ,pch=19,xlab="fee proportion",ylab="fold return",
+  main="Effect of fees on returns")
+mtext(EMA_HEADER)
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Trades by year
+
+It is good to see whether the strategy gives consistent returns over the years.
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+sma_trades$year <- sapply(strsplit(sma_trades[,"sell_date"],"-"),"[[",1)
+sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,"diff"] } )
+sma_yearly <- sma_yearly[which(lapply(sma_yearly,length)>0)]
+vioplot(sma_yearly,ylab="trade ROI distribution",main="ETH daily SMA cross strategy")
+
+yr <- sapply(sma_yearly,prod)
+barplot(yr,ylab="yearly fold returns",main="ETH daily SMA cross strategy")
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+ema_trades$year <- sapply(strsplit(ema_trades[,"sell_date"],"-"),"[[",1)
+ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,"diff"] } )
+ema_yearly <- ema_yearly[which(lapply(ema_yearly,length)>0)]
+vioplot(ema_yearly,ylab="trade ROI distribution",main="ETH daily EMA cross strategy")
+
+yr <- sapply(ema_yearly,prod)
+barplot(yr,ylab="yearly fold returns",main="ETH daily EMA cross strategy")
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+```
+
+
+## Conclusion
+
+Best SMA cross strategy (as at last script edit) was 5/27d, with returns slightly lower than the optimal single SMA strategy (34d/32,000x), but this was achieved with only 43
+trades as compared to 59 trades with the single SMA strategy.
+The Best EMA cross strategy was 13/16d and got returns similar to the single SMA, but with only 
+27 trades.
+This could be interpreted as a trade signal with fewer false positives.
+In conclusion, the EMA cross strategy gave favourable returns and fewer false positive compared 
+to the single MA strategy.
+In the past few years, ETH this type of indicator has given returns in excess of similar 
+indicators for BTC.
+
+If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
+These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
+Subscribing to alerts costs 0.0005 BTC per year.
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```

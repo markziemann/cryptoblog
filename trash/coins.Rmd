@@ -1,0 +1,165 @@
+---
+title: "<br>Altcoin trading based on MA and EMA crosses"
+author: "Mark Ziemann"
+date: "`r Sys.Date()`"
+---
+
+## Intro
+
+Trading off moving averages, exponenial moving averages and crosses between these is a popular method for timing entry and exit of positions.
+In this blog post I will be trilaing simple moving averages to find the one which performs the best.
+
+```{r,lib}
+
+library("jsonlite")
+library("tidyverse")
+library("runner")
+library("quantmod")
+library("TTR")
+library("vioplot")
+library("kableExtra")
+
+```
+
+## Get data
+
+Obtaining BTC historical data (daily).
+
+```{r,getdata}
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=200"
+download.file(URL,destfile="cmcdat.txt")
+cmcdat <- fromJSON("cmcdat.txt")
+cmcdf <- data.frame(cmcdat$data[,1:4],cmcdat$data$quote$USD)
+cmcdf <- cmcdf[order(-cmcdf$percent_change_7d),]
+cmcdf <- subset(cmcdf,percent_change_7d > 0)
+dim(cmcdf)
+
+```
+
+```{r,functions1}
+
+fetch <- function(myid) {
+  date0 <- Sys.Date()-100
+  date1 <- Sys.Date()-1
+  myid <- as.character(myid)
+  URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?id=",myid,"&convert=USD&interval=daily&time_start=",date0,"&time_end=",date1,sep="")
+  if ( file.exists("tmpdat.txt") ) { unlink("tmpdat.txt") }
+  Sys.sleep(1)
+  download.file(URL,destfile="tmpdat.txt")
+  dat <- fromJSON("tmpdat.txt")
+  unlink("tmpdat.txt")
+  price <- dat$data$quotes
+  price <- data.frame(price$time_close,price$quote$USD$close)
+  colnames(price) <- c("date","Close")
+  price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+  return(price)
+}
+
+## MA CROSS
+ma_cross <- function(price,name) {
+  n1=13
+  n2=20
+  ma1 <- tail(SMA(Cl(price),n=n1),1)
+  ma2 <- tail(SMA(Cl(price),n=n2),1)
+  if (ma1 > ma2) {
+    ma1 <- SMA(Cl(price),n=n1)
+    ma2 <- SMA(Cl(price),n=n2)
+    SMA_HEADER=paste(name, n1 , "and", n2 ,"period MA cross")
+    plot(price$Close~as.Date(price$date),type="l",log="y",
+    xlab="Date",ylab="price (USD)",main=SMA_HEADER)
+    grid()
+    lines(ma1~ as.Date(price$date) ,col="red")
+    lines(ma2~ as.Date(price$date) ,col="blue")
+    return(1)
+  } else {
+    return(0)
+  }
+}
+
+## MA
+ma <- function(price,name) {
+  n1=15
+  n2=22
+  n3=34
+  n4=43
+  ma2 <- tail(SMA(Cl(price),n=n2),1)
+  current_price <- tail(price$Close,1)
+  if (current_price > ma2) {
+    ma1 <- SMA(Cl(price),n=n1)
+    ma2 <- SMA(Cl(price),n=n2)
+    ma3 <- SMA(Cl(price),n=n3)
+    ma4 <- SMA(Cl(price),n=n4)
+    SMA_HEADER=paste(name, "15,22,34,43 period MA cross")
+    plot(price$Close~as.Date(price$date),type="l",log="y",
+    xlab="Date",ylab="price (USD)",main=SMA_HEADER)
+    grid()
+    lines(ma1~ as.Date(price$date) ,col="orange")
+    lines(ma2~ as.Date(price$date) ,col="red")
+    lines(ma3~ as.Date(price$date) ,col="purple")
+    lines(ma4~ as.Date(price$date) ,col="blue")
+    return(1)
+  } else {
+    return(0)
+  }
+}
+
+coinupdate <- function(myids) {
+  if (length(myids)==1) {
+    myid <- myids
+    name=cmcdf[which(cmcdf$id==myid),2]
+    dat <- fetch(myids)
+    res1 <- ma_cross(dat,name)
+    res2 <- ma(dat,name)
+    res <- c("id"=myid,"macross"=res1,"ma"=res2)
+  } else {
+    res <- sapply(myids, function(myid) {
+      name=cmcdf[which(cmcdf$id==myid),2]
+      dat <- fetch(myid)
+      res1 <- ma_cross(dat,name)
+      res2 <- ma(dat,name)
+      c("id"=myid,"macross"=res1,"ma"=res2)
+    })
+  }
+  return(res)
+}
+
+```
+
+```{r,analyze1}
+
+myids <- cmcdf$id
+
+coindata <- coinupdate(myids)
+
+```
+
+Here are the top uptrending coins.
+
+```{r, table1}
+
+coindata <- t(coindata)
+
+df <- merge(coindata,cmcdf,by="id")
+
+subset(df,macross==1 & ma==1) %>% kbl() %>% kable_styling()
+
+```
+
+Here is the full table.
+
+```{r, table2}
+
+df %>% kbl() %>% kable_styling()
+
+```
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```

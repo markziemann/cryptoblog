@@ -1,0 +1,371 @@
+---
+title: "<br>A BTC risk index for measuring the temperature of the market"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+    fig_width: 10
+    fig_height: 8
+---
+
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/risk_index.Rmd)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+Prominent YouTuber [Benjamin Cowan](https://www.youtube.com/channel/UCRvqjQPSeaWn-uEx-w0XOIg) 
+regularly discusses the BTC risk metric on his channel.
+It is based on a ratio between a relatively short moving average (50 day) and a longer one (50 week),
+although people implement this in different ways.
+
+For some background information read [here](https://www.reddit.com/r/Bitcoin/comments/mgr5kq/im_searching_for_the_glorious_risk_metric_formula/).
+
+A strategy used by some Bitcoiners is to accumulate when the risk metric is low and sell 
+when the risk metric is high.
+
+Here I'm going to calculate these moving averages and use them to calculate my own risk index.
+
+This document is designed to be updated daily, so revisit whenever you need.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+  library("anytime")
+  library("forecast")
+  library("plotly")
+})
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Historical data pre 2021 are from https://www.investing.com/indices/investing.com-btc-usd-historical-data
+while the recent data are from http://coinmarketcap.com/
+
+```{r,historicaldata}
+
+daily <- read.csv("BitcoinHistoricalData_daily.csv",stringsAsFactors=FALSE)
+daily <- daily[nrow(daily):1,]
+daily <- apply(daily,2,function(x) { gsub(",","",x) } )
+
+daily <- as.data.frame(daily,stringsAsFactors=FALSE)
+
+daily$Price <- as.numeric(daily$Price)
+daily$Open <- as.numeric(daily$Open)
+daily$High <- as.numeric(daily$High)
+daily$Low <- as.numeric(daily$Low)
+
+daily$Date <- anydate(daily$Date)
+
+daily <- daily[,c("Date","High","Low","Open","Price")]
+colnames(daily) <- c("Date","High","Low","Open","Close")
+daily <- daily[grep("2021",daily$Date,invert=TRUE),]
+
+```
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2021-01-01&time_end=",mydate,sep="")
+download.file(URL,destfile="btcdat_daily.txt")
+btcdat <- fromJSON("btcdat_daily.txt")
+price <- btcdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$open, price$quote$USD$close, stringsAsFactors=FALSE)
+colnames(price) <- c("Date","High","Low","Open","Close")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+
+price$Date <- anydate(price$Date)
+
+daily <- rbind(daily,price)
+
+```
+
+## Calculate moving averages, ratio and risk index
+
+The first step is to calculate the 50d and 50w MAs as well as the ratio.
+
+The MA ratio oscillates but the peaks are getting lower over time.
+
+The upper line probably follows a logarithmic decay model but I will cheat and use a linear approximation.
+
+The key dates I'm using as the tops are:
+
+2013-04-10 266.00
+
+2013-12-04 1237.6
+
+2017-12-17 19065.70
+
+The risk index can be calculated between 0 and 1 by the distance between the "floor" and what is considered the current top.
+
+```{r,ma1}
+
+daily$MA50d <- SMA(daily$Close,n=50)
+daily$MA50w <- SMA(daily$Close,n=350)
+
+daily$ratio <- daily$MA50d / daily$MA50w
+
+tail(daily) %>%
+  kbl(row.names=FALSE) %>%
+  kable_styling("hover", full_width = F)
+
+ratio<-daily[which(!is.na(daily$ratio)),"ratio"]
+rat_min <- min(ratio)
+
+# tops
+topdates <- as.Date(c("2013-04-10","2013-12-04","2017-12-17"))
+tops <- daily[which(daily$Date %in% topdates),]
+
+mylm <- lm(tops$ratio ~ tops$Date)
+
+coeffs <- coefficients(mylm)
+
+# generate points
+x <- seq(from=daily$Date[1],
+  to=daily$Date[nrow(daily)],
+  length.out=nrow(daily) )
+
+y <- predict(mylm,newdata=list(x=x), interval="confidence")
+
+today_topval <- coeffs[1] + coeffs[2]*as.numeric(Sys.Date())
+
+daily$topvals <- coeffs[1] + coeffs[2]*as.numeric(daily$Date)
+
+daily$floor <- rat_min
+
+daily$risk_index <- ( daily$ratio - daily$floor ) / daily$topvals
+
+daily$risk_index <- (daily$ratio - daily$floor) / (daily$topvals - daily$floor)
+
+```
+
+## Charts
+
+Here's an interactive chart of price action and MA50d and MA50w.
+You can hover over points to see their details as well zoom in by selecting a rectangle.
+
+```{r,plotly1,warning=FALSE}
+
+pal <- c("blue", "red")
+fig <- plot_ly(
+  daily, type = 'scatter', mode= "markers",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>MA50d:', round(MA50d,0.1),
+    '$<br>MA50w:', round(MA50w,0.1),  
+    '$<br>ratio:', signif(ratio,3),
+    '$<br>Risk Index:', signif(risk_index,3) ),
+  colors = pal,
+  color = ~risk_index  ) %>%
+  add_trace(x = ~Date, y = ~Close, name= "price" ) %>%
+  layout(yaxis = list(type="log"),
+  xaxis = list(range = c(head(daily,1)$Date,tail(daily,1)$Date)))
+fig <- fig %>% add_trace(type='scatter',x= ~Date, y = ~MA50d,
+  name = 'MA50d', mode = 'lines', line = list(color = 'orange', width = 4))
+fig <- fig %>% add_trace(type='scatter',x= ~Date, y = ~MA50w,
+  name = 'MA50w', mode = 'lines', line = list(color = 'black', width = 4))
+fig <- fig %>% layout(title = "BTC price history with MA50d and MA50w",
+         xaxis = list(title = "Date"),
+         yaxis = list(title = "USD price"))
+fig
+
+```
+
+This plot shows how the ratio peaks are diminishing over time.
+
+```{r,plot1}
+
+plot(daily$Date,daily$ratio,ylim=c(0.4,4),
+ xlab="", ylab="ratio", main="50d MA / 50w MA" ,pch=19,cex=0.1)
+mtext("blue line=floor,red line=top")
+grid()
+abline(h=rat_min,col="blue",lwd=2)
+abline(mylm, col="red",lwd=2)
+
+```
+
+
+```{r,plotly2,warning=FALSE}
+
+pal <- c("blue", "red")
+fig <- plot_ly(
+  daily, type = 'scatter', mode= "markers",
+  text = ~paste("Price: ", round(Close,0.1),
+    '$<br>MA50d:', round(MA50d,0.1),
+    '$<br>MA50w:', round(MA50w,0.1),
+    '$<br>ratio:', signif(ratio,3),
+    '$<br>Risk Index:', signif(risk_index,3) ),
+  colors = pal,
+  color = ~risk_index , marker = list(size = 10) ) %>%
+  add_trace(x = ~Date, y = ~risk_index, name= "risk index" ) %>%
+  layout( yaxis = list(range = c(0,1.2))     ,  
+    xaxis = list(range = c(head(daily,1)$Date,tail(daily,1)$Date)))
+fig <- fig %>% layout(title = "BTC risk index",
+         xaxis = list(title = "Date"),
+         yaxis = list(title = "Index"))
+fig
+
+```
+
+## Current BTC risk index values
+
+Now we can see the figures for the past 10 days to see how hot/cold the market is getting.
+
+```{r,tbl1}
+
+tail(daily) %>% kbl(row.names=FALSE) %>% kable_styling("hover", full_width = F)
+
+```
+
+## Conclusion
+
+This is just a model of the historical data, it may not turn out like this in future.
+As the old saying goes, "past performance does not predict future results", 
+however the market does seem to have repeating boom and bust cycles.
+
+This is just one indicator and should not be used in isolation.
+There are other indicators of market tops I've listed below:
+
+* https://charts.woobull.com/
+
+* https://www.lookintobitcoin.com/charts/
+
+* https://stats.buybitcoinworldwide.com/long-term-power-law/
+
+## What about ethereum?
+
+```{r,getdata_eth}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-01-01&time_end=",mydate,sep="")
+download.file(URL,destfile="ethdat_daily.txt")
+ethdat <- fromJSON("ethdat_daily.txt")
+price <- ethdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$open, price$quote$USD$close, stringsAsFactors=FALSE)
+colnames(price) <- c("Date","High","Low","Open","Close")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+
+price$Date <- anydate(price$Date)
+
+daily <- price
+
+```
+
+Calculate moving averages, ratio and risk index
+
+```{r,ma1_eth}
+
+daily$MA50d <- SMA(daily$Close,n=50)
+daily$MA50w <- SMA(daily$Close,n=350)
+
+daily$ratio <- daily$MA50d / daily$MA50w
+
+tail(daily) %>%
+  kbl(row.names=FALSE) %>%
+  kable_styling("hover", full_width = F)
+
+ratio<-daily[which(!is.na(daily$ratio)),"ratio"]
+rat_min <- min(ratio)
+
+```
+
+This plot shows how the ratio peaks are diminishing over time.
+
+```{r,plot1_eth,fig.height=10,fig.width=10}
+
+par(mfrow=c(2,1))
+
+plot(daily$Close ~ daily$Date, log="y",type="l",
+ xlab="", ylab="USD", main="USD Price" ,pch=19,cex=0.1)
+mtext("blue line=MA50d,red line=MA50w")
+lines( daily$MA50d ~ daily$Date , col="blue" )
+lines( daily$MA50w ~ daily$Date , col="red" )
+grid()
+
+plot(daily$Date,daily$ratio,
+ xlab="", ylab="ratio", main="50d MA / 50w MA" ,pch=19,cex=0.1)
+mtext("blue line=floor,red line=top")
+grid()
+
+```
+
+## What about monero?
+
+```{r,getdata_xmr}
+
+mydate <- Sys.Date()-1
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&time_start=2013-01-01&time_end=",mydate,sep="")
+download.file(URL,destfile="xmrdat_daily.txt")
+xmrdat <- fromJSON("xmrdat_daily.txt")
+price <- xmrdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$open, price$quote$USD$close, stringsAsFactors=FALSE)
+colnames(price) <- c("Date","High","Low","Open","Close")
+price$Date <- sapply(strsplit(as.character(price$Date),"T"),"[[",1)
+
+price$Date <- anydate(price$Date)
+
+daily <- price
+
+```
+
+Calculate moving averages, ratio and risk index
+
+```{r,ma1_xmr}
+
+daily$MA50d <- SMA(daily$Close,n=50)
+daily$MA50w <- SMA(daily$Close,n=350)
+
+daily$ratio <- daily$MA50d / daily$MA50w
+
+tail(daily) %>%
+  kbl(row.names=FALSE) %>%
+  kable_styling("hover", full_width = F)
+
+ratio<-daily[which(!is.na(daily$ratio)),"ratio"]
+rat_min <- min(ratio)
+
+```
+
+This plot shows how the ratio peaks are diminishing over time.
+
+```{r,plot1_xmr,fig.height=10,fig.width=10}
+
+par(mfrow=c(2,1))
+
+plot(daily$Close ~ daily$Date, log="y",type="l",
+ xlab="", ylab="USD", main="USD Price" ,pch=19,cex=0.1)
+mtext("blue line=MA50d,red line=MA50w")
+lines( daily$MA50d ~ daily$Date , col="blue" )
+lines( daily$MA50w ~ daily$Date , col="red" )
+grid()
+
+plot(daily$Date,daily$ratio,
+ xlab="", ylab="ratio", main="50d MA / 50w MA" ,pch=19,cex=0.1)
+mtext("blue line=floor,red line=top")
+grid()
+
+```
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```

@@ -1,0 +1,563 @@
+---
+title: "<br>Daily pivot point strategy for BTC"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+output:
+    fig_width: 15
+    fig_height: 12
+---
+
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/pivots_daily.Rmd)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+From Tradingview:
+
+>A pivot point is a technical analysis indicator, or calculations, used to determine the overall trend of the market over different time frames. The pivot point itself is simply the average of the intraday high and low, and the closing price from the previous trading day. On the subsequent day, trading above the pivot point is thought to indicate ongoing bullish sentiment, while trading below the pivot point indicates bearish sentiment.
+
+The purpose of this report is to investigate the possibility of using daily pivot resistance and
+support levels for sel and buy signals respectively.
+
+This will probably work best in a sideways market.
+
+This type of analysis might be better suited to altcoins with thinner volume and larger intraday 
+moves.
+
+This page is designed to be updated daily - today's date is shown below.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("lubridate")
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+Sys.Date()
+
+```
+
+Reminder: this is not financial advice.
+
+## Pivot point indicator
+
+Also called Central Pivot Range (CPR).
+
+central pivot point (pp) =  (prev_low + prev_high + prev_close) / 3
+
+Resistance points:
+
+r1 = 2  * pp - prev_low
+
+r2 = pp + ( prev_h - prev_low )
+
+r3 = pp + 2 * ( prev_high  - prev_low )
+
+support points
+
+s1 = 2 * pp - prev_high
+
+s2 = pp - ( prev_high  - prev_low )
+
+s3 = pp - 2 * ( prev_high  - prev_low )
+
+The pivot also has pivot top (PT) and pivot bottom (PB) lines.
+
+pb = ( high + low ) / 2
+pt = ( pp - pb ) + pp
+
+In this report, the pivot points are shown with dashed lines.
+Pivot line is black.
+S1 line is red.
+S2 line is orange.
+R1 line is blue.
+R2 line is gren.
+PB and PT are black (dashed)
+
+```{r,piv_fun}
+
+# this function is more for analysing tabular data
+# Works for 4hr data
+pivots_daily <- function(price) {
+  days <- price$date
+  wl <- lapply(X=unique(days) , FUN=function(w) {
+    rows <- which(days ==w )
+    wdat <- price[rows,]
+    hi <- max(wdat$high)
+    lo <- min(wdat$low)
+    cl <- wdat[nrow(wdat),"close"]
+    d <- wdat[nrow(wdat),"datetime"]
+    wagg <- list("date"=d,"high"=hi,"low"=lo,"close"=cl)
+  }  )
+  wmx <- as.data.frame(do.call(rbind,wl))
+  hlc2 <- matrix(unlist(wmx[,2:4]),ncol=3)
+  colnames(hlc2) <- c("high","low","close")
+  pp <- rowMeans(hlc2)
+  r1 <- 2  * pp - hlc2[,"low"]
+  r2 <- pp + ( hlc2[,"high"] - hlc2[,"low"] )
+  r3 <- pp + 2 * ( hlc2[,"high"]  - hlc2[,"low"] )
+  s1 <- 2 * pp - hlc2[,"high"]
+  s2 <- pp - ( hlc2[,"high"]  - hlc2[,"low"] )
+  s3 <- pp - 2 * ( hlc2[,"high"]  - hlc2[,"low"] )
+  pivots <- as.data.frame(cbind(pp,r1,r2,r3,s1,s2,s3))
+  pivots <- pivots[1:(nrow(pivots)-1),]
+  wmx <- wmx[2:nrow(wmx),]
+  res1 <- cbind(wmx,pivots)
+  res1[,2:4] = NULL
+  res1$date <- as.Date.POSIXct(unlist(res1$date))
+  res2 <- merge(price,res1,by="date",all.x=TRUE)
+  return(res2)
+}
+
+```
+
+## Fetch data
+
+Obtaining historical data (daily) from CoinMarketCap.com from 2015 to present.
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&time_period=hourly&interval=4h&time_start=2021-01-01&time_end=",mydate,sep="")
+
+download.file(URL,destfile="btcdat.txt")
+
+dat <- fromJSON("btcdat.txt")
+price <- dat$data$quotes
+
+price <- data.frame(price$time_close, as.Date(price$time_close), price$quote$USD$high,
+  price$quote$USD$low, price$quote$USD$close, price$quote$USD$volume , stringsAsFactors=FALSE)
+
+price <- price[1:(nrow(price)-1),]
+
+colnames(price) <- c("datetime","date","high","low","close","volume")
+
+open <- price$close
+open <- c(open[1],open)
+open <- open[1:(length(open)-1)]
+
+price <- data.frame("datetime"=as_datetime(price$datetime),"date"=as_date(price$date),
+  open,"high"=price$high,"low"=price$low,"close"=price$close)
+
+head(price) %>% kbl(row.names=FALSE) %>% kable_styling()
+
+tail(price) %>% kbl(row.names=FALSE) %>% kable_styling()
+
+xprice <- as.xts(price[,3:6],order.by = price$datetime)
+
+chartSeries(xprice)
+abline(h=200,col="red")
+
+```
+
+It works, so let's generate the pivots.
+
+But first let's calculate the hodl returns.
+
+```{r,hodl}
+
+myend <- price[nrow(price),"close"]
+mystart <- price[1,"close"]
+hodl <- myend/mystart
+hodl
+
+```
+
+## Generate daily pivots
+
+The range in each 4 hr interval is given.
+
+```{r,daily1}
+
+pivd <- pivots_daily(price)
+
+plot(pivd$datetime,pivd$close,cex=0)
+
+x <- lapply(1:nrow(pivd), function(i) {
+  x <- pivd[i,]
+  dd <- x[2]
+  lo <- x[5]
+  hi <- x[4]
+  lines(x=c(dd,dd), y=c(lo,hi), cex=2)
+} )
+
+lines(as_datetime(pivd$datetime) , pivd$s1, lty=2, col="blue")
+lines(as_datetime(pivd$datetime) , pivd$s2, lty=2, col="blue")
+lines(as_datetime(pivd$datetime) , pivd$r1, lty=2, col="red")
+lines(as_datetime(pivd$datetime) , pivd$r2, lty=2, col="red")
+
+# now cut down
+price2 <- tail(price,200)
+
+pivd <- pivots_daily(price2)
+
+plot(pivd$datetime,pivd$close,cex=0)
+
+x <- lapply(1:nrow(pivd), function(i) {
+  x <- pivd[i,]
+  dd <- x[2]
+  lo <- x[5]
+  hi <- x[4]
+  lines(x=c(dd,dd), y=c(lo,hi), cex=2)
+} )
+
+lines(as_datetime(pivd$datetime) , pivd$pp, lty=2)
+lines(as_datetime(pivd$datetime) , pivd$s1, lty=2, col="blue")
+lines(as_datetime(pivd$datetime) , pivd$s2, lty=2, col="blue")
+lines(as_datetime(pivd$datetime) , pivd$r1, lty=2, col="red")
+lines(as_datetime(pivd$datetime) , pivd$r2, lty=2, col="red")
+
+```
+
+## Trading strategy
+
+Start with 1 USD and keep track of purchases with USD=TRUE/FALSE.
+
+### Buy at S1 and sell at R1
+
+```{r,pivtrade1}
+
+fee = 0.002
+
+pivd <- pivots_daily(price)
+pivd <- pivd[which(!is.na(pivd$pp)),]
+
+pivd$buy <- pivd$low < pivd$s1
+pivd$sell <- pivd$high > pivd$r1
+pivd$diff <- pivd$buy - pivd$sell
+pivd2 <- pivd[which(pivd$diff != 0),]
+pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
+
+# cant start with a sell
+if ( pivd2[1,"diff"] == -1 )  { pivd2 <- pivd2[2:nrow(pivd2),]  }
+
+# cant end with a buy
+if ( pivd2[nrow(pivd2),"diff"] == 1 ) { pivd2 <- pivd2[1:nrow(pivd2)-1,] }
+
+buy <- subset(pivd2,buy==TRUE)
+sell <- subset(pivd2,sell==TRUE)
+
+buy <- buy[,c("datetime","s1")]
+sell <- sell[,c("datetime","r1")]
+
+res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
+  "buyprice"=buy$s1,"sellprice"=sell$r1)
+
+res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
+
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade1b}
+
+res %>% kbl(row.names=FALSE) %>% kable_styling()
+
+```
+
+</details>
+
+### Buy at S2 and sell at R2
+
+Buy at S2 and sell at R2
+
+```{r,pivtrade2}
+
+pivd <- pivots_daily(price)
+pivd <- pivd[which(!is.na(pivd$pp)),]
+
+pivd$buy <- pivd$low < pivd$s2
+pivd$sell <- pivd$high > pivd$r2
+pivd$diff <- pivd$buy - pivd$sell
+pivd2 <- pivd[which(pivd$diff != 0),]
+pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
+
+# cant start with a sell
+if ( pivd2[1,"diff"] == -1 )  { pivd2 <- pivd2[2:nrow(pivd2),]  }
+
+# cant end with a buy
+if ( pivd2[nrow(pivd2),"diff"] == 1 ) { pivd2 <- pivd2[1:nrow(pivd2)-1,] }
+
+buy <- subset(pivd2,buy==TRUE)
+sell <- subset(pivd2,sell==TRUE)
+
+buy <- buy[,c("datetime","s2")]
+sell <- sell[,c("datetime","r2")]
+
+res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
+  "buyprice"=buy$s2,"sellprice"=sell$r2)
+
+res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
+
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade2b}
+
+res %>% kbl(row.names=FALSE) %>% kable_styling()
+
+```
+
+</details>
+
+### BUY at R1 and SELL at S1
+
+BUY at R1 and SELL at S1
+
+```{r,pivtrade3a}
+
+pivd <- pivots_daily(price)
+pivd <- pivd[which(!is.na(pivd$pp)),]
+
+pivd$buy <- pivd$high > pivd$r1
+pivd$sell <- pivd$low < pivd$s1
+pivd$diff <- pivd$buy - pivd$sell
+pivd2 <- pivd[which(pivd$diff != 0),]
+pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
+
+# cant start with a sell
+if ( pivd2[1,"diff"] == -1 )  { pivd2 <- pivd2[2:nrow(pivd2),]  }
+
+# cant end with a buy
+if ( pivd2[nrow(pivd2),"diff"] == 1 ) { pivd2 <- pivd2[1:nrow(pivd2)-1,] }
+
+buy <- subset(pivd2,buy==TRUE)
+sell <- subset(pivd2,sell==TRUE)
+
+buy <- buy[,c("datetime","r1")]
+sell <- sell[,c("datetime","s1")]
+
+res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
+  "buyprice"=buy$r1,"sellprice"=sell$s1)
+
+res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
+
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade3ab}
+
+res %>% kbl(row.names=FALSE) %>% kable_styling()
+
+```
+
+</details>
+
+### BUY at R2 and SELL at S2
+
+BUY at R2 and SELL at S2
+
+```{r,pivtrade3}
+
+pivd <- pivots_daily(price)
+pivd <- pivd[which(!is.na(pivd$pp)),]
+
+pivd$buy <- pivd$high > pivd$r2
+pivd$sell <- pivd$low < pivd$s2
+pivd$diff <- pivd$buy - pivd$sell
+pivd2 <- pivd[which(pivd$diff != 0),]
+pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
+
+# cant start with a sell
+if ( pivd2[1,"diff"] == -1 )  { pivd2 <- pivd2[2:nrow(pivd2),]  }
+
+# cant end with a buy
+if ( pivd2[nrow(pivd2),"diff"] == 1 ) { pivd2 <- pivd2[1:nrow(pivd2)-1,] }
+
+buy <- subset(pivd2,buy==TRUE)
+sell <- subset(pivd2,sell==TRUE)
+
+buy <- buy[,c("datetime","r2")]
+sell <- sell[,c("datetime","s2")]
+
+res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
+  "buyprice"=buy$r2,"sellprice"=sell$s2)
+
+res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
+
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade3b}
+
+res %>% kbl(row.names=FALSE) %>% kable_styling()
+
+```
+
+</details>
+
+### BUY at R2 and SELL at S1
+
+BUY at R2 and SELL at S1
+
+```{r,pivtrade4}
+
+pivd <- pivots_daily(price)
+pivd <- pivd[which(!is.na(pivd$pp)),]
+
+pivd$buy <- pivd$high > pivd$r2
+pivd$sell <- pivd$low < pivd$s1
+pivd$diff <- pivd$buy - pivd$sell
+pivd2 <- pivd[which(pivd$diff != 0),]
+pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
+
+# cant start with a sell
+if ( pivd2[1,"diff"] == -1 )  { pivd2 <- pivd2[2:nrow(pivd2),]  }
+
+# cant end with a buy
+if ( pivd2[nrow(pivd2),"diff"] == 1 ) { pivd2 <- pivd2[1:nrow(pivd2)-1,] }
+
+buy <- subset(pivd2,buy==TRUE)
+sell <- subset(pivd2,sell==TRUE)
+
+buy <- buy[,c("datetime","r2")]
+sell <- sell[,c("datetime","s1")]
+
+res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
+  "buyprice"=buy$r2,"sellprice"=sell$s1)
+
+res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
+
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade4b}
+
+res %>% kbl(row.names=FALSE) %>% kable_styling()
+
+```
+
+</details>
+
+### BUY at R2 and SELL at PIV
+
+BUY at R2 and SELL at PIV
+
+```{r,pivtrade5}
+
+pivd <- pivots_daily(price)
+pivd <- pivd[which(!is.na(pivd$pp)),]
+
+pivd$buy <- pivd$high > pivd$r2
+pivd$sell <- pivd$low < pivd$pp
+pivd$diff <- pivd$buy - pivd$sell
+pivd2 <- pivd[which(pivd$diff != 0),]
+pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
+
+# cant start with a sell
+if ( pivd2[1,"diff"] == -1 )  { pivd2 <- pivd2[2:nrow(pivd2),]  }
+
+# cant end with a buy
+if ( pivd2[nrow(pivd2),"diff"] == 1 ) { pivd2 <- pivd2[1:nrow(pivd2)-1,] }
+
+buy <- subset(pivd2,buy==TRUE)
+sell <- subset(pivd2,sell==TRUE)
+
+buy <- buy[,c("datetime","r2")]
+sell <- sell[,c("datetime","pp")]
+
+res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
+  "buyprice"=buy$r2,"sellprice"=sell$pp)
+
+res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
+
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade5b}
+
+res %>% kbl(row.names=FALSE) %>% kable_styling()
+
+```
+
+</details>
+
+### BUY at R1 and SELL at PIV
+
+BUY at R1 and SELL at PIV
+
+```{r,pivtrade6}
+
+pivd <- pivots_daily(price)
+pivd <- pivd[which(!is.na(pivd$pp)),]
+
+pivd$buy <- pivd$high > pivd$r1
+pivd$sell <- pivd$low < pivd$pp
+pivd$diff <- pivd$buy - pivd$sell
+pivd2 <- pivd[which(pivd$diff != 0),]
+pivd2 <- pivd2[which(c(FALSE,pivd2[2:nrow(pivd2),"diff"] != pivd2[1:nrow(pivd2)-1,"diff"])),]
+
+# cant start with a sell
+if ( pivd2[1,"diff"] == -1 )  { pivd2 <- pivd2[2:nrow(pivd2),]  }
+
+# cant end with a buy
+if ( pivd2[nrow(pivd2),"diff"] == 1 ) { pivd2 <- pivd2[1:nrow(pivd2)-1,] }
+
+buy <- subset(pivd2,buy==TRUE)
+sell <- subset(pivd2,sell==TRUE)
+
+buy <- buy[,c("datetime","r1")]
+sell <- sell[,c("datetime","pp")]
+
+res <- data.frame("buydate"=buy$datetime,"selldate"=sell$datetime,
+  "buyprice"=buy$r1,"sellprice"=sell$pp)
+
+res$diff <- ( ( res$sellprice - res$buyprice ) / res$buyprice ) +1 - ( 2 * fee )
+
+paste("totalROI:",signif(prod(res$diff),3))
+paste("numTrades:",nrow(res))
+
+```
+
+<br><details><summary><b>"Click HERE to show all trades"</b></summary><br><p>
+
+```{r,pivtrade6b}
+
+res %>% kbl(row.names=FALSE) %>% kable_styling()
+
+```
+
+</details>
+
+## Session information
+
+For reproducibility
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
