@@ -464,8 +464,12 @@ write.table(t(stoch_dat),file=filename,append=TRUE,row.names=FALSE,col.names=FAL
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>

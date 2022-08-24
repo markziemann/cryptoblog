@@ -431,8 +431,12 @@ If you would like help with backtesting, I can provide coding assistance for a m
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>

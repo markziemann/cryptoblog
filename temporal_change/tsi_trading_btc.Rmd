@@ -518,8 +518,12 @@ When accounting for changing performance over time the realistic hodl returns we
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>

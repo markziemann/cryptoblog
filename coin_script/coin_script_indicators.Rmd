@@ -88,9 +88,12 @@ Interestingly the stoch performed best in this analysis (2022/07/20), followed b
 
 ## Session information
 
-```{r,sessionInfo0}
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
+```{r,sessioninfo}
 
 sessionInfo()
 
 ```
 
+</details>

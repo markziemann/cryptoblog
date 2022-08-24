@@ -463,8 +463,12 @@ write.table(t(tsi_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE
 
 For reproducibility
 
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
 ```{r,sessioninfo}
 
 sessionInfo()
 
 ```
+
+</details>
