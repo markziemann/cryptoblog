@@ -212,7 +212,7 @@ It will help fund more research and analysis.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
 
-For subscription to notifications and custom backtesting analysis, please visit the [product page](products.h
+For subscription to notifications and custom backtesting analysis, please visit the [product page](products.html)
 
 
 ## <br>License and source code
