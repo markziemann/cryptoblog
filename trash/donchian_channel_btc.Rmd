@@ -13,9 +13,16 @@ but if you find it useful, consider a small tip.
 
 ## Intro
 
-Donchian channel.
+Donchian channel (DC) was developed by Richard Donchian.
+It is a simple type of channel consisting of 3 lines.
+The upper line is simply the highest price achieved over the last 20 periods.
+The lower line is the lowest price achieved over the last 20 periods.
+The middle line is the average of the upper and lower lines.
+The simplest way to apply DC trading is to buy/long when the middle line starts to
+move up and sell/short when the middle line start moving down.
 
-however I will be seeing whether other intervals perform better.
+While the default values of DC are 20 periods, I will be testing other periods
+to see if they perform better.
 
 This page is designed to be updated daily - today's date is shown below.
 
@@ -75,9 +82,9 @@ hodl
 
 ## Basic look at the Donchian channel
 
-Here we can see the TSI over the past 730 days, using the default settings.
+Here we can see the DC over the past 730 days, using the default settings.
 
-```{r,tsi1,fig.height=10,fig.width=8}
+```{r,dc1,fig.height=10,fig.width=8}
 
 price2 <- tail(price,730)
 
@@ -92,12 +99,12 @@ lines(dc[,"low"] ~ as.Date(price2$date),col="red",lwd=2)
 
 ## DC trading function
 
-Here is the function for trading based on TSI indicator.
+Here is the function for trading based on DC indicator.
 Buy when the green line ticks up and sell when the red line ticks down.
 
 There are two variations on the function.
-mydc_hl uses the high and low range to create the channel while mydc_cl uses the
-closing price only.
+One approach uses the high and low range to create the channel while the one
+implemented here uses the closing price only.
 My testing shows that using the closing price only was superior.
 
 All trades are executed at the end of the daily session (UTC midnight).
@@ -194,14 +201,14 @@ plot(res$nr,res$returns,log="y",xlab="period",ylab="returns")
 mtext("Effect of Donchian channel period on returns")
 abline(h=hodl,col="red")
 
-plot(res$nr,res$xhodl,xlab="period",ylab="returns over hodl",xlim=c(1,50))
-mtext("Effect of Donchian channel period on returns (hodl baseline)")
-abline(h=hodl,col="red")
-grid()
-
 plot(res$nr,res$returns,log="y",xlab="period",ylab="returns",
   xlim=c(1,100))
 mtext("Effect of Donchian channel period on returns")
+abline(h=hodl,col="red")
+grid()
+
+plot(res$nr,res$xhodl,xlab="period",ylab="returns over hodl",xlim=c(1,50))
+mtext("Effect of Donchian channel period on returns (hodl baseline)")
 abline(h=hodl,col="red")
 grid()
 
@@ -339,8 +346,7 @@ abline(h=1,col="red",lty=2)
 ## Conclusion
 
 There are many approaches to momentum trading.
-Here using the Donchian channel we have a strategy which scored 5x hodl returns which is
-not as good as the TSI but better than EMA.
+Here using the Donchian channel we have a strategy which scored 5x hodl returns which is not as good as the TSI but better than EMA.
 
 ## Session information
 
