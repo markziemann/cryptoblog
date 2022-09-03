@@ -65,6 +65,13 @@ coinfun <- function(TICKER) {
   rmarkdown::render(scriptname,output_dir=TICKER)
   unlink(scriptname)
 
+  script <- readLines("donchian_channel_xx.Rmd")
+  script <- gsub("TICKER",TICKER,script)
+  scriptname <- gsub("xx",TICKER,"donchian_channel_xx.Rmd")
+  writeLines(script,scriptname)
+  rmarkdown::render(scriptname,output_dir=TICKER)
+  unlink(scriptname)
+
   script <- readLines("tsi_trading_xx.Rmd")
   script <- gsub("TICKER",TICKER,script)
   scriptname <- gsub("xx",TICKER,"tsi_trading_xx.Rmd")
