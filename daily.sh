@@ -88,13 +88,13 @@ Rscript -e "rmarkdown::render('stoch_trading_xmr.Rmd')" && \
   scp -P 21098 stoch_trading_xmr.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('donchian_channel_btc.Rmd')" && \
-  scp -P 21098 stoch_trading_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+  scp -P 21098 donchian_channel_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('donchian_channel_eth.Rmd')" && \
-  scp -P 21098 stoch_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+  scp -P 21098 donchian_channel_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('donchian_channel_xmr.Rmd')" && \
-  scp -P 21098 stoch_trading_xmr.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+  scp -P 21098 donchian_channel_xmr.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('stablecoincap.Rmd')" && \
   scp -P 21098 stablecoincap.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto

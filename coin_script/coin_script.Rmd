@@ -189,7 +189,7 @@ head(all_indicators[order(-all_indicators$totalROI),],50) %>%
 
 <br><details><summary><b>Click HERE to show session info</b></summary><br><p>
 
-```{r,sessioninfo}
+```{r,sessioninfo1}
 
 sessionInfo()
 

@@ -115,17 +115,14 @@ Current state if the indicators as at MYTIME:
 
 Among the simplest approaches is to rely on market momentum by buying when price rises above a
 [moving average](https://www.investopedia.com/articles/active-trading/052014/how-use-moving-average-buy-stocks.asp)
-and sell when price goes below.
-
-Backtesting (daily): [BTC](crypto/ma_trading_btc.html), [ETH](crypto/ma_trading_eth.html) and
-[XMR](altcoins/XMR/ma_trading_XMR.html).
-
+and sell when price goes below. Backtesting (daily): [BTC](crypto/ma_trading_btc.html), [ETH](crypto/ma_trading_eth.html) and
+[XMR](crypto/ma_trading_xmr.html).
 Backtesting (weekly): [BTC](crypto/ma_trading_weekly_btc.html) and [ETH](crypto/ma_trading_eth.html).
 
 Another useful approach is to use crosses of moving average lines.
 Buy when the short interval line rises above longer interval line and sell when it goes below.
 Backtesting: [BTC](crypto/ma_cross_btc.html), [ETH](crypto/ma_cross_eth.html)
-and [XMR](altcoins/XMR/ma_cross_XMR.html).
+and [XMR](crypto/ma_cross_xmr.html).
 
 #### **Directional movement indicator**
 
@@ -133,27 +130,24 @@ There are many different indicators that measure the momentum of a market.
 The [directional movement indicator (DMI)](https://www.investopedia.com/terms/d/dmi.asp) is one
 that quantifies the positive and negative momentum which we can take advantage of to trade cryptos like Bitcoin.
 In the following analysis, I test different DMI intervals to see which ones work best.
-
 Backtesting: [BTC](crypto/dmi_trading_btc.html), [ETH](crypto/dmi_trading_eth.html) and
-[XMR](altcoins/XMR/dmi_trading_XMR.html).
+[XMR](crypto/dmi_trading_xmr.html).
 
 #### **True strength index**
 
 Another good indicator is the [true strength index (TSI)](https://www.investopedia.com/terms/t/tsi.asp),
 it measures momentum on two timeframes and so it is very sensitive to early changes in momentum.
 In the following analysis, I test different TSI intervals to see which ones work best.
-
 Backtesting: [BTC](crypto/tsi_trading_btc.html), [ETH](crypto/tsi_trading_eth.html) and
-[XMR](altcoins/XMR/tsi_trading_XMR.html).
+[XMR](crypto/tsi_trading_xmr.html).
 
 #### **Stochastic oscillator**
 
 The [Stochastic oscillator](https://www.investopedia.com/terms/s/stochasticoscillator.asp) stoch for short,
 is yet another momentum indicator and provided oversold and overbought signals which can be used for entry and exits.
 In the following analysis, I test different stochastic intervals and parameters to see which strategy work best.
-
 Backtesting: [BTC](crypto/stoch_trading_btc.html), [ETH](crypto/stoch_trading_eth.html) and
-[XMR](altcoins/XMR/stoch_trading_XMR.html).
+[XMR](crypto/stoch_trading_xmr.html).
 
 #### **Double RSI**
 
@@ -161,9 +155,20 @@ The [Double RSI](https://www.trendfollowingsystem.com/double-rsi-trading-system/
 specific application of the relative strength indicator involving a short term and a longer term RSI line.
 When the short term line breaks above the long term line it is bullish and vice-versa.
 In the following analysis, I test different periods for RSI calculation to see which strategy work best.
-
 Backtesting: [BTC](crypto/rsi2_trading_btc.html), [ETH](crypto/rsi2_trading_eth.html) and
-[XMR](altcoins/XMR/rsi2_trading_XMR.html).
+[XMR](crypto/rsi2_trading_xmr.html).
+
+#### **Donchian channel**
+
+The [Donchian channel](https://www.investopedia.com/terms/d/donchianchannels.asp)
+is a simple channel consisting of three lines.
+The upper line is the the highest price in the past N periods, while the lower
+line is the lowest prive in that period.
+The middle line is the mean of the upper and lower lines.
+The strategy applied here is to trade the breakout, ie: buy when price exceeds the
+upper line and sell when the price dips under the lower line.
+Backtesting: [BTC](crypto/donchian_channel_btc.html), [ETH](crypto/donchian_channel_eth.html) and
+[XMR](crypto/donchian_channel_xmr.html).
 
 #### **Other indicators**
 
