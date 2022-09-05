@@ -23,29 +23,33 @@ file.copy("../images/banner1.png", "banner.png")
 In the backtesting analysis, I have established these profitable strategies for timing entry/exits.
 Click on the hyperlinks below to see how these signals were identified.
 
-1. Simple and exponential moving averages for [BTC](https://mdz-analytics.com/crypto/ma_trading_btc.html),
+* Simple and exponential moving averages for [BTC](https://mdz-analytics.com/crypto/ma_trading_btc.html),
 [ETH](https://mdz-analytics.com/crypto/ma_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/ma_trading_XMR.html).
+[XMR](https://mdz-analytics.com/crypto/ma_trading_xmr.html).
 
-2. Moving average crosses for [BTC](https://mdz-analytics.com/crypto/ma_cross_btc.html),
+* Moving average crosses for [BTC](https://mdz-analytics.com/crypto/ma_cross_btc.html),
 [ETH](https://mdz-analytics.com/crypto/ma_cross_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/ma_cross_XMR.html).
+[XMR](https://mdz-analytics.com/crypto/ma_cross_xmr.html).
 
-3. Directional movement index (DMI) for [BTC](https://mdz-analytics.com/crypto/dmi_trading_btc.html),
+* Directional movement index (DMI) for [BTC](https://mdz-analytics.com/crypto/dmi_trading_btc.html),
 [ETH](https://mdz-analytics.com/crypto/dmi_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/dmi_trading_XMR.html).
+[XMR](https://mdz-analytics.com/crypto/dmi_trading_xmr.html).
 
-4. True strength index (TSI) for [BTC](https://mdz-analytics.com/crypto/tsi_trading_btc.html),
+* True strength index (TSI) for [BTC](https://mdz-analytics.com/crypto/tsi_trading_btc.html),
 [ETH](https://mdz-analytics.com/crypto/tsi_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/tsi_trading_XMR.html).
+[XMR](https://mdz-analytics.com/crypto/tsi_trading_xmr.html).
 
-5. Stochastic oscillator (stoch) for [BTC](https://mdz-analytics.com/crypto/stoch_trading_btc.html),
+* Stochastic oscillator (stoch) for [BTC](https://mdz-analytics.com/crypto/stoch_trading_btc.html),
 [ETH](https://mdz-analytics.com/crypto/stoch_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/stoch_trading_XMR.html).
+[XMR](https://mdz-analytics.com/crypto/stoch_trading_xmr.html).
 
-6. Double RSI and [BTC](https://mdz-analytics.com/crypto/rsi2trading_btc.html),
+* Double RSI and [BTC](https://mdz-analytics.com/crypto/rsi2trading_btc.html),
 [ETH](https://mdz-analytics.com/crypto/rsi2_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/rsi2_trading_XMR.html).
+[XMR](https://mdz-analytics.com/crypto/rsi2_trading_xmr.html).
+
+* Donchian channel [BTC](https://mdz-analytics.com/crypto/donchian_channel_btc.html),
+[ETH](https://mdz-analytics.com/crypto/donchian_channel_eth.html) and
+[XMR](https://mdz-analytics.com/crypto/donchian_channel_xmr.html).
 
 This script will examine the price action and these trade signals just before the daily close.
 If the signal is TRUE, it is bullish and if FALSE it is bearish.
@@ -597,6 +601,92 @@ par(mfrow=c(1,1))
 
 ```
 
+## BTC Donchian channel indicator
+
+```{r,btc_dc1,fig.height=10,fig.width=8}
+
+n <- as.numeric(params[params$indicator == "DC",2])
+
+price2 <- price[1:nrow(price)-1,]
+dc <- DonchianChannel(price2$close,n=n)
+
+price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"high"] > dc[(i-1),"high"]
+} ))
+price2$lower <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"low"] < dc[(i-1),"low"]
+} )
+price2 <- price2[price2$higher != price2$lower,]
+# show changing rows only
+price2 <- price2[c(NA,unlist(lapply(2:nrow(price2) , function(i) {
+  price2$higher[i] != price2$higher[i-1]
+}))),]
+price2 <- price2[!is.na(price2$higher),]
+
+previous_signal <- price2[nrow(price2),"higher"]
+
+price2 <- price
+dc <- DonchianChannel(price2$close,n=n)
+colnames(dc) <- c("dchigh","dcmid","dclow")
+price2 <- cbind(price2,dc)
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+btc_signal="NONE"
+
+# if we in negative territory, check whether time to buy
+if ( previous_signal == FALSE ) {
+  if ( price2[nrow(price2),"dchigh"] > price2[nrow(price2)-1,"dchigh"] ) {
+    btc_signal="BUY"
+  }
+}
+
+# if we in positive territory, check whether time to sell
+if ( previous_signal == TRUE ) {
+  if ( price2[nrow(price2),"dclow"] < price2[nrow(price2)-1,"dclow"] ) {
+    btc_signal="SELL"
+  }
+}
+
+if ( btc_signal=="NONE" ) {
+  today_signal==previous_signal
+} else {
+  if (btc_signal="BUY") { today_signal = TRUE }
+  if (btc_signal="SELL") { today_signal = FALSE }
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/BTC_DC_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/BTC_DC_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/BTC_DC_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/BTC_DC_COL/red/' ../index1.html")
+}
+
+```
+
+```{r,btc_dc_plot,fig.height=10,fig.width=8}
+
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
+grid()
+
+lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
+lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
+
+
+price2 <- tail(price2,100)
+
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
+grid()
+
+lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
+lines(price2$dcmid~ as.Date(price2$date),lwd=1.5,col="gray")
+lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
+
+```
+
 ## Get ETH price data
 
 Obtaining ETH historical data (daily).
@@ -1069,6 +1159,92 @@ plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l",
 grid()
 abline(h=1,lty=2,lwd=2)
 par(mfrow=c(1,1))
+
+```
+
+## ETH Donchian channel indicator
+
+```{r,eth_dc1,fig.height=10,fig.width=8}
+
+n <- as.numeric(params[params$indicator == "DC",2])
+
+price2 <- price[1:nrow(price)-1,]
+dc <- DonchianChannel(price2$close,n=n)
+
+price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"high"] > dc[(i-1),"high"]
+} ))
+price2$lower <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"low"] < dc[(i-1),"low"]
+} )
+price2 <- price2[price2$higher != price2$lower,]
+# show changing rows only
+price2 <- price2[c(NA,unlist(lapply(2:nrow(price2) , function(i) {
+  price2$higher[i] != price2$higher[i-1]
+}))),]
+price2 <- price2[!is.na(price2$higher),]
+
+previous_signal <- price2[nrow(price2),"higher"]
+
+price2 <- price
+dc <- DonchianChannel(price2$close,n=n)
+colnames(dc) <- c("dchigh","dcmid","dclow")
+price2 <- cbind(price2,dc)
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+eth_signal="NONE"
+
+# if we in negative territory, check whether time to buy
+if ( previous_signal == FALSE ) {
+  if ( price2[nrow(price2),"dchigh"] > price2[nrow(price2)-1,"dchigh"] ) {
+    eth_signal="BUY"
+  }
+}
+
+# if we in positive territory, check whether time to sell
+if ( previous_signal == TRUE ) {
+  if ( price2[nrow(price2),"dclow"] < price2[nrow(price2)-1,"dclow"] ) {
+    eth_signal="SELL"
+  }
+}
+
+if ( eth_signal=="NONE" ) {
+  today_signal==previous_signal
+} else {
+  if (eth_signal="BUY") { today_signal = TRUE }
+  if (eth_signal="SELL") { today_signal = FALSE }
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/ETH_DC_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/ETH_DC_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/ETH_DC_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/ETH_DC_COL/red/' ../index1.html")
+}
+
+```
+
+```{r,eth_dc_plot,fig.height=10,fig.width=8}
+
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
+grid()
+
+lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
+lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
+
+
+price2 <- tail(price2,100)
+
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
+grid()
+
+lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
+lines(price2$dcmid~ as.Date(price2$date),lwd=1.5,col="gray")
+lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
 
 ```
 
@@ -1562,6 +1738,92 @@ plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l",
 grid()
 abline(h=1,lty=2,lwd=2)
 par(mfrow=c(1,1))
+
+```
+
+## XMR Donchian channel indicator
+
+```{r,xmr_dc1,fig.height=10,fig.width=8}
+
+n <- as.numeric(params[params$indicator == "DC",2])
+
+price2 <- price[1:nrow(price)-1,]
+dc <- DonchianChannel(price2$close,n=n)
+
+price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"high"] > dc[(i-1),"high"]
+} ))
+price2$lower <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"low"] < dc[(i-1),"low"]
+} )
+price2 <- price2[price2$higher != price2$lower,]
+# show changing rows only
+price2 <- price2[c(NA,unlist(lapply(2:nrow(price2) , function(i) {
+  price2$higher[i] != price2$higher[i-1]
+}))),]
+price2 <- price2[!is.na(price2$higher),]
+
+previous_signal <- price2[nrow(price2),"higher"]
+
+price2 <- price
+dc <- DonchianChannel(price2$close,n=n)
+colnames(dc) <- c("dchigh","dcmid","dclow")
+price2 <- cbind(price2,dc)
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+xmr_signal="NONE"
+
+# if we in negative territory, check whether time to buy
+if ( previous_signal == FALSE ) {
+  if ( price2[nrow(price2),"dchigh"] > price2[nrow(price2)-1,"dchigh"] ) {
+    xmr_signal="BUY"
+  }
+}
+
+# if we in positive territory, check whether time to sell
+if ( previous_signal == TRUE ) {
+  if ( price2[nrow(price2),"dclow"] < price2[nrow(price2)-1,"dclow"] ) {
+    xmr_signal="SELL"
+  }
+}
+
+if ( xmr_signal=="NONE" ) {
+  today_signal==previous_signal
+} else {
+  if (xmr_signal="BUY") { today_signal = TRUE }
+  if (xmr_signal="SELL") { today_signal = FALSE }
+}
+
+if (today_signal==TRUE) {
+ system("sed -i 's/XMR_DC_DAILY/BULLISH/' ../index1.html")
+ system("sed -i 's/XMR_DC_COL/limegreen/' ../index1.html")
+} else {
+ system("sed -i 's/XMR_DC_DAILY/BEARISH/' ../index1.html")
+ system("sed -i 's/XMR_DC_COL/red/' ../index1.html")
+}
+
+```
+
+```{r,xmr_dc_plot,fig.height=10,fig.width=8}
+
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
+grid()
+
+lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
+lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
+
+
+price2 <- tail(price2,100)
+
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
+grid()
+
+lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
+lines(price2$dcmid~ as.Date(price2$date),lwd=1.5,col="gray")
+lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
 
 ```
 
