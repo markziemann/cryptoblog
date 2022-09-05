@@ -137,9 +137,11 @@ mydate <- Sys.Date()-1
 
 for ( TICKER in TICKERS ) {
   DATNAME=paste(TICKER,"_dat.txt",sep="")
+  # hours since last update
   LAST_UPDATE_TIME=as.numeric(Sys.time() - file.info(DATNAME)$mtime )
-  if ( is.na(LAST_UPDATE_TIME) ) { LAST_UPDATE_TIME=100  }
-  if ( LAST_UPDATE_TIME >12 ) {
+  if ( is.na(LAST_UPDATE_TIME) ) { LAST_UPDATE_TIME=1000 }
+  # update if more than 14 days since backtesting
+  if ( LAST_UPDATE_TIME >336 ) {
     URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=",
       TICKER,
       "&convert=USD&interval=daily&time_start=2013-06-01&time_end=",
@@ -172,7 +174,6 @@ TSI n.first, n.second , n.signal
 
 all_indicators <- NULL
 myfiles <- list.files(".",pattern="_dat")
-
 
 for (myfile in myfiles) {
   dat <- read.table(myfile,header=TRUE)
