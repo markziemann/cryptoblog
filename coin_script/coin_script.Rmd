@@ -93,6 +93,12 @@ coinfun <- function(TICKER) {
   rmarkdown::render(scriptname,output_dir=TICKER)
   unlink(scriptname)
 
+  script <- readLines("ensembl_trading_xx.Rmd")
+  script <- gsub("TICKER",TICKER,script)
+  scriptname <- gsub("xx",TICKER,"ensembl_trading_xx.Rmd")
+  writeLines(script,scriptname)
+  rmarkdown::render(scriptname,output_dir=TICKER)
+
   file.copy(paste(TICKER,"_dat.txt",sep=""),TICKER, overwrite = TRUE)
 
   script <- readLines("summary_xx.Rmd")
