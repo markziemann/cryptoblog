@@ -615,7 +615,7 @@ price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {
 } ))
 price2$lower <- c(NA,sapply(2:nrow(dc),function(i) {
   dc[i,"low"] < dc[(i-1),"low"]
-} )
+} ))
 price2 <- price2[price2$higher != price2$lower,]
 # show changing rows only
 price2 <- price2[c(NA,unlist(lapply(2:nrow(price2) , function(i) {
@@ -651,8 +651,8 @@ if ( previous_signal == TRUE ) {
 if ( btc_signal=="NONE" ) {
   today_signal==previous_signal
 } else {
-  if (btc_signal="BUY") { today_signal = TRUE }
-  if (btc_signal="SELL") { today_signal = FALSE }
+  if (btc_signal=="BUY") { today_signal = TRUE }
+  if (btc_signal=="SELL") { today_signal = FALSE }
 }
 
 if (today_signal==TRUE) {
@@ -1176,7 +1176,7 @@ price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {
 } ))
 price2$lower <- c(NA,sapply(2:nrow(dc),function(i) {
   dc[i,"low"] < dc[(i-1),"low"]
-} )
+} ))
 price2 <- price2[price2$higher != price2$lower,]
 # show changing rows only
 price2 <- price2[c(NA,unlist(lapply(2:nrow(price2) , function(i) {
@@ -1212,8 +1212,8 @@ if ( previous_signal == TRUE ) {
 if ( eth_signal=="NONE" ) {
   today_signal==previous_signal
 } else {
-  if (eth_signal="BUY") { today_signal = TRUE }
-  if (eth_signal="SELL") { today_signal = FALSE }
+  if (eth_signal=="BUY") { today_signal = TRUE }
+  if (eth_signal=="SELL") { today_signal = FALSE }
 }
 
 if (today_signal==TRUE) {
@@ -1755,7 +1755,7 @@ price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {
 } ))
 price2$lower <- c(NA,sapply(2:nrow(dc),function(i) {
   dc[i,"low"] < dc[(i-1),"low"]
-} )
+} ))
 price2 <- price2[price2$higher != price2$lower,]
 # show changing rows only
 price2 <- price2[c(NA,unlist(lapply(2:nrow(price2) , function(i) {
@@ -1791,8 +1791,8 @@ if ( previous_signal == TRUE ) {
 if ( xmr_signal=="NONE" ) {
   today_signal==previous_signal
 } else {
-  if (xmr_signal="BUY") { today_signal = TRUE }
-  if (xmr_signal="SELL") { today_signal = FALSE }
+  if (xmr_signal=="BUY") { today_signal = TRUE }
+  if (xmr_signal=="SELL") { today_signal = FALSE }
 }
 
 if (today_signal==TRUE) {
