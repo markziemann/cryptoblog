@@ -77,7 +77,7 @@ Current state if the indicators as at MYTIME:
 <td style="color:XMR_TSI_COL"><b>XMR_TSI_DAILY</b></td>
 </tr>
 <tr class="odd">
-<td>Stochastic</td>
+<td>Stoch</td>
 <td style="color:BTC_STOCH_COL"><b>BTC_STOCH_DAILY</b></td>
 <td style="color:ETH_STOCH_COL"><b>ETH_STOCH_DAILY</b></td>
 <td style="color:XMR_STOCH_COL"><b>XMR_STOCH_DAILY</b></td>
@@ -87,6 +87,12 @@ Current state if the indicators as at MYTIME:
 <td style="color:BTC_RSI_COL"><b>BTC_RSI_DAILY</b></td>
 <td style="color:ETH_RSI_COL"><b>ETH_RSI_DAILY</b></td>
 <td style="color:XMR_RSI_COL"><b>XMR_RSI_DAILY</b></td>
+</tr>
+<tr class="odd">
+<td>Donchian channel</td>
+<td style="color:BTC_DC_COL"><b>BTC_DC_DAILY</b></td>
+<td style="color:ETH_DC_COL"><b>ETH_DC_DAILY</b></td>
+<td style="color:XMR_DC_COL"><b>XMR_DC_DAILY</b></td>
 </tr>
 </tbody>
 </table>
