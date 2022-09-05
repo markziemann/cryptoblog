@@ -148,7 +148,7 @@ mydc <- function(price,n=10,fee=0.002) {
 Now let's go back in time to test the performance of the different interval strategies on the daily
 timeframe, here are the ranges tested:
 
-* n: from 3 to 300 days
+* n: from 3 to 200 days
 
 Let's assume a 0.2% exchange fee.
 
@@ -156,7 +156,7 @@ Let's assume a 0.2% exchange fee.
 
 fee=0.002
 
-nr <- seq(3,300,1)
+nr <- seq(3,200,1)
 
 res <- mclapply(X=nr , FUN=function(n) {
   mydc(price,n=n,fee=fee)
