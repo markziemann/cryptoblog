@@ -121,23 +121,26 @@ mydc <- function(price,n=10,fee=0.002) {
     price2$higher[i] != price2$higher[i-1]
   }))),]
   price2 <- price2[!is.na(price2$higher),]
-  # cannot begin with sell
-  if ( price2[1,"higher"] == FALSE ) { price2 <- price2[2:nrow(price2),] }
-  # cannot end with buy
-  if ( price2[nrow(price2),"higher"] == TRUE ) { price2 <- price2[1:(nrow(price2)-1),] }
-
-  buy <- subset(price2,higher==TRUE)[,c("date","close")]
-  colnames(buy) <- c("buy_date","buy_price")
-  sell <- subset(price2,lower==TRUE)[,c("date","close")]
-  colnames(sell) <- c("sell_date","sell_price")
-  if( nrow(buy) != nrow(sell) ) {
-    MIN=min(nrow(buy),nrow(sell))
-    buy <- buy[1:MIN,]
-    sell <- sell[1:MIN,]
+  if (nrow(price2) > 0 ) {
+    # cannot begin with sell
+    if ( price2[1,"higher"] == FALSE ) { price2 <- price2[2:nrow(price2),] }
+    # cannot end with buy
+    if ( price2[nrow(price2),"higher"] == TRUE ) { price2 <- price2[1:(nrow(price2)-1),] }
+    buy <- subset(price2,higher==TRUE)[,c("date","close")]
+    colnames(buy) <- c("buy_date","buy_price")
+    sell <- subset(price2,lower==TRUE)[,c("date","close")]
+    colnames(sell) <- c("sell_date","sell_price")
+    if( nrow(buy) != nrow(sell) ) {
+      MIN=min(nrow(buy),nrow(sell))
+      buy <- buy[1:MIN,]
+      sell <- sell[1:MIN,]
+    }
+    trades <- cbind(buy,sell)
+    trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+    return(c(prod(trades$diff),nrow(trades)))
+  } else {
+    return(c(1,0))
   }
-  trades <- cbind(buy,sell)
-  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-  return(c(prod(trades$diff),nrow(trades)))
 }
 
 ```
