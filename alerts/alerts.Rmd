@@ -663,6 +663,8 @@ if (today_signal==TRUE) {
  system("sed -i 's/BTC_DC_COL/red/' ../index1.html")
 }
 
+message(paste("BTC DC signal:",btc_signal))
+
 ```
 
 ```{r,btc_dc_plot,fig.height=10,fig.width=8}
@@ -1223,6 +1225,8 @@ if (today_signal==TRUE) {
  system("sed -i 's/ETH_DC_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/ETH_DC_COL/red/' ../index1.html")
 }
+
+message(paste("ETH DC signal:",btc_signal))
 
 ```
 
@@ -1802,6 +1806,8 @@ if (today_signal==TRUE) {
  system("sed -i 's/XMR_DC_DAILY/BEARISH/' ../index1.html")
  system("sed -i 's/XMR_DC_COL/red/' ../index1.html")
 }
+
+message(paste("XMR DC signal:",btc_signal))
 
 ```
 
