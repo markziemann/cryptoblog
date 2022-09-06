@@ -463,6 +463,23 @@ abline(h=threshold,lty=2)
 
 ```
 
+```{r,export}
+
+myparameter <- paste(paste(combo,collapse=","),threshold,collapse=",",sep=",")
+
+ens_dat <- c("indicator"="ENS",
+  "parameter"= myparameter ,
+  "meanROI"= mean(trades$diff) ,
+  "totalROI"= prod(trades$diff) ,
+  "ntrades"= nrow(trades) ,
+  "ndays"= nrow(price) ,
+  "xhodl"= prod(trades$diff)/hodl )
+
+filename <- paste("TICKER","_dat.txt",sep="")
+write.table(t(ens_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
+
+```
+
 ## Conclusion
 
 This analysis indicates that using a basket of indicators works better than the individual indicators separately.
