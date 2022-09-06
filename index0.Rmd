@@ -103,6 +103,8 @@ Current state if the indicators as at MYTIME:
 
 ## <br>News and updates
 
+* *2022/09/06* - Added Donchian channel indicator! Enjoy.
+
 * *2022/08/20* - New ensembl indicator analysis - see below.
 
 * *2022/08/04* - Added XMR/Monero alerts to the front page.
