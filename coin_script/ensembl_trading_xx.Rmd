@@ -405,7 +405,7 @@ if ( length(which(combo == "RSI2")) ) {
   indicators$RSI2 <- rsi1 > rsi2
 }
 
-indicators <- indicators[,2:ncol(indicators)]
+indicators <- indicators[,2:ncol(indicators),drop=FALSE]
 indicators[is.na(indicators)] <- 0
 
 price3 <- price
