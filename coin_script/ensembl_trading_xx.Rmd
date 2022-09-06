@@ -467,7 +467,7 @@ abline(h=threshold,lty=2)
 
 myparameter <- paste(paste(combo,collapse=","),threshold,collapse=",",sep=",")
 
-ens_dat <- c("indicator"="ENS",
+ens_dat <- c("indicator"="Ensemble",
   "parameter"= myparameter ,
   "meanROI"= mean(trades$diff) ,
   "totalROI"= prod(trades$diff) ,
