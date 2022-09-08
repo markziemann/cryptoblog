@@ -431,7 +431,7 @@ if ( length(which(combo == "DC")) ) {
   }))
   dc_sig <- c(rep(FALSE,nrow(price) - length(dc_sig)),dc_sig)
   indicators$DC <- dc_sig
-})
+}
 
 indicators <- indicators[,2:ncol(indicators),drop=FALSE]
 indicators[is.na(indicators)] <- 0
