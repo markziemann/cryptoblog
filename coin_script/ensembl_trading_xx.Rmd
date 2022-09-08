@@ -13,7 +13,7 @@ but if you find it useful, consider a small tip.
 
 ## Intro
 
-In this report I will be looking at whether a combination of MA derived indicators and RSI  works better than
+In this report I will be looking at whether a combination of MA derived indicators works better than
 each on their own.
 The theory is that there is a chance that combining them will reduce false positives.
 
@@ -34,6 +34,8 @@ The indicators I will be using are:
 7. True strength index
 
 8. Double RSI
+
+9. Donchian channel
 
 ```{r,lib}
 
@@ -180,8 +182,25 @@ n1 <- n[1]
 n2 <- n[2]
 rsi1 <- RSI(price$close,n=n1,maType=EMA)
 rsi2 <- RSI(price$close,n=n2,maType=EMA)
-
 price2$RSI2 <- rsi1 > rsi2
+
+# donchian channel
+n <- as.numeric(params[params$indicator == "DC",2])
+price3 <- price[1:nrow(price)-1,]
+dc <- DonchianChannel(price3$close,n=n)
+price3$higher <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"high"] > dc[(i-1),"high"]
+} ))
+price3$lower <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"low"] < dc[(i-1),"low"]
+} ))
+price3[is.na(price3)] <- FALSE
+price3 <- price3[price3$higher != price3$lower,]
+dc_sig <- unlist(sapply(1:nrow(price),function(i) {
+  price3[tail(which(price[i,"date"] > price3$date),1),"higher"]
+}))
+dc_sig <- c(rep(FALSE,nrow(price) - length(dc_sig)),dc_sig)
+price2$DC <- dc_sig
 
 ```
 
@@ -281,7 +300,7 @@ Select N indicators where N is between 2 and 7
 
 ```{r,ensemble2}
 
-indi <- price2[,6:13]
+indi <- price2[,6:14]
 price3 <- price
 
 mygrid <- expand.grid(rep(list(c(0,1)),ncol(indi)))
@@ -404,6 +423,15 @@ if ( length(which(combo == "RSI2")) ) {
   rsi2 <- RSI(price$close,n=n2,maType=EMA)
   indicators$RSI2 <- rsi1 > rsi2
 }
+
+if ( length(which(combo == "DC")) ) {
+  n <- as.numeric(params[params$indicator == "DC",2])
+  dc_sig <- unlist(sapply(1:nrow(price),function(i) {
+    price3[tail(which(price[i,"date"] > price3$date),1),"higher"]
+  }))
+  dc_sig <- c(rep(FALSE,nrow(price) - length(dc_sig)),dc_sig)
+  indicators$DC <- dc_sig
+})
 
 indicators <- indicators[,2:ncol(indicators),drop=FALSE]
 indicators[is.na(indicators)] <- 0
