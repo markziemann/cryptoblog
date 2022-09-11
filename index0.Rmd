@@ -94,6 +94,13 @@ Current state if the indicators as at MYTIME:
 <td style="color:ETH_DC_COL"><b>ETH_DC_DAILY</b></td>
 <td style="color:XMR_DC_COL"><b>XMR_DC_DAILY</b></td>
 </tr>
+</tr>
+<tr class="even">
+<td>Ensemble indicator</td>
+<td style="color:BTC_ENS_COL"><b>BTC_ENS_DAILY</b></td>
+<td style="color:ETH_ENS_COL"><b>ETH_ENS_DAILY</b></td>
+<td style="color:XMR_ENS_COL"><b>XMR_ENS_DAILY</b></td>
+</tr>
 </tbody>
 </table>
 
@@ -178,6 +185,14 @@ upper line and sell when the price dips under the lower line.
 Backtesting: [BTC](crypto/donchian_channel_btc.html), [ETH](crypto/donchian_channel_eth.html) and
 [XMR](crypto/donchian_channel_xmr.html).
 
+#### **Ensemble indicator**
+
+The above indicators are very good, but do they work better when combined?
+The short answer is yes.
+I tested all of the possible combinations to find the best performing combination of indicators.
+Backtesting: [BTC](crypto/ensembl_trading_btc.html), [ETH](crypto/ensembl_trading_btc.html) and
+[XMR](crypto/ensembl_trading_btc.html).
+
 #### **Other indicators**
 
 * [Bitcoin risk index: a good measure for market temperature? (also ETH & XMR)](crypto/risk_index.html)
@@ -191,8 +206,6 @@ Backtesting: [BTC](crypto/donchian_channel_btc.html), [ETH](crypto/donchian_chan
 * [Keltner Channels indicator for BTC, ETH & XMR](crypto/keltner_channels.html)
 
 * [Weekly and Monthy pivot points for BTC, ETH & XMR](crypto/pivots.html)
-
-* Testing ensembl indicators for [BTC](crypto/ensembl_trading_btc.html), [ETH](crypto/ensembl_trading_eth.html) & [XMR](crypto/ensembl_trading_xmr.html)
 
 * [Does MA/EMA indicator performance change over time?](crypto/ma_temporal2.html)
 

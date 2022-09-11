@@ -51,6 +51,10 @@ Click on the hyperlinks below to see how these signals were identified.
 [ETH](https://mdz-analytics.com/crypto/donchian_channel_eth.html) and
 [XMR](https://mdz-analytics.com/crypto/donchian_channel_xmr.html).
 
+* Ensemble indicator [BTC](https://mdz-analytics.com/crypto/ensembl_trading_btc.html),
+[ETH](https://mdz-analytics.com/crypto/ensembl_trading_eth.html) and
+[XMR](https://mdz-analytics.com/crypto/ensembl_trading_xmr.html).
+
 This script will examine the price action and these trade signals just before the daily close.
 If the signal is TRUE, it is bullish and if FALSE it is bearish.
 When there is a switch from bearish to bullish it is a buy signal and when it switches from bullish to bearish it is a sell signal.
