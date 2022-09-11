@@ -472,6 +472,93 @@ if ( trx_signal != "NONE") {
 
 ```
 
+## TRX Donchian channel indicator
+
+```{r,trx_dc1,fig.height=10,fig.width=8}
+
+n <- as.numeric(params[params$indicator == "DC",2])
+
+price2 <- price[1:nrow(price)-1,]
+dc <- DonchianChannel(price2$close,n=n)
+
+price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"high"] > dc[(i-1),"high"]
+} ))
+price2$lower <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"low"] < dc[(i-1),"low"]
+} ))
+price2 <- price2[price2$higher != price2$lower,]
+# show changing rows only
+price2 <- price2[c(NA,unlist(lapply(2:nrow(price2) , function(i) {
+  price2$higher[i] != price2$higher[i-1]
+}))),]
+price2 <- price2[!is.na(price2$higher),]
+
+previous_signal <- price2[nrow(price2),"higher"]
+
+price2 <- price
+dc <- DonchianChannel(price2$close,n=n)
+colnames(dc) <- c("dchigh","dcmid","dclow")
+price2 <- cbind(price2,dc)
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+trx_signal="NONE"
+
+# if we in negative territory, check whether time to buy
+if ( previous_signal == FALSE ) {
+  if ( price2[nrow(price2),"dchigh"] > price2[nrow(price2)-1,"dchigh"] ) {
+    trx_signal="BUY"
+  }
+}
+
+# if we in positive territory, check whether time to sell
+if ( previous_signal == TRUE ) {
+  if ( price2[nrow(price2),"dclow"] < price2[nrow(price2)-1,"dclow"] ) {
+    trx_signal="SELL"
+  }
+}
+
+if ( trx_signal=="NONE" ) {
+  today_signal==previous_signal
+} else {
+  if (trx_signal=="BUY") { today_signal = TRUE }
+  if (trx_signal=="SELL") { today_signal = FALSE }
+}
+
+message(paste("TRX DC signal:",trx_signal))
+
+```
+
+```{r,trx_dc_plot,fig.height=10,fig.width=8}
+
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
+grid()
+
+lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
+lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
+
+price2 <- tail(price2,100)
+
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
+grid()
+
+lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
+lines(price2$dcmid~ as.Date(price2$date),lwd=1.5,col="gray")
+lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
+
+```
+
+```{r,trx_dc_push}
+
+if ( trx_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE,"TRX Donchian channel signal is", trx_signal,".")
+}
+
+```
+
 ## Send a push notification.
 
 ```{r,push}
