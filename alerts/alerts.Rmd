@@ -737,8 +737,9 @@ indicators <- indicators[names(indicators) %in% combo]
 today_count <- sum(indicators)
 message(paste("today_count_BTC",today_count,sep="="))
 today_signal <- today_count>n
-#TODO need to fix
-prev_signal = TRUE
+
+prev_html <- readLines("https://mdz-analytics.com/crypto/alerts.html")
+prev_signal <- length(grep("BTC ensemble indicator is BULLISH",prev_html))>1
 
 btc_signal <- "NONE"
 
@@ -1357,8 +1358,8 @@ indicators <- indicators[names(indicators) %in% combo]
 today_count <- sum(indicators)
 message(paste("today_count_ETH",today_count,sep="="))
 today_signal <- today_count>n
-#TODO need to fix
-prev_signal = TRUE
+
+prev_signal <- length(grep("ETH ensemble indicator is BULLISH",prev_html))>1
 
 eth_signal <- "NONE"
 
@@ -1995,8 +1996,8 @@ indicators <- indicators[names(indicators) %in% combo]
 today_count <- sum(indicators)
 message(paste("today_count_XMR",today_count,sep="="))
 today_signal <- today_count>n
-#TODO need to fix
-prev_signal = TRUE
+
+prev_signal <- length(grep("XMR ensemble indicator is BULLISH",prev_html))>1
 
 xmr_signal <- "NONE"
 
