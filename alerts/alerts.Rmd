@@ -707,7 +707,7 @@ lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
 
 ```
 
-## BTC Ensembl indicator
+## BTC Ensemble indicator
 
 This is a combination of a number of n=y indicators, where x/y
 are a buy/sell threshold.
@@ -753,9 +753,11 @@ if ( today_signal != prev_signal ) {
 if (today_signal==TRUE) {
   system("sed -i 's/BTC_ENS_DAILY/BULLISH/' ../index1.html")
   system("sed -i 's/BTC_ENS_COL/limegreen/' ../index1.html")
+  message("BTC ensemble indicator is BULLISH")
 } else {
   system("sed -i 's/BTC_ENS_DAILY/BEARISH/' ../index1.html")
   system("sed -i 's/BTC_ENS_COL/red/' ../index1.html")
+  message("BTC ensemble indicator is BEARISH")
 }
 
 message(paste("BTC ENS signal:",btc_signal))
@@ -1371,9 +1373,11 @@ if ( today_signal != prev_signal ) {
 if (today_signal==TRUE) {
   system("sed -i 's/ETH_ENS_DAILY/BULLISH/' ../index1.html")
   system("sed -i 's/ETH_ENS_COL/limegreen/' ../index1.html")
+  message("ETH ensemble indicator is BULLISH")
 } else {
   system("sed -i 's/ETH_ENS_DAILY/BEARISH/' ../index1.html")
   system("sed -i 's/ETH_ENS_COL/red/' ../index1.html")
+  message("ETH ensemble indicator is BEARISH")
 }
 
 message(paste("ETH ENS signal:",eth_signal))
@@ -1958,6 +1962,63 @@ grid()
 lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
 lines(price2$dcmid~ as.Date(price2$date),lwd=1.5,col="gray")
 lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
+
+```
+
+## XMR Ensemble indicator
+
+This is a combination of a number of n=y indicators, where x/y
+are a buy/sell threshold.
+
+```{r,xmr_ens1,fig.height=10,fig.width=8}
+
+ens <- params[params$indicator=="Ensemble","parameter"]
+myrev <- intToUtf8(rev(utf8ToInt(ens)))
+myrev <- unlist(strsplit(myrev,","))
+# get thresh
+n <- as.numeric(myrev[1])
+myrev <- myrev[2:length(myrev)]
+# get combination
+combo <- sapply(myrev,function(s) { intToUtf8(rev(utf8ToInt(s))) })
+
+indicators <- c("SMA"=ens_SMA,
+  "EMA"=ens_EMA,
+  "SMAcross"=ens_SMAcross,
+  "EMAcross"=ens_EMAcross,
+  "DMI"=ens_DMI,
+  "TSI"=ens_TSI,
+  "stoch"=ens_stoch,
+  "RSI2"=ens_RSI2,
+  "DC"=ens_DC)
+
+indicators <- indicators[names(indicators) %in% combo]
+today_count <- sum(indicators)
+message(paste("today_count_XMR",today_count,sep="="))
+today_signal <- today_count>n
+#TODO need to fix
+prev_signal = TRUE
+
+xmr_signal <- "NONE"
+
+if ( today_signal != prev_signal ) {
+  if ( today_signal == TRUE ) {
+    xmr_signal="BUY"
+  } else {
+    xmr_signal="SELL"
+  }
+}
+
+if (today_signal==TRUE) {
+  system("sed -i 's/XMR_ENS_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/XMR_ENS_COL/limegreen/' ../index1.html")
+  message("XMR ensemble indicator is BULLISH")
+} else {
+  system("sed -i 's/XMR_ENS_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/XMR_ENS_COL/red/' ../index1.html")
+  message("XMR ensemble indicator is BEARISH")
+}
+
+message(paste("XMR ENS signal:",xmr_signal))
 
 ```
 
