@@ -180,11 +180,13 @@ btc_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/BTC_SMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_SMA_COL/limegreen/' ../index1.html")
+  ens_SMA=TRUE
+  system("sed -i 's/BTC_SMA_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/BTC_SMA_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/BTC_SMA_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/BTC_SMA_COL/red/' ../index1.html")
+  ens_SMA=FALSE
+  system("sed -i 's/BTC_SMA_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/BTC_SMA_COL/red/' ../index1.html")
 }
 
 message(paste("BTC SMA signal:",btc_signal))
@@ -227,11 +229,13 @@ btc_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/BTC_EMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_EMA_COL/limegreen/' ../index1.html")
+  ens_EMA=TRUE
+  system("sed -i 's/BTC_EMA_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/BTC_EMA_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/BTC_EMA_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/BTC_EMA_COL/red/' ../index1.html")
+  ens_EMA=FALSE
+  system("sed -i 's/BTC_EMA_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/BTC_EMA_COL/red/' ../index1.html")
 }
 
 message(paste("BTC EMA signal:",btc_signal))
@@ -278,11 +282,13 @@ btc_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/BTC_SMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_SMACROSS_COL/limegreen/' ../index1.html")
+  ens_SMAcross=TRUE
+  system("sed -i 's/BTC_SMACROSS_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/BTC_SMACROSS_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/BTC_SMACROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/BTC_SMACROSS_COL/red/' ../index1.html")
+  ens_SMAcross=FALSE
+  system("sed -i 's/BTC_SMACROSS_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/BTC_SMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("BTC SMA cross signal is",btc_signal))
@@ -330,11 +336,13 @@ btc_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/BTC_EMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_EMACROSS_COL/limegreen/' ../index1.html")
+  ens_EMAcross=TRUE
+  system("sed -i 's/BTC_EMACROSS_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/BTC_EMACROSS_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/BTC_EMACROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/BTC_EMACROSS_COL/red/' ../index1.html")
+  ens_EMAcross=FALSE
+  system("sed -i 's/BTC_EMACROSS_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/BTC_EMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("BTC EMA cross signal is",btc_signal))
@@ -378,11 +386,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/BTC_DMI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_DMI_COL/limegreen/' ../index1.html")
+  ens_DMI=TRUE
+  system("sed -i 's/BTC_DMI_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/BTC_DMI_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/BTC_DMI_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/BTC_DMI_COL/red/' ../index1.html")
+  ens_DMI=FALSE
+  system("sed -i 's/BTC_DMI_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/BTC_DMI_COL/red/' ../index1.html")
 }
 
 message(paste("BTC DMI signal:",btc_signal))
@@ -451,11 +461,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/BTC_TSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_TSI_COL/limegreen/' ../index1.html")
+  ens_TSI=TRUE
+  system("sed -i 's/BTC_TSI_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/BTC_TSI_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/BTC_TSI_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/BTC_TSI_COL/red/' ../index1.html")
+  ens_TSI=FALSE
+  system("sed -i 's/BTC_TSI_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/BTC_TSI_COL/red/' ../index1.html")
 }
 
 message(paste("BTC TSI signal:",btc_signal))
@@ -508,11 +520,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/BTC_STOCH_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_STOCH_COL/limegreen/' ../index1.html")
+  ens_stoch=TRUE
+  system("sed -i 's/BTC_STOCH_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/BTC_STOCH_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/BTC_STOCH_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/BTC_STOCH_COL/red/' ../index1.html")
+  ens_stoch=FALSE
+  system("sed -i 's/BTC_STOCH_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/BTC_STOCH_COL/red/' ../index1.html")
 }
 
 message(paste("BTC stoch signal:",btc_signal))
@@ -565,11 +579,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/BTC_RSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_RSI_COL/limegreen/' ../index1.html")
+  ens_RSI2=TRUE
+  system("sed -i 's/BTC_RSI_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/BTC_RSI_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/BTC_RSI_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/BTC_RSI_COL/red/' ../index1.html")
+  ens_RSI2=FALSE
+  system("sed -i 's/BTC_RSI_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/BTC_RSI_COL/red/' ../index1.html")
 }
 
 message(paste("BTC RSI signal:",btc_signal))
@@ -656,11 +672,13 @@ if ( btc_signal=="NONE" ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/BTC_DC_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/BTC_DC_COL/limegreen/' ../index1.html")
+  ens_DC=TRUE
+  system("sed -i 's/BTC_DC_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/BTC_DC_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/BTC_DC_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/BTC_DC_COL/red/' ../index1.html")
+  ens_DC=FALSE
+  system("sed -i 's/BTC_DC_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/BTC_DC_COL/red/' ../index1.html")
 }
 
 message(paste("BTC DC signal:",btc_signal))
@@ -686,6 +704,61 @@ grid()
 lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
 lines(price2$dcmid~ as.Date(price2$date),lwd=1.5,col="gray")
 lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
+
+```
+
+## BTC Ensembl indicator
+
+This is a combination of a number of n=y indicators, where x/y
+are a buy/sell threshold.
+
+```{r,btc_ens1,fig.height=10,fig.width=8}
+
+ens <- params[params$indicator=="Ensemble","parameter"]
+myrev <- intToUtf8(rev(utf8ToInt(ens)))
+myrev <- unlist(strsplit(myrev,","))
+# get thresh
+n <- as.numeric(myrev[1])
+myrev <- myrev[2:length(myrev)]
+# get combination
+combo <- sapply(myrev,function(s) { intToUtf8(rev(utf8ToInt(s))) })
+
+indicators <- c("SMA"=ens_SMA,
+  "EMA"=ens_EMA,
+  "SMAcross"=ens_SMAcross,
+  "EMAcross"=ens_EMAcross,
+  "DMI"=ens_DMI,
+  "TSI"=ens_TSI,
+  "stoch"=ens_stoch,
+  "RSI2"=ens_RSI2,
+  "DC"=ens_DC)
+
+indicators <- indicators[names(indicators) %in% combo]
+today_count <- sum(indicators)
+message(paste("today_count_BTC",today_count,sep="="))
+today_signal <- today_count>n
+#TODO need to fix
+prev_signal = TRUE
+
+btc_signal <- "NONE"
+
+if ( today_signal != prev_signal ) {
+  if ( today_signal == TRUE ) {
+    btc_signal="BUY"
+  } else {
+    btc_signal="SELL"
+  }
+}
+
+if (today_signal==TRUE) {
+  system("sed -i 's/BTC_ENS_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/BTC_ENS_COL/limegreen/' ../index1.html")
+} else {
+  system("sed -i 's/BTC_ENS_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/BTC_ENS_COL/red/' ../index1.html")
+}
+
+message(paste("BTC ENS signal:",btc_signal))
 
 ```
 
@@ -1226,7 +1299,7 @@ if (today_signal==TRUE) {
  system("sed -i 's/ETH_DC_COL/red/' ../index1.html")
 }
 
-message(paste("ETH DC signal:",btc_signal))
+message(paste("ETH DC signal:",eth_signal))
 
 ```
 
@@ -1249,6 +1322,61 @@ grid()
 lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
 lines(price2$dcmid~ as.Date(price2$date),lwd=1.5,col="gray")
 lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
+
+```
+
+## ETH Ensembl indicator
+
+This is a combination of a number of n=y indicators, where x/y
+are a buy/sell threshold.
+
+```{r,eth_ens1,fig.height=10,fig.width=8}
+
+ens <- params[params$indicator=="Ensemble","parameter"]
+myrev <- intToUtf8(rev(utf8ToInt(ens)))
+myrev <- unlist(strsplit(myrev,","))
+# get thresh
+n <- as.numeric(myrev[1])
+myrev <- myrev[2:length(myrev)]
+# get combination
+combo <- sapply(myrev,function(s) { intToUtf8(rev(utf8ToInt(s))) })
+
+indicators <- c("SMA"=ens_SMA,
+  "EMA"=ens_EMA,
+  "SMAcross"=ens_SMAcross,
+  "EMAcross"=ens_EMAcross,
+  "DMI"=ens_DMI,
+  "TSI"=ens_TSI,
+  "stoch"=ens_stoch,
+  "RSI2"=ens_RSI2,
+  "DC"=ens_DC)
+
+indicators <- indicators[names(indicators) %in% combo]
+today_count <- sum(indicators)
+message(paste("today_count_ETH",today_count,sep="="))
+today_signal <- today_count>n
+#TODO need to fix
+prev_signal = TRUE
+
+eth_signal <- "NONE"
+
+if ( today_signal != prev_signal ) {
+  if ( today_signal == TRUE ) {
+    eth_signal="BUY"
+  } else {
+    eth_signal="SELL"
+  }
+}
+
+if (today_signal==TRUE) {
+  system("sed -i 's/ETH_ENS_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/ETH_ENS_COL/limegreen/' ../index1.html")
+} else {
+  system("sed -i 's/ETH_ENS_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/ETH_ENS_COL/red/' ../index1.html")
+}
+
+message(paste("ETH ENS signal:",eth_signal))
 
 ```
 
@@ -1807,7 +1935,7 @@ if (today_signal==TRUE) {
  system("sed -i 's/XMR_DC_COL/red/' ../index1.html")
 }
 
-message(paste("XMR DC signal:",btc_signal))
+message(paste("XMR DC signal:",xmr_signal))
 
 ```
 
