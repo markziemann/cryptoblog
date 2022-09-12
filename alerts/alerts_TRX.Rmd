@@ -8,20 +8,28 @@ date: "`r Sys.Date()`"
 
 ## Intro
 
-In the backtesting analysis, I have established five different profitable strategies for timing entry/exits.
-Click on the hyperlinks below to see how these signals were identified.
+In the backtesting analysis, I have established several different profitable strategies for timing entry/exits.
+Visit the [TRX page] to see how these signals were identified.
 
-1. Simple moving averages
+1. Simple moving average (SMA)
 
-2. Moving average crosses
+2. Exponential moving average (EMA)
 
-3. Directional movement index (DMI)
+3. SMA crosses
 
-4. True strength index (TSI) **BEST**
+4. EMA crosses
 
-5. Stochastic oscillator (stoch)
+5. Directional movement index (DMI)
 
-6. Double RSI
+6. True strength index (TSI) **BEST**
+
+7. Stochastic oscillator (stoch)
+
+8. Double RSI
+
+9. Donchian channel
+
+10. Ensembl indicator
 
 This script will examine the price action and these trade signals just before the daily close.
 If the signal is TRUE, it is bullish and if FALSE it is bearish.
@@ -140,6 +148,12 @@ if (today_signal != previous_signal ) {
 trx_signal <- "NONE"
 }
 
+if (today_signal==TRUE) {
+  ens_SMA=TRUE
+} else {
+  ens_SMA=FALSE
+}
+
 message(paste("TRX SMA signal:",trx_signal))
 
 ```
@@ -157,6 +171,59 @@ lines(price2$ma~ as.Date(price2$date) ,col="red")
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste("The TRX SMA signal is", trx_signal,".")
+}
+
+```
+
+## TRX EMA indicator
+
+Now to determine whether TRX has crossed the EMA line.
+
+```{r, trx_ema}
+
+price2 <- price
+
+n <- as.numeric(params[params$indicator == "EMA",2])
+
+price2$ma <- EMA(Cl(price2),n=n)
+price2$signal <- price2$close > price2$ma
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    trx_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    trx_signal="SELL"
+  }
+} else {
+  trx_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_EMA=TRUE
+} else {
+  ens_EMA=FALSE
+}
+
+message(paste("TRX EMA signal:",trx_signal))
+
+```
+
+```{r, trx_ema_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="TRX EMA")
+grid()
+lines(price2$ma~ as.Date(price2$date) ,col="red")
+
+```
+
+```{r,trx_ema_push}
+
+if ( trx_signal != "NONE") {
+  MYNOTE <- paste("The TRX EMA signal is", trx_signal,".")
 }
 
 ```
@@ -191,10 +258,15 @@ if (today_signal != previous_signal ) {
 trx_signal <- "NONE"
 }
 
+if (today_signal==TRUE) {
+  ens_SMAcross=TRUE
+} else {
+  ens_SMAcross=FALSE
+}
+
 message(paste("TRX SMA cross signal:",trx_signal))
 
 ```
-
 
 ```{r, trx_cross_plot,fig.height=8,fig.width=8}
 
@@ -206,10 +278,68 @@ lines(price2$ma2~ as.Date(price2$date) ,col="blue")
 
 ```
 
-```{r,trx_cross_push}
+```{r,trx_smacross_push}
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste(MYNOTE, "The TRX SMA cross signal is", trx_signal,".")
+}
+
+```
+
+## TRX EMA cross indicator
+
+The EMA cross is a moderately profitable strategy.
+
+```{r, trx_ema_cross}
+
+price2 <- price
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "EMAcross",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+price2$ma1 <- EMA(Cl(price2),n=n1)
+price2$ma2 <- EMA(Cl(price2),n=n2)
+
+price2$signal <- price2$ma2 > price2$ma1
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    trx_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    trx_signal="SELL"
+  }
+} else {
+  trx_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_EMAcross=TRUE
+} else {
+  ens_EMAcross=FALSE
+}
+
+message(paste("TRX EMA cross signal is",trx_signal))
+
+```
+
+```{r, trx_ema_cross_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="TRX EMA cross")
+grid()
+lines(price2$ma1~ as.Date(price2$date) ,col="red")
+lines(price2$ma2~ as.Date(price2$date) ,col="blue")
+
+```
+
+```{r,trx_emacross_push}
+
+if ( trx_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE, "The TRX EMA cross signal is", trx_signal,".")
 }
 
 ```
@@ -238,6 +368,12 @@ if (today_signal != previous_signal ) {
   }
 } else {
   trx_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_DMI=TRUE
+} else {
+  ens_DMI=FALSE
 }
 
 message(paste("TRX DMI signal:",trx_signal))
@@ -316,6 +452,12 @@ if (today_signal != previous_signal ) {
   trx_signal <- "NONE"
 }
 
+if (today_signal==TRUE) {
+  ens_TSI=TRUE
+} else {
+  ens_TSI=FALSE
+}
+
 message(paste("TRX TSI signal:",trx_signal))
 
 ```
@@ -376,6 +518,12 @@ if (today_signal != previous_signal ) {
   trx_signal <- "NONE"
 }
 
+if (today_signal==TRUE) {
+  ens_stoch=TRUE
+} else {
+  ens_stoch=FALSE
+}
+
 message(paste("TRX stoch signal:",trx_signal))
 
 ```
@@ -433,6 +581,12 @@ if (today_signal != previous_signal ) {
   }
 } else {
   trx_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_RSI2=TRUE
+} else {
+  ens_RSI2=FALSE
 }
 
 message(paste("TRX RSI signal:",trx_signal))
@@ -526,6 +680,12 @@ if ( trx_signal=="NONE" ) {
   if (trx_signal=="SELL") { today_signal = FALSE }
 }
 
+if (today_signal==TRUE) {
+  ens_DC=TRUE
+} else {
+  ens_DC=FALSE
+}
+
 message(paste("TRX DC signal:",trx_signal))
 
 ```
@@ -556,6 +716,65 @@ lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
 if ( trx_signal != "NONE") {
   MYNOTE <- paste(MYNOTE,"TRX Donchian channel signal is", trx_signal,".")
 }
+
+```
+
+## TRX Ensemble indicator
+
+This is a combination of a number of indicators.
+
+```{r,trx_ens1,fig.height=10,fig.width=8}
+
+ens <- params[params$indicator=="Ensemble","parameter"]
+myrev <- intToUtf8(rev(utf8ToInt(ens)))
+myrev <- unlist(strsplit(myrev,","))
+# get thresh
+n <- as.numeric(myrev[1])
+myrev <- myrev[2:length(myrev)]
+# get combination
+combo <- sapply(myrev,function(s) { intToUtf8(rev(utf8ToInt(s))) })
+
+message(paste("The combination is",paste(combo,collapse=" ")))
+
+message(paste("The buy threshold is",n))
+
+indicators <- c("SMA"=ens_SMA,
+  "EMA"=ens_EMA,
+  "SMAcross"=ens_SMAcross,
+  "EMAcross"=ens_EMAcross,
+  "DMI"=ens_DMI,
+  "TSI"=ens_TSI,
+  "stoch"=ens_stoch,
+  "RSI2"=ens_RSI2,
+  "DC"=ens_DC)
+
+indicators <- indicators[names(indicators) %in% combo]
+message("State of the indicators:")
+indicators
+today_count <- sum(indicators)
+message(paste("today_count_TRX",today_count,sep="="))
+today_signal <- today_count>n
+
+prev_html <- readLines("https://mdz-analytics.com/crypto/alerts.html")
+prev_signal <- length(grep("TRX ensemble indicator is BULLISH",prev_html))>1
+
+trx_signal <- "NONE"
+
+if ( today_signal != prev_signal ) {
+  if ( today_signal == TRUE ) {
+    trx_signal="BUY"
+  } else {
+    trx_signal="SELL"
+  }
+}
+
+if (today_signal==TRUE) {
+  message("TRX ensemble indicator is BULLISH")
+} else {
+  message("TRX ensemble indicator is BEARISH")
+}
+
+message(paste("TRX ENS signal:",trx_signal))
 
 ```
 
