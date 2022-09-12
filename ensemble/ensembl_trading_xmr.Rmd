@@ -35,6 +35,8 @@ The indicators I will be using are:
 
 8. Double RSI
 
+9. Donchian channel
+
 ```{r,lib}
 
 suppressPackageStartupMessages({
@@ -183,6 +185,24 @@ rsi2 <- RSI(price$close,n=n2,maType=EMA)
 
 price2$RSI2 <- rsi1 > rsi2
 
+# donchian channel
+n <- as.numeric(params[params$indicator == "DC",2])
+price3 <- price[1:nrow(price)-1,]
+dc <- DonchianChannel(price3$close,n=n)
+price3$higher <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"high"] > dc[(i-1),"high"]
+} ))
+price3$lower <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"low"] < dc[(i-1),"low"]
+} ))
+price3[is.na(price3)] <- FALSE
+price3 <- price3[price3$higher != price3$lower,]
+dc_sig <- unlist(sapply(1:nrow(price),function(i) {
+  price3[tail(which(price[i,"date"] > price3$date),1),"higher"]
+}))
+dc_sig <- c(rep(FALSE,nrow(price) - length(dc_sig)),dc_sig)
+price2$DC <- dc_sig
+
 ```
 
 ## Ensemble trading
@@ -277,11 +297,11 @@ res %>% kbl(caption="backtesting results with minimum postive indicators") %>%  
 
 That is great, but what if we take out one or two of the indicators, will the ensemble perform better?
 
-Select N indicators where N is between 2 and 7
+Select N indicators where N is between 2 and 8
 
 ```{r,ensemble2}
 
-indi <- price2[,6:13]
+indi <- price2[,6:14]
 price3 <- price
 
 mygrid <- expand.grid(rep(list(c(0,1)),ncol(indi)))
@@ -403,6 +423,15 @@ if ( length(which(combo == "RSI2")) ) {
   rsi1 <- RSI(price$close,n=n1,maType=EMA)
   rsi2 <- RSI(price$close,n=n2,maType=EMA)
   indicators$RSI2 <- rsi1 > rsi2
+}
+
+if ( length(which(combo == "DC")) ) {
+  n <- as.numeric(params[params$indicator == "DC",2])
+  dc_sig <- unlist(sapply(1:nrow(price),function(i) {
+    price3[tail(which(price[i,"date"] > price3$date),1),"higher"]
+  }))
+  dc_sig <- c(rep(FALSE,nrow(price) - length(dc_sig)),dc_sig)
+  indicators$DC <- dc_sig
 }
 
 indicators <- indicators[,2:ncol(indicators)]
