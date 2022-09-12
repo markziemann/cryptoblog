@@ -18,7 +18,7 @@ file.copy("../images/banner1.png", "banner.png")
 
 [Source code](https://github.com/markziemann/cryptoblog/blob/main/alerts/alerts.Rmd)
 
-## Intro
+# Intro
 
 In the backtesting analysis, I have established these profitable strategies for timing entry/exits.
 Click on the hyperlinks below to see how these signals were identified.
@@ -112,7 +112,9 @@ mydate <- as.Date(mydate)
 
 ```
 
-## Get BTC price data
+# BTC
+
+## Get price data
 
 Obtaining BTC price data (daily) for the last 300 days.
 
@@ -713,8 +715,7 @@ lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
 
 ## BTC Ensemble indicator
 
-This is a combination of a number of n=y indicators, where x/y
-are a buy/sell threshold.
+This is a combination of a number of indicators.
 
 ```{r,btc_ens1,fig.height=10,fig.width=8}
 
@@ -727,6 +728,10 @@ myrev <- myrev[2:length(myrev)]
 # get combination
 combo <- sapply(myrev,function(s) { intToUtf8(rev(utf8ToInt(s))) })
 
+message(paste("The combination is",paste(combo,collapse=" ")))
+
+message(paste("The buy threshold is",n))
+
 indicators <- c("SMA"=ens_SMA,
   "EMA"=ens_EMA,
   "SMAcross"=ens_SMAcross,
@@ -738,6 +743,8 @@ indicators <- c("SMA"=ens_SMA,
   "DC"=ens_DC)
 
 indicators <- indicators[names(indicators) %in% combo]
+message("State of the indicators:")
+indicators
 today_count <- sum(indicators)
 message(paste("today_count_BTC",today_count,sep="="))
 today_signal <- today_count>n
@@ -769,7 +776,9 @@ message(paste("BTC ENS signal:",btc_signal))
 
 ```
 
-## Get ETH price data
+# ETH
+
+## Get price data
 
 Obtaining ETH historical data (daily).
 
@@ -1348,6 +1357,10 @@ myrev <- myrev[2:length(myrev)]
 # get combination
 combo <- sapply(myrev,function(s) { intToUtf8(rev(utf8ToInt(s))) })
 
+message(paste("The combination is",paste(combo,collapse=" ")))
+
+message(paste("The buy threshold is",n))
+
 indicators <- c("SMA"=ens_SMA,
   "EMA"=ens_EMA,
   "SMAcross"=ens_SMAcross,
@@ -1359,6 +1372,8 @@ indicators <- c("SMA"=ens_SMA,
   "DC"=ens_DC)
 
 indicators <- indicators[names(indicators) %in% combo]
+message("State of the indicators:")
+indicators
 today_count <- sum(indicators)
 message(paste("today_count_ETH",today_count,sep="="))
 today_signal <- today_count>n
@@ -1389,7 +1404,9 @@ message(paste("ETH ENS signal:",eth_signal))
 
 ```
 
-## Get XMR price data
+# XMR
+
+## Get price data
 
 Obtaining XMR price data (daily) for the last 300 days.
 
@@ -1986,6 +2003,10 @@ myrev <- myrev[2:length(myrev)]
 # get combination
 combo <- sapply(myrev,function(s) { intToUtf8(rev(utf8ToInt(s))) })
 
+message(paste("The combination is",paste(combo,collapse=" ")))
+
+message(paste("The buy threshold is",n))
+
 indicators <- c("SMA"=ens_SMA,
   "EMA"=ens_EMA,
   "SMAcross"=ens_SMAcross,
@@ -1997,8 +2018,10 @@ indicators <- c("SMA"=ens_SMA,
   "DC"=ens_DC)
 
 indicators <- indicators[names(indicators) %in% combo]
+message("State of the indicators:")
+indicators
 today_count <- sum(indicators)
-message(paste("today_count_XMR",today_count,sep="="))
+message(paste("today_count_ETH",today_count,sep="="))
 today_signal <- today_count>n
 
 prev_signal <- length(grep("XMR ensemble indicator is BULLISH",prev_html))>1
@@ -2027,7 +2050,7 @@ message(paste("XMR ENS signal:",xmr_signal))
 
 ```
 
-## Session information
+# Session information
 
 For reproducibility
 
