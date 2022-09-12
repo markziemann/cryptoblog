@@ -9,7 +9,7 @@ date: "`r Sys.Date()`"
 ## Intro
 
 In the backtesting analysis, I have established several different profitable strategies for timing entry/exits.
-Visit the [TRX page] to see how these signals were identified.
+Visit the [TRX page](https://mdz-analytics.com/altcoins/TRX/) to see how these signals were identified.
 
 1. Simple moving average (SMA)
 
@@ -753,7 +753,7 @@ message("State of the indicators:")
 indicators
 today_count <- sum(indicators)
 message(paste("today_count_TRX",today_count,sep="="))
-today_signal <- today_count>n
+today_signal <- today_count>=n
 
 prev_html <- readLines("https://mdz-analytics.com/crypto/alerts.html")
 prev_signal <- length(grep("TRX ensemble indicator is BULLISH",prev_html))>1
