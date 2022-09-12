@@ -778,6 +778,14 @@ message(paste("TRX ENS signal:",trx_signal))
 
 ```
 
+```{r,trx_ens_push}
+
+if ( trx_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE,"TRX Ensemble indicator is", trx_signal,".")
+}
+
+```
+
 ## Send a push notification.
 
 ```{r,push}
