@@ -340,7 +340,7 @@ resl <- lapply(1:length(resl), function(i) {
 
 resdf <- do.call(rbind,resl)
 
-resdf <- resdf[order(-resdf$xhodl),]
+resdf <- resdf[order(-resdf$ensembl_trading_btc.Rmd),]
 
 head(resdf,20) %>% kbl(row.names=FALSE,caption="top performing indicator combinations") %>%  kable_styling("hover", full_width = F)
 
