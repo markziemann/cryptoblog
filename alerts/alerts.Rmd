@@ -850,11 +850,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/ETH_SMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_SMA_COL/limegreen/' ../index1.html")
+  ens_SMA=TRUE
+  system("sed -i 's/ETH_SMA_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/ETH_SMA_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/ETH_SMA_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/ETH_SMA_COL/red/' ../index1.html")
+  ens_SMA=FALSE
+  system("sed -i 's/ETH_SMA_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/ETH_SMA_COL/red/' ../index1.html")
 }
 
 message(paste("ETH SMA signal:",eth_signal))
@@ -897,11 +899,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/ETH_EMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_EMA_COL/limegreen/' ../index1.html")
+  ens_EMA=TRUE
+  system("sed -i 's/ETH_EMA_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/ETH_EMA_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/ETH_EMA_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/ETH_EMA_COL/red/' ../index1.html")
+  ens_EMA=FALSE
+  system("sed -i 's/ETH_EMA_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/ETH_EMA_COL/red/' ../index1.html")
 }
 
 message(paste("ETH EMA signal:",eth_signal))
@@ -948,11 +952,13 @@ eth_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/ETH_SMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_SMACROSS_COL/limegreen/' ../index1.html")
+  ens_SMAcross=TRUE
+  system("sed -i 's/ETH_SMACROSS_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/ETH_SMACROSS_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/ETH_SMACROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/ETH_SMACROSS_COL/red/' ../index1.html")
+  ens_SMAcross=FALSE
+  system("sed -i 's/ETH_SMACROSS_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/ETH_SMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("ETH SMA cross signal:",eth_signal))
@@ -1000,11 +1006,13 @@ eth_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/ETH_EMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_EMACROSS_COL/limegreen/' ../index1.html")
+  ens_EMAcross=TRUE
+  system("sed -i 's/ETH_EMACROSS_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/ETH_EMACROSS_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/ETH_EMACROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/ETH_EMACROSS_COL/red/' ../index1.html")
+  ens_EMAcross=FALSE
+  system("sed -i 's/ETH_EMACROSS_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/ETH_EMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("ETH EMA cross signal:",eth_signal))
@@ -1046,11 +1054,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/ETH_DMI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_DMI_COL/limegreen/' ../index1.html")
+  ens_DMI=TRUE
+  system("sed -i 's/ETH_DMI_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/ETH_DMI_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/ETH_DMI_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/ETH_DMI_COL/red/' ../index1.html")
+  ens_DMI=FALSE
+  system("sed -i 's/ETH_DMI_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/ETH_DMI_COL/red/' ../index1.html")
 }
 
 message(paste("ETH DMI signal:",eth_signal))
@@ -1102,11 +1112,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/ETH_TSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_TSI_COL/limegreen/' ../index1.html")
+  ens_TSI=TRUE
+  system("sed -i 's/ETH_TSI_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/ETH_TSI_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/ETH_TSI_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/ETH_TSI_COL/red/' ../index1.html")
+  ens_TSI=FALSE
+  system("sed -i 's/ETH_TSI_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/ETH_TSI_COL/red/' ../index1.html")
 }
 
 message(paste("ETH TSI signal:",eth_signal))
@@ -1159,11 +1171,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/ETH_STOCH_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_STOCH_COL/limegreen/' ../index1.html")
+  ens_stoch=TRUE
+  system("sed -i 's/ETH_STOCH_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/ETH_STOCH_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/ETH_STOCH_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/ETH_STOCH_COL/red/' ../index1.html")
+  ens_stoch=FALSE
+  system("sed -i 's/ETH_STOCH_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/ETH_STOCH_COL/red/' ../index1.html")
 }
 
 message(paste("ETH stoch signal:",eth_signal))
@@ -1216,11 +1230,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/ETH_RSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_RSI_COL/limegreen/' ../index1.html")
+  ens_RSI2=TRUE
+  system("sed -i 's/ETH_RSI_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/ETH_RSI_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/ETH_RSI_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/ETH_RSI_COL/red/' ../index1.html")
+  ens_RSI2=FALSE
+  system("sed -i 's/ETH_RSI_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/ETH_RSI_COL/red/' ../index1.html")
 }
 
 message(paste("ETH RSI signal:",eth_signal))
@@ -1308,11 +1324,13 @@ if ( eth_signal=="NONE" ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/ETH_DC_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/ETH_DC_COL/limegreen/' ../index1.html")
+  ens_DC=TRUE
+  system("sed -i 's/ETH_DC_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/ETH_DC_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/ETH_DC_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/ETH_DC_COL/red/' ../index1.html")
+  ens_DC=FALSE
+  system("sed -i 's/ETH_DC_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/ETH_DC_COL/red/' ../index1.html")
 }
 
 message(paste("ETH DC signal:",eth_signal))
@@ -1478,11 +1496,13 @@ xmr_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/XMR_SMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_SMA_COL/limegreen/' ../index1.html")
+  ens_SMA=TRUE
+  system("sed -i 's/XMR_SMA_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/XMR_SMA_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/XMR_SMA_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/XMR_SMA_COL/red/' ../index1.html")
+  ens_SMA=FALSE
+  system("sed -i 's/XMR_SMA_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/XMR_SMA_COL/red/' ../index1.html")
 }
 
 message(paste("XMR SMA signal:",xmr_signal))
@@ -1525,11 +1545,13 @@ xmr_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/XMR_EMA_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_EMA_COL/limegreen/' ../index1.html")
+  ens_EMA=TRUE
+  system("sed -i 's/XMR_EMA_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/XMR_EMA_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/XMR_EMA_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/XMR_EMA_COL/red/' ../index1.html")
+  ens_EMA=FALSE
+  system("sed -i 's/XMR_EMA_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/XMR_EMA_COL/red/' ../index1.html")
 }
 
 message(paste("XMR EMA signal:",xmr_signal))
@@ -1576,11 +1598,13 @@ xmr_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/XMR_SMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_SMACROSS_COL/limegreen/' ../index1.html")
+  ens_SMAcross=TRUE
+  system("sed -i 's/XMR_SMACROSS_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/XMR_SMACROSS_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/XMR_SMACROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/XMR_SMACROSS_COL/red/' ../index1.html")
+  ens_SMAcross=FALSE
+  system("sed -i 's/XMR_SMACROSS_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/XMR_SMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("XMR SMA cross signal is",xmr_signal))
@@ -1628,11 +1652,13 @@ xmr_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/XMR_EMACROSS_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_EMACROSS_COL/limegreen/' ../index1.html")
+  ens_EMAcross=TRUE
+  system("sed -i 's/XMR_EMACROSS_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/XMR_EMACROSS_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/XMR_EMACROSS_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/XMR_EMACROSS_COL/red/' ../index1.html")
+  ens_EMAcross=FALSE
+  system("sed -i 's/XMR_EMACROSS_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/XMR_EMACROSS_COL/red/' ../index1.html")
 }
 
 message(paste("XMR EMA cross signal is",xmr_signal))
@@ -1676,11 +1702,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/XMR_DMI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_DMI_COL/limegreen/' ../index1.html")
+  ens_DMI=TRUE
+  system("sed -i 's/XMR_DMI_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/XMR_DMI_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/XMR_DMI_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/XMR_DMI_COL/red/' ../index1.html")
+  ens_DMI=FALSE
+  system("sed -i 's/XMR_DMI_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/XMR_DMI_COL/red/' ../index1.html")
 }
 
 message(paste("XMR DMI signal:",xmr_signal))
@@ -1749,11 +1777,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/XMR_TSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_TSI_COL/limegreen/' ../index1.html")
+  ens_TSI=TRUE
+  system("sed -i 's/XMR_TSI_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/XMR_TSI_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/XMR_TSI_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/XMR_TSI_COL/red/' ../index1.html")
+  ens_TSI=FALSE
+  system("sed -i 's/XMR_TSI_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/XMR_TSI_COL/red/' ../index1.html")
 }
 
 message(paste("XMR TSI signal:",xmr_signal))
@@ -1806,11 +1836,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/XMR_STOCH_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_STOCH_COL/limegreen/' ../index1.html")
+  ens_stoch=TRUE
+  system("sed -i 's/XMR_STOCH_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/XMR_STOCH_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/XMR_STOCH_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/XMR_STOCH_COL/red/' ../index1.html")
+  ens_stoch=FALSE
+  system("sed -i 's/XMR_STOCH_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/XMR_STOCH_COL/red/' ../index1.html")
 }
 
 message(paste("XMR stoch signal:",xmr_signal))
@@ -1863,11 +1895,13 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/XMR_RSI_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_RSI_COL/limegreen/' ../index1.html")
+  ens_RSI2=TRUE
+  system("sed -i 's/XMR_RSI_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/XMR_RSI_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/XMR_RSI_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/XMR_RSI_COL/red/' ../index1.html")
+  ens_RSI2=FALSE
+  system("sed -i 's/XMR_RSI_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/XMR_RSI_COL/red/' ../index1.html")
 }
 
 message(paste("XMR RSI signal:",xmr_signal))
@@ -1954,11 +1988,13 @@ if ( xmr_signal=="NONE" ) {
 }
 
 if (today_signal==TRUE) {
- system("sed -i 's/XMR_DC_DAILY/BULLISH/' ../index1.html")
- system("sed -i 's/XMR_DC_COL/limegreen/' ../index1.html")
+  ens_DC=TRUE
+  system("sed -i 's/XMR_DC_DAILY/BULLISH/' ../index1.html")
+  system("sed -i 's/XMR_DC_COL/limegreen/' ../index1.html")
 } else {
- system("sed -i 's/XMR_DC_DAILY/BEARISH/' ../index1.html")
- system("sed -i 's/XMR_DC_COL/red/' ../index1.html")
+  ens_DC=FALSE
+  system("sed -i 's/XMR_DC_DAILY/BEARISH/' ../index1.html")
+  system("sed -i 's/XMR_DC_COL/red/' ../index1.html")
 }
 
 message(paste("XMR DC signal:",xmr_signal))
