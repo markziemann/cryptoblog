@@ -674,7 +674,7 @@ if ( previous_signal == TRUE ) {
 }
 
 if ( trx_signal=="NONE" ) {
-  today_signal==previous_signal
+  today_signal=previous_signal
 } else {
   if (trx_signal=="BUY") { today_signal = TRUE }
   if (trx_signal=="SELL") { today_signal = FALSE }
@@ -756,7 +756,7 @@ message(paste("today_count_TRX",today_count,sep="="))
 today_signal <- today_count>=n
 
 prev_html <- readLines("https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html")
-prev_signal <- length(grep("TRX ensemble indicator is BULLISH",prev_html))>1
+prev_signal <- length(grep("TRX ensemble indicator is BULLISH",prev_html))>2
 
 trx_signal <- "NONE"
 
