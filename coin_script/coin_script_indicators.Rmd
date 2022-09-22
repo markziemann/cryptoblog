@@ -13,7 +13,7 @@ but if you find it useful, consider a small tip.
 
 ## Intro
 
-Previously I performed backtesting for major altcoins.
+Previously I performed backtesting for major coins.
 Now it is time to look at which indicator performed best across all coins.
 
 ```{r,lib0}

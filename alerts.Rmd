@@ -25,27 +25,27 @@ Click on the hyperlinks below to see how these signals were identified.
 
 1. Simple and exponential moving averages for [BTC](https://mdz-analytics.com/crypto/ma_trading_btc.html),
 [ETH](https://mdz-analytics.com/crypto/ma_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/ma_trading_XMR.html).
+[XMR](https://mdz-analytics.com/coins/XMR/ma_trading_XMR.html).
 
 2. Moving average crosses for [BTC](https://mdz-analytics.com/crypto/ma_cross_btc.html),
 [ETH](https://mdz-analytics.com/crypto/ma_cross_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/ma_cross_XMR.html).
+[XMR](https://mdz-analytics.com/coins/XMR/ma_cross_XMR.html).
 
 3. Directional movement index (DMI) for [BTC](https://mdz-analytics.com/crypto/dmi_trading_btc.html),
 [ETH](https://mdz-analytics.com/crypto/dmi_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/dmi_trading_XMR.html).
+[XMR](https://mdz-analytics.com/coins/XMR/dmi_trading_XMR.html).
 
 4. True strength index (TSI) for [BTC](https://mdz-analytics.com/crypto/tsi_trading_btc.html),
 [ETH](https://mdz-analytics.com/crypto/tsi_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/tsi_trading_XMR.html).
+[XMR](https://mdz-analytics.com/coins/XMR/tsi_trading_XMR.html).
 
 5. Stochastic oscillator (stoch) for [BTC](https://mdz-analytics.com/crypto/stoch_trading_btc.html),
 [ETH](https://mdz-analytics.com/crypto/stoch_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/stoch_trading_XMR.html).
+[XMR](https://mdz-analytics.com/coins/XMR/stoch_trading_XMR.html).
 
 6. Double RSI and [BTC](https://mdz-analytics.com/crypto/rsi2trading_btc.html),
 [ETH](https://mdz-analytics.com/crypto/rsi2_trading_eth.html) and
-[XMR](https://mdz-analytics.com/altcoins/XMR/rsi2_trading_XMR.html).
+[XMR](https://mdz-analytics.com/coins/XMR/rsi2_trading_XMR.html).
 
 This script will examine the price action and these trade signals just before the daily close.
 If the signal is TRUE, it is bullish and if FALSE it is bearish.
@@ -144,7 +144,7 @@ Now fetch the backtested parameters.
 
 ```{r,btc_params}
 
-params <- read.table("https://mdz-analytics.com/altcoins/BTC/BTC_dat.txt", header=TRUE)
+params <- read.table("https://mdz-analytics.com/coins/BTC/BTC_dat.txt", header=TRUE)
 params %>% kbl(caption="BTC optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
 ```
@@ -637,7 +637,7 @@ Fetch backtested parameters.
 
 ```{r,eth_params}
 
-params <- read.table("https://mdz-analytics.com/altcoins/ETH/ETH_dat.txt", header=TRUE)
+params <- read.table("https://mdz-analytics.com/coins/ETH/ETH_dat.txt", header=TRUE)
 params %>% kbl(caption="ETH optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
 ```
@@ -1112,7 +1112,7 @@ Now fetch the backtested parameters.
 
 ```{r,xmr_params}
 
-params <- read.table("https://mdz-analytics.com/altcoins/XMR/XMR_dat.txt", header=TRUE)
+params <- read.table("https://mdz-analytics.com/coins/XMR/XMR_dat.txt", header=TRUE)
 params %>% kbl(caption="XMR optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
 ```

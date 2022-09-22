@@ -9,7 +9,7 @@ date: "`r Sys.Date()`"
 ## Intro
 
 In the backtesting analysis, I have established several different profitable strategies for timing entry/exits.
-Visit the [TRX page](https://mdz-analytics.com/altcoins/TRX/) to see how these signals were identified.
+Visit the [TRX page](https://mdz-analytics.com/coins/TRX/) to see how these signals were identified.
 
 1. Simple moving average (SMA)
 
@@ -83,7 +83,7 @@ mydate <- as.Date(mydate)
 
 ```{r,params}
 
-params <- read.table("https://mdz-analytics.com/altcoins/TRX/TRX_dat.txt", header=TRUE)
+params <- read.table("https://mdz-analytics.com/coins/TRX/TRX_dat.txt", header=TRUE)
 params %>% kbl(caption="optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
 ```
@@ -755,7 +755,7 @@ today_count <- sum(indicators)
 message(paste("today_count_TRX",today_count,sep="="))
 today_signal <- today_count>=n
 
-prev_html <- readLines("https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html")
+prev_html <- readLines("https://mdz-analytics.com/coins/TRX/alerts_TRX.html")
 prev_signal <- length(grep("TRX ensemble indicator is BULLISH",prev_html))>2
 
 trx_signal <- "NONE"
@@ -793,7 +793,7 @@ if ( trx_signal != "NONE") {
 MYNOTE
 
 if ( !is.null(MYNOTE) ) {
-  MYNOTE <- paste(MYNOTE, ". Visit https://mdz-analytics.com/altcoins/TRX/alerts_TRX.html for the details")
+  MYNOTE <- paste(MYNOTE, ". Visit https://mdz-analytics.com/coins/TRX/alerts_TRX.html for the details")
   MYNOTE
   pbPost("note", "Crypto Alert", MYNOTE ,channel="trx_signal")
 }

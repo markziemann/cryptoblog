@@ -13,7 +13,7 @@ for RMD in alerts/alerts_*Rmd ; do
   COIN=$(echo $RMD | sed 's#alerts/alerts_##' | sed 's/.Rmd//')
   echo $COIN $RMD
   Rscript -e "rmarkdown::render('${RMD}')"
-  scp -P 21098 alerts/alerts_${COIN}.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/altcoins/${COIN}
+  scp -P 21098 alerts/alerts_${COIN}.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/coins/${COIN}
 done
 
 sleep 15m
@@ -127,4 +127,4 @@ Rscript -e "rmarkdown::render('ensemble/ensembl_trading_xmr.Rmd')" && \
 
 cd coin_script
 Rscript -e "rmarkdown::render('coin_script.Rmd')" && \
-  scp -P 21098 coin_script.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/altcoins
+  scp -P 21098 coin_script.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/coins

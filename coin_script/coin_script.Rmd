@@ -108,7 +108,7 @@ coinfun <- function(TICKER) {
   rmarkdown::render(scriptname,output_dir=TICKER)
   unlink(scriptname)
 
-  CMD=paste("scp -r -P 21098", TICKER  , "mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/altcoins")
+  CMD=paste("scp -r -P 21098", TICKER  , "mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/coins")
   system(CMD)
 
 }

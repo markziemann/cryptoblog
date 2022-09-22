@@ -154,7 +154,7 @@ Now fetch the backtested parameters.
 
 ```{r,btc_params}
 
-params <- read.table("https://mdz-analytics.com/altcoins/BTC/BTC_dat.txt", header=TRUE)
+params <- read.table("https://mdz-analytics.com/coins/BTC/BTC_dat.txt", header=TRUE)
 params %>% kbl(caption="BTC optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
 ```
@@ -818,7 +818,7 @@ Fetch backtested parameters.
 
 ```{r,eth_params}
 
-params <- read.table("https://mdz-analytics.com/altcoins/ETH/ETH_dat.txt", header=TRUE)
+params <- read.table("https://mdz-analytics.com/coins/ETH/ETH_dat.txt", header=TRUE)
 params %>% kbl(caption="ETH optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
 ```
@@ -1464,7 +1464,7 @@ Now fetch the backtested parameters.
 
 ```{r,xmr_params}
 
-params <- read.table("https://mdz-analytics.com/altcoins/XMR/XMR_dat.txt", header=TRUE)
+params <- read.table("https://mdz-analytics.com/coins/XMR/XMR_dat.txt", header=TRUE)
 params %>% kbl(caption="XMR optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
 ```
