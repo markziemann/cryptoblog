@@ -313,7 +313,7 @@ abline(h=1,col="red",lty=2)
 
 Recent action of the indicator.
 
-```{r,update}
+```{r,update,fig.height=8,fig.width=8}
 
 n=100
 price <- cbind(price,rsi1,rsi2)

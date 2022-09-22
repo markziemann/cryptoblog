@@ -80,8 +80,8 @@ midpoint <- round(nrow(price)/2)
 price0 <- price[1:midpoint,]
 price1 <- price[midpoint:nrow(price),]
 
-price0[c(1:5,(nrow(price0)-5):nrow(price0)),]  %>% kbl(caption="period0 range") %>%  kable_paper("hover", full_width = F)
-price1[c(1:5,(nrow(price1)-5):nrow(price1)),]  %>% kbl(caption="period1 range") %>%  kable_paper("hover", full_width = F)
+price0[c(1:5,(nrow(price0)-5):nrow(price0)),]  %>% kbl(caption="period0 range") %>%  kable_styling("hover", full_width = F)
+price1[c(1:5,(nrow(price1)-5):nrow(price1)),]  %>% kbl(caption="period1 range") %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -211,7 +211,7 @@ res_sma1$xhodl1 <- res_sma1$returns1 / hodl1
 # join
 res_sma <- cbind(res_sma0,res_sma1)
 
-res_sma %>% kbl(caption="SMA trading strategies in period 0 and 1") %>%  kable_paper("hover", full_width = F)
+res_sma %>% kbl(caption="SMA trading strategies in period 0 and 1") %>%  kable_styling("hover", full_width = F)
 
 # ema old
 res <- sapply(myrange,function(n) { ema(price0,n,fee) } )
@@ -236,7 +236,7 @@ res_ema1$xhodl1 <- res_ema1$returns1 / hodl1
 # join
 res_ema <- cbind(res_ema0,res_ema1)
 
-res_ema %>% kbl(caption="EMA trading strategies in period 0 and 1") %>%  kable_paper("hover", full_width = F)
+res_ema %>% kbl(caption="EMA trading strategies in period 0 and 1") %>%  kable_styling("hover", full_width = F)
 
 ```
 

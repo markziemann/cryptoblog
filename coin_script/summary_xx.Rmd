@@ -53,7 +53,7 @@ dat <- read.table(FILE,header=TRUE)
 
 dat %>%
   kbl(caption="Indicator performance") %>%
-  kable_paper("hover", full_width = F)
+  kable_styling("hover", full_width = F)
 
 ```
 

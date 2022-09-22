@@ -305,7 +305,7 @@ par(mfrow=c(1,1))
 
 ## 16d DMI recent action
 
-```{r,recent1}
+```{r,recent1,fig.height=8,fig.width=8}
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
