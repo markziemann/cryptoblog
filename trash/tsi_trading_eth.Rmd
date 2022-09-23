@@ -185,7 +185,7 @@ performance metrics.
 
 ```{r,backtest1}
 
-fee=0.002
+fee=0.005
 
 n1r <- seq(10,107,3)
 n2r <- seq(3,100,3)
@@ -255,7 +255,7 @@ Now a fine search of the best parameter space.
 
 ```{r,backtest2}
 
-fee=0.002
+fee=0.005
 
 n1r <- seq(min(head(res2,20)$n1),max(head(res2,20)$n1),1)
 n2r <- seq(min(head(res2,20)$n2),max(head(res2,20)$n2),1)

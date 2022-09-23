@@ -154,7 +154,7 @@ Here is a table of results.
 
 ```{r,backtest}
 
-fee=0.002
+fee=0.005
 myrange <- 4:200
 res <- t(sapply(myrange,function(n) { dmi(price,n,fee) } ))
 rownames(res) <- myrange

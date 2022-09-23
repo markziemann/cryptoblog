@@ -155,7 +155,7 @@ if (n1 != n2) {
 
 ```{r,backtest}
 
-fee=0.002
+fee=0.005
 
 mas <- expand.grid(4:100,4:100)
 

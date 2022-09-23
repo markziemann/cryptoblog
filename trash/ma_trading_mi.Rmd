@@ -169,7 +169,7 @@ sapply(10:50, function(i) {ema2(price,i,0.001) } )
 
 ```{r,backtest}
 
-fee=0.001
+fee=0.005
 
 myrange <- 3:200
 

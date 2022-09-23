@@ -268,7 +268,7 @@ The slowD will be set to the same as fast D.
 
 ```{r,backtest1}
 
-fee=0.001
+fee=0.005
 
 nFastK <- seq(2,50,5)
 nFastD <- seq(2,80,5)
@@ -375,7 +375,7 @@ backtesting for the following values nfastk(32:52),nfastd/nslowd(42:82) and smoo
 
 ```{r,backtest2}
 
-fee=0.001
+fee=0.005
 
 nFastK <- seq(min(res5$nFastK),max(res5$nFastK),1)
 nFastD <- seq(min(res5$nFastD),max(res5$nFastD),1)

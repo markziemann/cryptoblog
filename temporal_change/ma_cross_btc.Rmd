@@ -212,7 +212,7 @@ Below, I show the 20 highest returning indicators.
 
 ```{r,backtestsma}
 
-fee=0.001
+fee=0.005
 
 mas <- expand.grid(5:200,5:200)
 mas <- mas[which( mas$Var2 < mas$Var1) ,]

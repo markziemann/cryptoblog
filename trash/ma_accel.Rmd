@@ -65,7 +65,7 @@ Assuming 0.1% trading fee, as per binance current rate.
 
 
 n=43
-fee=0.002
+fee=0.005
 
 ma <- SMA(Cl(price),n=n)
 

@@ -82,7 +82,7 @@ executed over the years.
 best_n1 = 104
 best_n2 = 15
 best_ns = 5
-fee=0.002
+fee=0.005
 
 message(paste("Selected n1 period:",best_n1))
 message(paste("Selected n2 period:",best_n2))
@@ -207,7 +207,7 @@ price2 <- price
 best_n1 = 99
 best_n2 = 15
 best_ns = 5
-fee=0.002
+fee=0.005
 tsi <- TSI(price$close , n.first = best_n1, n.second = best_n2, n.signal = best_ns )
 tsi_sig <- tsi[,"tsi"] > tsi[,"signal"]
 
@@ -265,7 +265,7 @@ price2 <- price
 best_n1 = 99
 best_n2 = 15
 best_ns = 5
-fee=0.002
+fee=0.005
 tsi <- TSI(price$close , n.first = best_n1, n.second = best_n2, n.signal = best_ns )
 tsi_sig <- tsi[,"tsi"] > tsi[,"signal"]
 

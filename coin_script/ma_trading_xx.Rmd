@@ -151,7 +151,7 @@ Let's assume a 0.2% trading fee.
 
 ```{r,backtest}
 
-fee=0.002
+fee=0.005
 
 myrange <- 3:200
 

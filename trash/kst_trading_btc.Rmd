@@ -132,7 +132,7 @@ All trades are executed at the end of the daily session (UTC midnight).
 
 ```{r,kstfunc1}
 
-mykst <- function(price,nScale=1,nrocScale=1,nSig=9,fee=0.002) {
+mykst <- function(price,nScale=1,nrocScale=1,nSig=9,fee=0.005) {
   nn <- c(10, 10, 10, 15) * nScale
   nroc <- c(10, 15, 20, 30) * nrocScale
   kst <- KST(price$close, n = nn, nROC = nroc, nSig = nSig)
@@ -181,7 +181,7 @@ performance metrics.
 
 ```{r,backtest1}
 
-fee=0.002
+fee=0.005
 
 nScale <- seq(1,3,0.2)
 nrocScale <- seq(0.1,1,0.05)

@@ -152,7 +152,7 @@ Here, the entry and exit can be either same or different.
 
 ENTRYEXITSAME=FALSE
 
-fee=0.002
+fee=0.005
 n_rsi=14
 
 if ( ENTRYEXITSAME == TRUE ) {

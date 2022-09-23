@@ -280,7 +280,7 @@ ensembl <- function(price2,threshold,fee) {
 
 myrange=1:max(price2$sum)
 res <- t( sapply(myrange,function(i) {
-  ensembl(price2,threshold=i,fee=0.002)
+  ensembl(price2,threshold=i,fee=0.005)
 }) )
 
 rownames(res) <- myrange
@@ -312,7 +312,7 @@ resl <- lapply(1:nrow(mygrid), function(i) {
   price2$sum <- rowSums(indi2)
   myrange=1:max(price2$sum)
   res <- t( sapply(myrange,function(i) {
-    ensembl(price2,threshold=i,fee=0.002)
+    ensembl(price2,threshold=i,fee=0.005)
   }) )
   rownames(res) <- myrange
   xhodl <- t(t(as.numeric(res[, 1]/hodl)))
@@ -352,7 +352,7 @@ Study the top ensemble.
 
 ```{r,top1}
 
-fee=0.002
+fee=0.005
 threshold <- head(resdf$pos_indicator,1)
 combo <- head(resdf$indi,1)
 combo <- unlist(strsplit(combo,","))

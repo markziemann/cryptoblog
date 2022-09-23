@@ -132,7 +132,7 @@ dmi <- function(price,n,fee) {
 
 ```{r,backtest}
 
-fee=0.002
+fee=0.005
 
 myrange <- 3:100
 res_dmi <- t(sapply(myrange,function(n) { dmi(price,n,fee) } ))

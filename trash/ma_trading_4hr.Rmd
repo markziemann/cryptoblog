@@ -145,7 +145,7 @@ Let's assume a 0.1% trading fee, as per binance current rate.
 
 ```{r,backtest}
 
-fee=0.002
+fee=0.005
 
 myrange <- 3:500
 

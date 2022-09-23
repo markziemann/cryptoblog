@@ -94,7 +94,7 @@ Here is the function for CCI, where we'll change the entry and exit level.
 
 ```{r,cci2}
 
-ccifun <- function(price,entry=-100,exit=100,n=20,fee=0.002) {
+ccifun <- function(price,entry=-100,exit=100,n=20,fee=0.005) {
   cci <- CCI(price[,c("high","low","close")], n = n, c = 0.015 )
   cciy <- c(NA,cci)[1:nrow(price)]
   price2 <- data.frame(price,cci,cciy,stringsAsFactors=FALSE)
@@ -142,7 +142,7 @@ Here is a table of results.
 
 ```{r,backtest1}
 
-fee=0.002
+fee=0.005
 n=20
 
 ccifun(price, entry=-100,  exit=100, n=20)
@@ -152,7 +152,7 @@ mymx <- expand.grid(seq(-100,0,5),seq(0,100,5),seq(5,50,3))
 mylist <- as.list(as.data.frame(t(mymx)))
 
 cci_res <- mclapply(X=mylist,mc.cores=4,FUN=function(x) { 
-  ccifun(price,entry=x[1],exit=x[2],n=x[3],fee=0.002)
+  ccifun(price,entry=x[1],exit=x[2],n=x[3],fee=0.005)
 })
 
 cci_res <- do.call(rbind,cci_res)
@@ -175,7 +175,7 @@ mymx <- expand.grid(seq(-20,10,1),seq(0,25,1),5:50)
 mylist <- as.list(as.data.frame(t(mymx)))
 
 cci_res2 <- mclapply(X=mylist,mc.cores=2,FUN=function(x) {
-  ccifun(price,entry=x[1],exit=x[2],n=x[3],fee=0.002)
+  ccifun(price,entry=x[1],exit=x[2],n=x[3],fee=0.005)
 })
 
 cci_res2 <- do.call(rbind,cci_res2)

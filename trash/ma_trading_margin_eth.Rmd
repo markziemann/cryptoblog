@@ -131,7 +131,7 @@ return(prod(trades$diff))
 
 ```{r,backtest,fig.height=8,fig.width=8}
 
-fee=0.001
+fee=0.005
 
 intervals <- c(0,0,3:200)
 

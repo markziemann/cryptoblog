@@ -110,7 +110,7 @@ All trades are executed at the end of the daily session (UTC midnight).
 
 ```{r,dcfunc1}
 
-mydc <- function(price,n=10,fee=0.002) {
+mydc <- function(price,n=10,fee=0.005) {
   price2 <- price
   dc <- DonchianChannel(price2$close,n=n)
   price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {dc[i,"high"] > dc[(i-1),"high"] } ))
@@ -156,7 +156,7 @@ Let's assume a 0.2% exchange fee.
 
 ```{r,backtest1}
 
-fee=0.002
+fee=0.005
 
 nr <- seq(3,200,1)
 

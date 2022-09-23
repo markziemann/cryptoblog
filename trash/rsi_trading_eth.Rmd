@@ -148,7 +148,7 @@ rsisig <- function(price,vals=x,fee) {
 
 ENTRYEXITSAME=FALSE
 
-fee=0.002
+fee=0.005
 n_rsi=14
 
 if ( ENTRYEXITSAME == TRUE ) {

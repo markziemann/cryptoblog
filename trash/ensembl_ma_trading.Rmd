@@ -227,7 +227,7 @@ ensembl <- function(price2,threshold,fee) {
 
 myrange=1:5
 res <- t( sapply(myrange,function(i) {
-  ensembl(price2,threshold=i,fee=0.002)
+  ensembl(price2,threshold=i,fee=0.005)
 }) )
 
 rownames(res) <- myrange
@@ -403,7 +403,7 @@ we can assess what good entry and exit points are.
 
 myrange=1:5
 res <- t( sapply(myrange,function(i) {
-  ensembl(price2,threshold=i,fee=0.002)
+  ensembl(price2,threshold=i,fee=0.005)
 }) )
 
 rownames(res) <- myrange
@@ -579,7 +579,7 @@ we can assess what good entry and exit points are.
 
 myrange=1:5
 res <- t( sapply(myrange,function(i) {
-  ensembl(price2,threshold=i,fee=0.002)
+  ensembl(price2,threshold=i,fee=0.005)
 }) )
 
 rownames(res) <- myrange

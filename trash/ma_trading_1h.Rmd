@@ -163,7 +163,7 @@ return(prod(trades$diff))
 
 ```{r,backtest}
 
-fee=0.001
+fee=0.005
 
 int=seq(from=10,to=10000,10)
 

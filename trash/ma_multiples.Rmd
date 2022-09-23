@@ -132,7 +132,7 @@ return(c(prod(trades$diff),nrow(trades)))
 
 ```{r,backtest}
 
-fee=0.001
+fee=0.005
 
 myrange <- 3:700
 res <- sapply(myrange,function(n) { sma(price,n,1,fee) } )

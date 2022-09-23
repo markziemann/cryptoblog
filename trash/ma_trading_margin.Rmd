@@ -141,7 +141,7 @@ The MA is multiplied by a margin factor between -0.1and 0.1.
 
 ```{r,backtest,fig.height=8,fig.width=8}
 
-fee=0.002
+fee=0.005
 
 intervals <- c(rep(0,5),6:400)
 
