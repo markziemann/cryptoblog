@@ -250,6 +250,10 @@ Underlying code for this work and other experimental work can be found on my [Gi
 
 <hr>
 
+These analysis are made possible by data from the [CoinMarketCap](https://coinmarketcap.com/) API.
+
+<hr>
+
 Shout out to the developers of the [downcute rmarkdown template](https://github.com/juba/rmdformats) for making this site look 100% better.
 
 <hr>
