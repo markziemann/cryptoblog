@@ -671,7 +671,7 @@ if ( previous_signal == TRUE ) {
 }
 
 if ( btc_signal=="NONE" ) {
-  today_signal==previous_signal
+  today_signal=previous_signal
 } else {
   if (btc_signal=="BUY") { today_signal = TRUE }
   if (btc_signal=="SELL") { today_signal = FALSE }
@@ -1317,7 +1317,7 @@ if ( previous_signal == TRUE ) {
 }
 
 if ( eth_signal=="NONE" ) {
-  today_signal==previous_signal
+  today_signal=previous_signal
 } else {
   if (eth_signal=="BUY") { today_signal = TRUE }
   if (eth_signal=="SELL") { today_signal = FALSE }
@@ -1981,7 +1981,7 @@ if ( previous_signal == TRUE ) {
 }
 
 if ( xmr_signal=="NONE" ) {
-  today_signal==previous_signal
+  today_signal=previous_signal
 } else {
   if (xmr_signal=="BUY") { today_signal = TRUE }
   if (xmr_signal=="SELL") { today_signal = FALSE }
