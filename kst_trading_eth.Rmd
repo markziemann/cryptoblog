@@ -1,10 +1,10 @@
 ---
-title: "<br>Trading BTC based on the Know Sure Thing (KST) indicator"
+title: "<br>Trading ETH based on the Know Sure Thing (KST) indicator"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/kst_trading_btc.Rmd)
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/kst_trading_eth.Rmd)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
@@ -13,22 +13,30 @@ but if you find it useful, consider a small tip.
 
 ## Intro
 
-There are many indicators of market momentum, one of them is the true strength index (TSI).
-The TSI involves two momentum indicators one with a short duration and another with a long duration.
-In this backtesting, when the short duration line breaks through the long duration line, it makes a buy
-signal and when it breaks below, sell.
-What I am examining here is different intervals for the calculation of the two TSI lines as well as the
-signal interval.
+There are many indicators of market momentum, here we will look at one called the Know Sure Thing (KST).
 
-The standard values used are:
+From [Investopedia](https://www.investopedia.com/terms/k/know-sure-thing-kst.asp):
 
-* n.first=25
+>The Know Sure Thing (KST) is a momentum oscillator developed by Martin Pring to make
+rate-of-change readings easier for traders to interpret.
+The KST is calculated by taking the simple moving average (SMA) of four different rate-of-change (ROC) periods, adding them together to come up with the KST, and creating a signal line by taking the 9-period SMA of the KST.
 
-* n.second=13
+Like other indicators, it is an oscillator with a signal line to distinguish bullish and bearish
+situations.
 
-* n.signal=7
+There are three input parameters:
 
-however I will be seeing whether other intervals perform better.
+* Vector of four SMA periods.
+
+* Vector of four rate of change (ROC) periods.
+
+* Signal line lag.
+
+This could get really complicated if each number was changed, meaning there would be millions of
+combinations of input variables.
+To make it simpler, for the I will multiply the default SMA and ROC values by a scaling factor, between
+0.1 and 3.
+The signal line will be varied between 4 and 60 periods.
 
 This page is designed to be updated daily - today's date is shown below.
 
@@ -55,15 +63,15 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
+Obtaining historical data (daily) from CoinMarketCap.com from June 2013 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
-download.file(URL,destfile="btcdat.txt")
-btcdat <- fromJSON("btcdat.txt")
-price <- btcdat$data$quotes
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="ethdat.txt")
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
 price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
@@ -75,7 +83,7 @@ price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
 It's important to calculate the returns for simply holding the asset rather than actively trading.
 
 The number shown here is the fold return on investment.
-BTC has appreciated a lot since 2013!
+ETH has appreciated a lot since 2015!
 
 ```{r,hodl}
 
@@ -183,9 +191,9 @@ performance metrics.
 
 fee=0.005
 
-nScale <- seq(1,3,0.2)
-nrocScale <- seq(0.1,1,0.05)
-nSigs <- seq(5,40,1)
+nScale <- seq(1,3,0.1)
+nrocScale <- seq(0.1,1,0.02)
+nSigs <- seq(5,60,1)
 
 params <- expand.grid(nScale,nrocScale,nSigs)
 colnames(params) <- c("nScale","nrocScale","nSigs")
@@ -258,8 +266,8 @@ best_nScale = res2[1,1]
 best_nrocScale = res2[1,2]
 best_nSigs = res2[1,3]
 
-message(paste("Selected n1 period:",best_nScale))
-message(paste("Selected n2 period:",best_nrocScale))
+message(paste("Selected n scale factor:",best_nScale))
+message(paste("Selected nROC scale factor:",best_nrocScale))
 message(paste("Selected n.signal period:",best_nSigs))
 
 price2 <- price
@@ -338,7 +346,9 @@ fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0
 res_fees <- sapply(fee_levels,function(x) {
 
 
-  mykst(price,nScale=nScale,nrocScale=nrocScale,nSig=nSigs,fee=x)
+  suppressWarnings(
+    mykst(price,nScale=nScale,nrocScale=nrocScale,nSig=nSigs,fee=x)
+  )
 
 } )
 
@@ -371,8 +381,7 @@ abline(h=1,col="red",lty=2)
 ## Conclusion
 
 There are many approaches to momentum trading.
-Here using the KST we have a strategy which scored 9x hodl returns which is superior to the best directional movement indicator
-and best moving average strategy (3.4x hodl) with roughly the same number of trades.
+Here using the KST we have a strategy which scored very good performance similar to the TSI indicator.
 
 ## Session information
 
