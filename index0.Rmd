@@ -110,6 +110,8 @@ Current state if the indicators as at MYTIME:
 
 ## <br>News and updates
 
+* *2022/09/27* - Know Sure Thing has been added as a new indicator!
+
 * *2022/09/12* - The ensemble indicator has been added to BTC/ETH/XMR alerts!
 
 * *2022/09/06* - Added Donchian channel indicator! Enjoy.
@@ -186,6 +188,19 @@ The strategy applied here is to trade the breakout, ie: buy when price exceeds t
 upper line and sell when the price dips under the lower line.
 Backtesting: [BTC](crypto/donchian_channel_btc.html), [ETH](crypto/donchian_channel_eth.html) and
 [XMR](crypto/donchian_channel_xmr.html).
+
+#### **Know Sure Thing**
+
+The [Know Sure Thing (KST)](https://www.investopedia.com/terms/k/know-sure-thing-kst.asp)
+is a momentum oscillator developed by Martin Pring to make rate-of-change readings easier
+for traders to interpret.
+The KST is calculated by taking the simple moving average (SMA) of four different
+rate-of-change (ROC) periods, adding them together to come up with the KST,
+and creating a signal line by taking the 9-period SMA of the KST.
+Like other indicators, it is an oscillator with a signal line to distinguish bullish and bearish
+conditions.
+Backtesting: [BTC](crypto/kst_trading_btc.html), [ETH](crypto/kst_trading_eth.html) and
+[XMR](crypto/kst_trading_xmr.html).
 
 #### **Ensemble indicator**
 
