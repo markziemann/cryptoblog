@@ -301,7 +301,7 @@ message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
 kst_dat <- c("indicator"="KST",
-  "parameter"=paste(,best_nScale,best_nrocScale,best_nSigs,sep=",")  ,
+  "parameter"=paste(best_nScale,best_nrocScale,best_nSigs,sep=",")  ,
   "meanROI"= mean(trades$diff) ,
   "totalROI"= prod(trades$diff) ,
   "ntrades"= nrow(trades) ,
