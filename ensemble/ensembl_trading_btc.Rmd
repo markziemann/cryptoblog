@@ -1,10 +1,10 @@
 ---
-title: "<br>Trading BTC based on indicator ensembles"
+title: "Trading BTC based on indicator ensembles"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/ensemble/ensembl_trading_btc.Rmd)
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/coin_script/ensembl_trading_xx.Rmd)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
@@ -13,7 +13,7 @@ but if you find it useful, consider a small tip.
 
 ## Intro
 
-In this report I will be looking at whether a combination of MA derived indicators and RSI  works better than
+In this report I will be looking at whether a combination of MA derived indicators works better than
 each on their own.
 The theory is that there is a chance that combining them will reduce false positives.
 
@@ -64,9 +64,9 @@ mydate <- Sys.Date()-1
 
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
 
-download.file(URL,destfile="btcdat.txt")
+#download.file(URL,destfile="dat.txt")
 
-dat <- fromJSON("btcdat.txt")
+dat <- fromJSON("dat.txt")
 price <- dat$data$quotes
 price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,
   price$quote$USD$volume, stringsAsFactors=FALSE)
@@ -83,7 +83,7 @@ These have been optimised with backtesting.
 
 ```{r,params}
 
-params <- read.table("https://mdz-analytics.com/altcoins/BTC/BTC_dat.txt", header=TRUE)
+params <- read.table("BTC_dat.txt", header=TRUE)
 
 params %>% kbl(caption="optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
@@ -113,7 +113,7 @@ is positive or negative.
 #SMA
 best_sma = as.numeric(params[which(params$indicator == "SMA"),"parameter"])
 ma <- SMA(Cl(price),n=best_sma)
-price2$SMA <- price$close > ma
+price2$SMA <- as.numeric(price$close > ma)
 
 #SMA cross
 best_sma_cross = params[which(params$indicator == "SMAcross"),"parameter"]
@@ -121,12 +121,12 @@ best_sma_cross1 <- as.numeric(unlist(strsplit(best_sma_cross,","))[1])
 best_sma_cross2 <- as.numeric(unlist(strsplit(best_sma_cross,","))[2])
 sma1 <- SMA(Cl(price),n=best_sma_cross1)
 sma2 <- SMA(Cl(price),n=best_sma_cross2)
-price2$SMAcross <- sma2>sma1
+price2$SMAcross <- as.numeric(sma2>sma1)
 
 #EMA
 best_ema = as.numeric(params[which(params$indicator == "EMA"),"parameter"])
 ema <- EMA(Cl(price),n=best_ema)
-price2$EMA <- price$close > ema
+price2$EMA <- as.numeric(price$close > ema)
 
 #EMA cross
 best_ema_cross = params[which(params$indicator == "EMAcross"),"parameter"]
@@ -134,12 +134,12 @@ best_ema_cross1 <- as.numeric(unlist(strsplit(best_ema_cross,","))[1])
 best_ema_cross2 <- as.numeric(unlist(strsplit(best_ema_cross,","))[2])
 ema1 <- EMA(Cl(price),n=best_ema_cross1)
 ema2 <- EMA(Cl(price),n=best_ema_cross2)
-price2$EMAcross <- ema2>ema1
+price2$EMAcross <- as.numeric(ema2>ema1)
 
 #DMI
 n <- as.numeric(params[params$indicator == "DMI",2])
 dmi.adx <- ADX(price[,c("high","low","close")],n=n)
-price2$DMI <- dmi.adx[,"DIp"]>dmi.adx[,"DIn"]
+price2$DMI <- as.numeric(dmi.adx[,"DIp"]>dmi.adx[,"DIn"])
 
 #TSI
 n <- as.numeric(unlist(strsplit(params[params$indicator == "TSI",2],",")))
@@ -165,7 +165,7 @@ TSI <- function(x, n.first = 25, n.second = 13, n.signal = 7) {
 
 tsi <- TSI(price$close , n.first = n1, n.second = n2, n.signal = ns )
 colnames(tsi) <- c("tsi","sig")
-price2$TSI <- tsi[,1]>tsi[,2]
+price2$TSI <- as.numeric(tsi[,1]>tsi[,2])
 
 #stoch
 n <- as.numeric(unlist(strsplit(params[params$indicator == "stoch",2],",")))
@@ -174,7 +174,7 @@ n2 <- n[2]
 n3 <- n[3]
 sto <- stoch(HLC(price), nFastK=n1 , nFastD=n2 , nSlowD=n2 , 
   bounded = TRUE, smooth=n3)
-price2$stoch <- sto[,"fastK"] > sto[,"fastD"]
+price2$stoch <- as.numeric(sto[,"fastK"] > sto[,"fastD"])
 
 #double RSI
 n <- as.numeric(unlist(strsplit(params[params$indicator == "RSI2",2],",")))
@@ -182,8 +182,7 @@ n1 <- n[1]
 n2 <- n[2]
 rsi1 <- RSI(price$close,n=n1,maType=EMA)
 rsi2 <- RSI(price$close,n=n2,maType=EMA)
-
-price2$RSI2 <- rsi1 > rsi2
+price2$RSI2 <- as.numeric(rsi1 > rsi2)
 
 # donchian channel
 n <- as.numeric(params[params$indicator == "DC",2])
@@ -201,7 +200,19 @@ dc_sig <- unlist(sapply(1:nrow(price),function(i) {
   price3[tail(which(price[i,"date"] > price3$date),1),"higher"]
 }))
 dc_sig <- c(rep(FALSE,nrow(price) - length(dc_sig)),dc_sig)
-price2$DC <- dc_sig
+price2$DC <- as.numeric(dc_sig)
+
+#KST
+n <- as.numeric(unlist(strsplit(params[params$indicator == "KST",2],",")))
+nScale <- n[1]
+nrocScale <- n[2]
+nSigs <- n[3]
+
+kst <- KST(price2$close,n=nScale * c(10, 10, 10, 15) ,
+  nROC=nrocScale * c(10, 15, 20, 30),
+  nSig=nSigs)
+
+price2$KST <- as.numeric(kst[,1]>kst[,2])
 
 ```
 
@@ -297,11 +308,11 @@ res %>% kbl(caption="backtesting results with minimum postive indicators") %>%  
 
 That is great, but what if we take out one or two of the indicators, will the ensemble perform better?
 
-Select N indicators where N is between 2 and 8
+Select N indicators where N is between 2 and 7
 
 ```{r,ensemble2}
 
-indi <- price2[,6:14]
+indi <- price2[,6:15]
 price3 <- price
 
 mygrid <- expand.grid(rep(list(c(0,1)),ncol(indi)))
@@ -362,7 +373,7 @@ indicators <- data.frame(1:nrow(price))
 if ( length(which(combo == "SMA")) ) {
   best_sma = as.numeric(params[which(params$indicator == "SMA"),"parameter"])
   ma <- SMA(Cl(price),n=best_sma)
-  indicators$SMA <- price$close > ma
+  indicators$SMA <- as.numeric(price$close > ma)
 }
 
 if ( length(which(combo == "SMAcross")) ) {
@@ -371,13 +382,13 @@ if ( length(which(combo == "SMAcross")) ) {
   best_sma_cross2 <- as.numeric(unlist(strsplit(best_sma_cross,","))[2])
   sma1 <- SMA(Cl(price),n=best_sma_cross1)
   sma2 <- SMA(Cl(price),n=best_sma_cross2)
-  indicators$SMAcross <- sma2>sma1
+  indicators$SMAcross <- as.numeric(sma2>sma1)
 }
 
 if ( length(which(combo == "EMA")) ) {
   best_ema = as.numeric(params[which(params$indicator == "EMA"),"parameter"])
   ma <- EMA(Cl(price),n=best_ema)
-  indicators$EMA <- price$close > ma
+  indicators$EMA <- as.numeric(price$close > ma)
 }
 
 if ( length(which(combo == "EMAcross")) ) {
@@ -386,13 +397,13 @@ if ( length(which(combo == "EMAcross")) ) {
   best_ema_cross2 <- as.numeric(unlist(strsplit(best_ema_cross,","))[2])
   ema1 <- EMA(Cl(price),n=best_ema_cross1)
   ema2 <- EMA(Cl(price),n=best_ema_cross2)
-  indicators$EMAcross <- ema2>ema1
+  indicators$EMAcross <- as.numeric(ema2>ema1)
 }
 
 if ( length(which(combo == "DMI")) ) {
   n <- as.numeric(params[params$indicator == "DMI",2])
   dmi.adx <- ADX(price[,c("high","low","close")],n=n)
-  indicators$DMI <- dmi.adx[,"DIp"]>dmi.adx[,"DIn"]
+  indicators$DMI <- as.numeric(dmi.adx[,"DIp"]>dmi.adx[,"DIn"])
 }
 
 if ( length(which(combo == "TSI")) ) {
@@ -402,7 +413,7 @@ if ( length(which(combo == "TSI")) ) {
   ns <- n[3]
   tsi <- TSI(price$close , n.first = n1, n.second = n2, n.signal = ns )
   colnames(tsi) <- c("tsi","sig")
-  indicators$TSI <- tsi[,1]>tsi[,2]
+  indicators$TSI <- as.numeric(tsi[,1]>tsi[,2])
 }
 
 if ( length(which(combo == "stoch")) ) {
@@ -413,7 +424,7 @@ if ( length(which(combo == "stoch")) ) {
 
   sto <- stoch(HLC(price), nFastK=n1 , nFastD=n2 , nSlowD=n2 ,
     bounded = TRUE, smooth=n3)
-  indicators$stoch <- sto[,"fastK"] > sto[,"fastD"]
+  indicators$stoch <- as.numeric(sto[,"fastK"] > sto[,"fastD"])
 }
 
 if ( length(which(combo == "RSI2")) ) {
@@ -422,7 +433,7 @@ if ( length(which(combo == "RSI2")) ) {
   n2 <- n[2]
   rsi1 <- RSI(price$close,n=n1,maType=EMA)
   rsi2 <- RSI(price$close,n=n2,maType=EMA)
-  indicators$RSI2 <- rsi1 > rsi2
+  indicators$RSI2 <- as.numeric(rsi1 > rsi2)
 }
 
 if ( length(which(combo == "DC")) ) {
@@ -431,10 +442,23 @@ if ( length(which(combo == "DC")) ) {
     price3[tail(which(price[i,"date"] > price3$date),1),"higher"]
   }))
   dc_sig <- c(rep(FALSE,nrow(price) - length(dc_sig)),dc_sig)
-  indicators$DC <- dc_sig
+  indicators$DC <- as.numeric(dc_sig)
 }
 
-indicators <- indicators[,2:ncol(indicators)]
+if ( length(which(combo == "KST")) ) {
+  n <- as.numeric(unlist(strsplit(params[params$indicator == "KST",2],",")))
+  nScale <- n[1]
+  nrocScale <- n[2]
+  nSigs <- n[3]
+
+  kst <- KST(price2$close,n=nScale * c(10, 10, 10, 15) ,
+    nROC=nrocScale * c(10, 15, 20, 30),
+    nSig=nSigs )
+
+  indicators$KST <- as.numeric(kst[,1]>kst[,2])
+}
+
+indicators <- indicators[,2:ncol(indicators),drop=FALSE]
 indicators[is.na(indicators)] <- 0
 
 price3 <- price
@@ -488,7 +512,23 @@ grid()
 plot(price4$sum ~ as.Date(price4$date),type="l",
   xlab="Date",ylab="positive indicators",main="Indicator set")
 grid()
-abline(h=threshold,lty=2)
+abline(h=threshold-0.5,lty=2)
+
+```
+
+```{r,export}
+
+myparameter <- paste(paste(combo,collapse=","),threshold,collapse=",",sep=",")
+
+ens_dat <- c("indicator"="Ensemble",
+  "parameter"= myparameter ,
+  "meanROI"= mean(trades$diff) ,
+  "totalROI"= prod(trades$diff) ,
+  "ntrades"= nrow(trades) ,
+  "ndays"= nrow(price) ,
+  "xhodl"= prod(trades$diff)/hodl )
+
+ens_dat
 
 ```
 
