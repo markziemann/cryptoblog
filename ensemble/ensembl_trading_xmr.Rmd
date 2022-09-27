@@ -64,7 +64,7 @@ mydate <- Sys.Date()-1
 
 URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
 
-#download.file(URL,destfile="dat.txt")
+download.file(URL,destfile="dat.txt")
 
 dat <- fromJSON("dat.txt")
 price <- dat$data$quotes
@@ -83,7 +83,7 @@ These have been optimised with backtesting.
 
 ```{r,params}
 
-params <- read.table("XMR_dat.txt", header=TRUE)
+params <- read.table("https://mdz-analytics.com/coins/XMR/XMR_dat.txt", header=TRUE)
 
 params %>% kbl(caption="optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
 
