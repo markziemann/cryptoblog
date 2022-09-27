@@ -282,7 +282,7 @@ Here's the table of results for the strategies with mean trade ROI of >108% and 
 ```{r,res4}
 
 res5 <- res2[order(-res2$returns),]
-res5 <- head(res5,20)
+res5 <- head(res5,10)
 res5 %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
