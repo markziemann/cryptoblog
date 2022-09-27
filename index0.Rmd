@@ -94,8 +94,13 @@ Current state if the indicators as at MYTIME:
 <td style="color:ETH_DC_COL"><b>ETH_DC_DAILY</b></td>
 <td style="color:XMR_DC_COL"><b>XMR_DC_DAILY</b></td>
 </tr>
-</tr>
 <tr class="even">
+<td>KST</td>
+<td style="color:BTC_KST_COL"><b>BTC_KST_DAILY</b></td>
+<td style="color:ETH_KST_COL"><b>ETH_KST_DAILY</b></td>
+<td style="color:XMR_KST_COL"><b>XMR_KST_DAILY</b></td>
+</tr>
+<tr class="odd">
 <td>Ensemble indicator</td>
 <td style="color:BTC_ENS_COL"><b>BTC_ENS_DAILY</b></td>
 <td style="color:ETH_ENS_COL"><b>ETH_ENS_DAILY</b></td>
