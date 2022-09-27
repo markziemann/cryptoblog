@@ -273,7 +273,7 @@ message(paste("Selected n.signal period:",best_nSigs))
 price2 <- price
 kst <- KST(price2$close,n=best_nScale * c(10, 10, 10, 15) ,
   nROC= best_nrocScale * c(10, 15, 20, 30),
-  nSig=best_nSigs, fee=fee)
+  nSig=best_nSigs )
 
 price2 <- cbind(price2,kst)
 price2$higher <- price2$kst > price2$signal
