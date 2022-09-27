@@ -301,7 +301,7 @@ message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
 kst_dat <- c("indicator"="KST",
-  "parameter"=paste(,best_nScale,best_nrocScale,best_nSigs,sep=",")  ,
+  "parameter"=paste(best_nScale,best_nrocScale,best_nSigs,sep=",")  ,
   "meanROI"= mean(trades$diff) ,
   "totalROI"= prod(trades$diff) ,
   "ntrades"= nrow(trades) ,
@@ -392,7 +392,7 @@ Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
 ```{r,export}
 
 filename <- paste("TICKER","_dat.txt",sep="")
-write.table(t(tsi_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
+write.table(t(kst_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
 
 ```
 

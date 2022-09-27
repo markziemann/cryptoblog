@@ -96,13 +96,13 @@ Rscript -e "rmarkdown::render('donchian_channel_eth.Rmd')" && \
 Rscript -e "rmarkdown::render('donchian_channel_xmr.Rmd')" && \
   scp -P 21098 donchian_channel_xmr.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
-Rscript -e "rmarkdown::render('kst_trading_btc.html') && \
+Rscript -e "rmarkdown::render('kst_trading_btc.Rmd')" && \
   scp -P 21098 kst_trading_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
-Rscript -e "rmarkdown::render('kst_trading_eth.html') && \
+Rscript -e "rmarkdown::render('kst_trading_eth.Rmd')" && \
   scp -P 21098 kst_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
-Rscript -e "rmarkdown::render('kst_trading_xmr.html') && \
+Rscript -e "rmarkdown::render('kst_trading_xmr.Rmd')" && \
   scp -P 21098 kst_trading_xmr.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('stablecoincap.Rmd')" && \
