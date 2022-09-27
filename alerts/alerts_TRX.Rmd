@@ -29,7 +29,9 @@ Visit the [TRX page](https://mdz-analytics.com/coins/TRX/) to see how these sign
 
 9. Donchian channel
 
-10. Ensembl indicator
+10. Know sure thing (KST)
+
+11. Ensembl indicator
 
 This script will examine the price action and these trade signals just before the daily close.
 If the signal is TRUE, it is bullish and if FALSE it is bearish.
@@ -715,6 +717,75 @@ lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
 
 if ( trx_signal != "NONE") {
   MYNOTE <- paste(MYNOTE,"TRX Donchian channel signal is", trx_signal,".")
+}
+
+```
+
+## TRX KST indicator
+
+Another high-performing indicator across different price series data.
+
+```{r,trx_kst,fig.height=10,fig.width=8}
+
+price2 <- price
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "KST",2],",")))
+nScale <- n[1]
+nrocScale <- n[2]
+nSigs <- n[3]
+
+kst <- KST(price2$close,n=nScale * c(10, 10, 10, 15) ,
+  nROC=nrocScale * c(10, 15, 20, 30),
+  nSig=nSigs)
+
+price2 <- cbind(price2,kst)
+price2$KST <- as.numeric(kst[,1]>kst[,2])
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"KST"]
+previous_signal <- price2[(nrow(price2)-1),"KST"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    signal="SELL"
+  }
+} else {
+  signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_DMI=TRUE
+} else {
+  ens_DMI=FALSE
+}
+
+message(paste("TRX KST signal:",btc_signal))
+
+```
+
+```{r,trx_kst_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(kst[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="KST",main="KST")
+lines(as.Date(price2$date), kst[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+```{r,trx_kst_push}
+
+if ( trx_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE,"TRX KST signal is", trx_signal,".")
 }
 
 ```
