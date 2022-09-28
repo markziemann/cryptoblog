@@ -762,7 +762,7 @@ if (today_signal==TRUE) {
   ens_DMI=FALSE
 }
 
-message(paste("TRX KST signal:",btc_signal))
+message(paste("TRX KST signal:",trx_signal))
 
 ```
 
