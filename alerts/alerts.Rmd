@@ -2258,7 +2258,7 @@ indicators <- indicators[names(indicators) %in% combo]
 message("State of the indicators:")
 indicators
 today_count <- sum(indicators)
-message(paste("today_count_ETH",today_count,sep="="))
+message(paste("today_count_XMR",today_count,sep="="))
 today_signal <- today_count>=n
 
 prev_signal <- length(grep("XMR ensemble indicator is BULLISH",prev_html))>1
