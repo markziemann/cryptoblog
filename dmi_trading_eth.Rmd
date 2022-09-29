@@ -367,7 +367,7 @@ Longer timeframes give a lower return overall, but the signals have a lower fals
 The 16-day DMI gave returns 22x the hodl ROI, which is no better than the moving average 
 strategies which yielded returns around ~27x the hodl ROI.
 
-If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
+If you would like to receive trade alerts on these strategies, let me know by email info@mdz-analytics.com.
 These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
 Subscribing to alerts costs 0.0005 BTC per year.
 

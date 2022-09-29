@@ -353,7 +353,7 @@ tail(price ,20) %>%
 The best double RSI strategy yielded returns ~6x hodl which is respectable.
 It is better than the SMA and DMI strategies but not as good as the TSI strategy (9x hodl).
 
-If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
+If you would like to receive trade alerts on these strategies, let me know by email info@mdz-analytics.com.
 These alerts are sent before the daily close and will assist you in sticking to your desired strategy.
 
 ## Session information

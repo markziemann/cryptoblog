@@ -36,7 +36,7 @@ This HTML is updated just before the daily close each day, but push notification
 
 If you would like to receive these signals in real-time, you can subscribe for 0.0005 BTC per year.
 If you need some help to design your own trading signals/strategies, I am happy to help for a fee.
-email me at mark.ziemann{αt}gmail.com for any enquiries/suggestions/feedback.
+email me at info@mdz-analytics.com for any enquiries/suggestions/feedback.
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.

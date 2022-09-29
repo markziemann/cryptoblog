@@ -24,7 +24,7 @@ potential.
 Consider speaking to a financial advisor about your personal situation and acceptable levels of risk.
 
 This is a work in progress, so may have typos and lack links to sources.
-Feel free to get in touch by email mark.ziemann[at]gmail.com or twitter @mdziemann.
+Feel free to get in touch by email info@mdz-analytics.com or twitter @mdziemann.
 
 ```{r,lib, echo=FALSE}
 
@@ -350,4 +350,4 @@ These still require a lot of discipline to follow, so start with a small amount.
 
 ## Feedback and suggestions
 
-mark.ziemann[at]gmail.com
+info@mdz-analytics.com

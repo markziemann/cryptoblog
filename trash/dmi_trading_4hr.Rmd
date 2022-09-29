@@ -300,7 +300,7 @@ Personally, this is why I consider the 26 day interval the "best".
 The 26-day DMI gave returns 21x the hodl ROI, which is significantly better than the moving average 
 strategies which yielded returns around 3-6x the hodl ROI.
 
-If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
+If you would like to receive trade alerts on these strategies, let me know by email info@mdz-analytics.com.
 These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
 Subscribing to alerts costs 0.0005 BTC per year.
 

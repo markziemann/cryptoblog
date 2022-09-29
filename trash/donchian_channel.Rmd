@@ -1,24 +1,15 @@
 ---
-title: "Trading BTC based on Directional Movement Index (DMI)"
+title: "<br>Trading BTC based on Directional Movement Index (DMI)"
 author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
-output:
-  html_document:
-    toc: true
-    toc_float: true
-    code_folding: hide
-    fig_width: 7
-    fig_height: 7
-theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/dmi_trading.Rmd
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/dmi_trading.Rmd)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
-
-XMR:4BGrdeAF5qyJQXjzWF4W5uCZF7WuwJU16BfPtgg1WJMnf33jZMtLvoF1jRtZBGpLtz5BQZaLYiBFJJC488anty64FB7SASD
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
 
 ## Intro
 
@@ -29,9 +20,6 @@ momentum is greater than the negative momentum indicator.
 Then sell when the negative indicator is larger than the positive indicator.
 What I am examining here is different intervals for the calculation of the DMI, typically 
 14 day is used, however I will be seeing whether other intervals perform better.
-
-The function is modified so as to place greater emphasis on recent performance similar to the exponential
-moving average (EMA).
 
 This page is designed to be updated daily - today's date is shown below.
 
@@ -117,25 +105,9 @@ goes above the negative momentum indicator line, and sell when it falls below.
 
 All trades are executed at the end of the daily session (UTC midnight).
 
-offset is the exponent for time 0. For example if it is 0.5 and return is 3x, the day1 trade is 3 ^ 0.5 = 1.7
-
-Start with offset=0.5
-
-multiplier is how much to emphasise the latest period over the earliest period.
-
-Start with multiplier=1.
-
-Trades in oldest time are worth 0.5x.
-Very recent trades are worth 1.5x.
-Trades in the middle of the time are worth 1x.
-
 ```{r,dmi_func}
 
-offset=0.5
-
-multiplier=1
-
-dmi <- function(price,n,fee, offset=0.5 , multiplier=1) {
+dmi <- function(price,n,fee) {
   dmi.adx <- ADX(price[,c("high","low","close")],n=n)
   price2 <- price
   price2 <- cbind(price2,dmi.adx)
@@ -159,17 +131,7 @@ dmi <- function(price,n,fee, offset=0.5 , multiplier=1) {
   }
   trades <- cbind(buy,sell)
   trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-  time0 <- as.numeric(as.Date(price[1,1]))
-  time1 <- as.numeric(as.Date(price[nrow(price),1]))
-  timed <- time1-time0
-  times <- cbind(as.numeric(as.Date(trades$buy_date)),as.numeric(as.Date(trades$sell_date)))
-  times <- rowMeans(times)
-  times <- times - time0
-  times <- times/timed * multiplier
-  times <- times + offset
-  trades$times <- times
-  trades$adj_diff <- trades$diff ^ trades$times
-  return(c(prod(trades$diff), prod(trades$adj_diff), nrow(trades)))
+  return(c(prod(trades$diff),nrow(trades)))
 }
 
 ```
@@ -185,18 +147,16 @@ Here is a table of results.
 
 ```{r,backtest}
 
-fee=0.005
+fee=0.002
 myrange <- 4:200
 res <- t(sapply(myrange,function(n) { dmi(price,n,fee) } ))
 rownames(res) <- myrange
-colnames(res) <- c("returns","returns_adjusted","trades")
+colnames(res) <- c("returns","trades")
 res <-  as.data.frame(res)
 res$mean <- res$returns^(1/res$trades)
-res$mean_adjusted <- res$returns_adjusted^(1/res$trades)
-
 res <- cbind(rownames(res),res,stringsAsFactors=FALSE)
 colnames(res)[1] <- "period"
-res %>% kbl() %>%  kable_styling("hover", full_width = F)
+res %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -211,84 +171,35 @@ plot(res$trades,res$returns,log="y", cex=2, pch=19,col="gray",
 text(res$trades,res$returns,labels=res$period,cex=1.5)
 abline(h=hodl,col="red")
 grid()
-mtext("unadjusted")
-
-plot(res$trades,res$returns_adjusted,log="y", cex=2, pch=19,col="gray",
-  xlab="num trades",ylab="fold returns")
-text(res$trades,res$returns_adjusted,labels=res$period,cex=1.5)
-abline(h=hodl,col="red")
-grid()
-mtext("adjusted")
 
 plot(res$period,res$returns,pch=19,xlab="n interval (days)",ylab="fold return",main="DMI")
 abline(h=hodl,col="red")
 grid()
-mtext("unadjusted")
-
-plot(res$period,res$returns_adjusted,pch=19,xlab="n interval (days)",ylab="fold return",main="DMI")
-abline(h=hodl,col="red")
-grid()
-mtext("adjusted")
 
 plot(res$period,res$returns,pch=19,xlim=c(1,50),xlab="n interval (days)",ylab="fold return",
   main="DMI",log="y")
 abline(h=hodl,col="red")
 grid()
-mtext("unadjusted")
-
-plot(res$period,res$returns_adjusted,pch=19,xlim=c(1,50),xlab="n interval (days)",ylab="fold return",
-  main="DMI",log="y")
-abline(h=hodl,col="red")
-grid()
-mtext("adjusted")
 
 plot(res$mean,res$returns,xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res$mean,res$returns , cex=1, labels=res$period)
 abline(h=hodl,col="red")
-mtext("unadjusted")
-
-plot(res$mean_adjusted,res$returns_adjusted,xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
-grid()
-text(res$mean_adjusted,res$returns_adjusted , cex=1, labels=res$period)
-abline(h=hodl,col="red")
-mtext("adjusted")
 
 plot(res$mean,res$returns,log="y",xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res$mean,res$returns , cex=1, labels=res$period)
 abline(h=hodl,col="red")
-mtext("unadjusted")
-
-plot(res$mean_adjusted,res$returns_adjusted,log="y",xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
-grid()
-text(res$mean_adjusted,res$returns_adjusted , cex=1, labels=res$period)
-abline(h=hodl,col="red")
-mtext("adjusted")
 
 plot(res$mean,res$returns,log="y",xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray",
   ylim=c(100,1E4))
 grid()
 text(res$mean,res$returns , cex=1, labels=res$period)
 abline(h=hodl,col="red")
-mtext("unadjusted")
-
-plot(res$mean_adjusted,res$returns_adjusted,log="y",xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray",
-  ylim=c(100,1E4))
-grid()
-text(res$mean_adjusted,res$returns_adjusted , cex=1, labels=res$period)
-abline(h=hodl,col="red")
-mtext("adjusted")
 
 plot(res[,3],res[,2],pch=19,cex=2,col="gray",main="DMI returns per trade",xlab="n trades",ylab="fold return USD")
 text(res[,3],res[,2],labels=res$period,pch=19,cex=1)
 abline(h=hodl,col="red")
-mtext("unadjusted")
-
-plot(res[,4],res[,2],pch=19,cex=2,col="gray",main="DMI returns per trade",xlab="n trades",ylab="fold return USD")
-text(res[,4],res[,2],labels=res$period,pch=19,cex=1)
-abline(h=hodl,col="red")
-mtext("adjusted")
 
 
 ```
@@ -327,22 +238,11 @@ if( nrow(buy) != nrow(sell) ) {
 }
 trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-time0 <- as.numeric(as.Date(price[1,1]))
-time1 <- as.numeric(as.Date(price[nrow(price),1]))
-timed <- time1-time0
-times <- cbind(as.numeric(as.Date(trades$buy_date)),as.numeric(as.Date(trades$sell_date)))
-times <- rowMeans(times)
-times <- times - time0
-times <- times/timed * multiplier
-times <- times + offset
-trades$times <- times
-trades$adj_diff <- trades$diff ^ trades$times
-
 message(paste("Number of trades:",nrow(trades)))
-message(paste("Total ROI:",prod(trades$adj_diff)))
-message(paste("Returns over hodl:",prod(trades$adj_diff)/hodl))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
-trades %>% kbl() %>%  kable_styling()
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -391,22 +291,11 @@ if( nrow(buy) != nrow(sell) ) {
 }
 trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-time0 <- as.numeric(as.Date(price[1,1]))
-time1 <- as.numeric(as.Date(price[nrow(price),1]))
-timed <- time1-time0
-times <- cbind(as.numeric(as.Date(trades$buy_date)),as.numeric(as.Date(trades$sell_date)))
-times <- rowMeans(times)
-times <- times - time0
-times <- times/timed * multiplier
-times <- times + offset
-trades$times <- times
-trades$adj_diff <- trades$diff ^ trades$times
-
 message(paste("Number of trades:",nrow(trades)))
-message(paste("Total ROI:",prod(trades$adj_diff)))
-message(paste("Returns over hodl:",prod(trades$adj_diff)/hodl))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
-trades %>% kbl() %>%  kable_styling()
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -454,22 +343,11 @@ if( nrow(buy) != nrow(sell) ) {
 }
 trades <- cbind(buy,sell)
 trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-time0 <- as.numeric(as.Date(price[1,1]))
-time1 <- as.numeric(as.Date(price[nrow(price),1]))
-timed <- time1-time0
-times <- cbind(as.numeric(as.Date(trades$buy_date)),as.numeric(as.Date(trades$sell_date)))
-times <- rowMeans(times)
-times <- times - time0
-times <- times/timed * multiplier
-times <- times + offset
-trades$times <- times
-trades$adj_diff <- trades$diff ^ trades$times
-
 message(paste("Number of trades:",nrow(trades)))
-message(paste("Total ROI:",prod(trades$adj_diff)))
-message(paste("Returns over hodl:",prod(trades$adj_diff)/hodl))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
-trades %>% kbl() %>%  kable_styling()
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -487,7 +365,7 @@ par(mfrow=c(1,1))
 
 ## 32d DMI recent action
 
-```{r,recent1,fig.width=8,fig.height=7}
+```{r,recent1}
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -512,7 +390,7 @@ It is important to factor in the effect of fees because higher exchange fees wil
 fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
 
 res_fees <- sapply(fee_levels,function(x) { dmi(price,best_n,fee=x) } )
-plot(fee_levels,res_fees[2,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
 mtext(HEADER)
 abline(h=hodl,col="red")
 grid()
@@ -529,7 +407,7 @@ It is good to see whether the strategy gives consistent returns over the years.
 years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
 trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
-yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,7] } )
+yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
 yearly <- yearly[which(lapply(yearly,length)>0)]
 vioplot(yearly)
 yr <- sapply(yearly,prod)

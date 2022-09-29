@@ -542,7 +542,7 @@ Best SMA cross strategy (as at last script edit) was 12/21d, with returns roughl
 Best EMA cross strategy was 27/48d and got returns 2.9 times hodl, but with only 15 trades.
 In conclusion, these strategies give better returns than single MA strategies.
 
-If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
+If you would like to receive trade alerts on these strategies, let me know by email info@mdz-analytics.com.
 These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
 Subscribing to alerts costs 0.0005 BTC per year.
 

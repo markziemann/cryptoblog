@@ -46,7 +46,7 @@ https://www.pushbullet.com/channel?tag=trx_signal
 <script type="text/javascript">(function(){var a=document.createElement('script');a.type='text/javascript';a.async=true;a.src='https://widget.pushbullet.com/embed.js';var b=document.getElementsByTagName('script')[0];b.parentNode.insertBefore(a,b);})();</script>
 
 If you need some help to design your own trading signals/strategies, I am happy to help for a fee.
-email me at mark.ziemann{αt}gmail.com for any enquiries/suggestions/feedback.
+email me at info@mdz-analytics.com for any enquiries/suggestions/feedback.
 
 This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.

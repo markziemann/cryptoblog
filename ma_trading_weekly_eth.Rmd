@@ -397,7 +397,7 @@ One must be cutious though, because most of the MA intervals tested here gave re
 These weekly MA strategies might be useful if you don't want to be checking charts every day, but the returns shown here were much 
 lower than for the ETH daily MA strategy.
 
-If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
+If you would like to receive trade alerts on these strategies, let me know by email info@mdz-analytics.com.
 These alerts are sent at 30 mins before the close of the weekly session and will assist you in sticking to your desired strategy.
 Subscribing to alerts costs 0.0005 BTC per year.
 

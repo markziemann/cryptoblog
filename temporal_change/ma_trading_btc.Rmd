@@ -562,7 +562,7 @@ Interestingly, the <20d EMA strategies were less profitable in this analysis as 
 
 The 143d SMA looks like a high reward/risk signal which may be suitable for leveraged traders.
 
-If you would like to receive trade alerts on these strategies, let me know by email mark.ziemann{αt}gmail.com.
+If you would like to receive trade alerts on these strategies, let me know by email info@mdz-analytics.com.
 These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
 Subscribing to alerts costs 0.0005 BTC per year.
 

@@ -1,0 +1,411 @@
+---
+title: "Trading BTC based on the Know Sure Thing (KST) indicator"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+---
+
+[Source code](https://github.com/markziemann/cryptoblog/blob/main/coin_script/kst_trading_xx.Rmd)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+There are many indicators of market momentum, here we will look at one called the Know Sure Thing (KST).
+
+From [Investopedia](https://www.investopedia.com/terms/k/know-sure-thing-kst.asp):
+
+>The Know Sure Thing (KST) is a momentum oscillator developed by Martin Pring to make
+rate-of-change readings easier for traders to interpret.
+The KST is calculated by taking the simple moving average (SMA) of four different rate-of-change (ROC) periods, adding them together to come up with the KST, and creating a signal line by taking the 9-period SMA of the KST.
+
+Like other indicators, it is an oscillator with a signal line to distinguish bullish and bearish
+situations.
+
+There are three input parameters:
+
+* Vector of four SMA periods.
+
+* Vector of four rate of change (ROC) periods.
+
+* Signal line lag.
+
+This could get really complicated if each number was changed, meaning there would be millions of
+combinations of input variables.
+To make it simpler, for the I will multiply the default SMA and ROC values by a scaling factor, between
+0.1 and 3.
+The signal line will be varied between 4 and 60 periods.
+
+This page is designed to be updated daily - today's date is shown below.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+  library("parallel")
+})
+
+Sys.Date()
+
+CORES=detectCores()/2
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining historical data (daily) from CoinMarketCap.com from June 2013 to present.
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=BTC&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+#download.file(URL,destfile="dat.txt")
+dat <- fromJSON("dat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+It's important to calculate the returns for simply holding the asset rather than actively trading.
+
+The number shown here is the fold return on investment.
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),4][2]
+mystart <- price[c(1,nrow(price)),4][1]
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## Basic look at the KST indicator
+
+Here we can see the KST over the past 730 days, using the default settings.
+
+```{r,kst1,fig.height=10,fig.width=8}
+
+price2 <- price
+
+kst <- KST(price2$close, n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9)
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(kst[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="KST",main="KST")
+lines(as.Date(price2$date), kst[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+kst <- tail(kst,200)
+price2 <- tail(price2,200)
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(kst[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="KST",main="KST")
+lines(as.Date(price2$date), kst[,2]  , col="red"  )
+grid()
+
+```
+
+## KST trading function
+
+Here is the function for trading based on KST indicator, buying when short interval indicator
+goes above the longer interval line, and sell when it falls below.
+
+All trades are executed at the end of the daily session (UTC midnight).
+
+```{r,kstfunc1}
+
+mykst <- function(price,nScale=1,nrocScale=1,nSig=9,fee=0.005) {
+  nn <- c(10, 10, 10, 15) * nScale
+  nroc <- c(10, 15, 20, 30) * nrocScale
+  kst <- KST(price$close, n = nn, nROC = nroc, nSig = nSig)
+  price2 <- price
+  price2 <- cbind(price2,kst)
+  price2$higher <- price2$kst > price2$signal
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c("date","close")]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c("date","close")]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+}
+
+```
+
+## Backtesting
+
+Now let's go back in time to test the performance of the different interval strategies on the daily
+timeframe, here are the ranges tested:
+
+* n1: from 10 to 107 days
+
+* n2: from 3 to 25 days
+
+* n_signal: from 3 to 20 days
+
+Let's assume a 0.1% exchange fee, as per binance current rate.
+
+There are a lot of possibilities, so the best way to get a feel for the results is to see which combinations of parameters performed best using different
+performance metrics.
+
+```{r,backtest1}
+
+fee=0.005
+
+nScale <- seq(1,3,0.1)
+nrocScale <- seq(0.1,1,0.02)
+nSigs <- seq(5,60,1)
+
+params <- expand.grid(nScale,nrocScale,nSigs)
+colnames(params) <- c("nScale","nrocScale","nSigs")
+
+res <- mclapply(X=1:nrow(params) , FUN=function(i) {
+  nScale=as.numeric(params[i,1])
+  nrocScale=as.numeric(params[i,2])
+  nSigs=as.numeric(params[i,3])
+  mykst(price,nScale=nScale,nrocScale=nrocScale,nSig=nSigs,fee=fee)
+} , mc.cores = CORES )
+
+res <- as.data.frame(do.call(rbind, res))
+colnames(res) <- c("returns","trades")
+res2 <- cbind(params,res)
+res2$returnspertrade <- res2$returns/res2$trades
+res2$mean <- res2$returns^(1/res2$trades)
+
+basic <- mykst(price,fee=fee)
+basic_returns <- basic[1]
+basic_mean <- basic[1]^(1/basic[2])
+
+```
+
+Here are the strategies which had the highest mean return per trade.
+These opportunities don't arise often but could be potential opportunities for leveraged trades.
+
+```{r,backtest_res1}
+
+head(res2[order(-res2$mean),],20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
+
+```
+
+Here are the strategies which had the highest overall returns.
+This involves more frequent trading and the returns on each trade were smaller.
+This is less optimal if trades are executed manually.
+
+```{r,backtest_res2}
+
+res2 <- res2[order(-res2$returns),]
+
+head(res2,20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
+
+```
+
+## Plots
+
+Another approach to selecting "good" parameters could be to begin with the default values and then
+aim to increase returns and decrease the number of trades executed.
+
+The red dot in the chart below indicates the KST with default interval values.
+Data points to the upper right side of that dot are strategies with better performance.
+
+```{r,plots1,fig.height=8,fig.width=8}
+
+plot(res2$mean , res2$returns, log="y",xlab="mean ROI", ylab="total returns")
+points(basic_mean,basic_returns,col="red",pch=19,cex=2)
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Optimised strategy
+
+Here I use the optimised values for n1, n2 and n.signal and we can have a look at all the trades
+executed over the years.
+
+```{r,best1,fig.width=10,fig.height=8}
+
+best_nScale = res2[1,1]
+best_nrocScale = res2[1,2]
+best_nSigs = res2[1,3]
+
+message(paste("Selected n scale factor:",best_nScale))
+message(paste("Selected nROC scale factor:",best_nrocScale))
+message(paste("Selected n.signal period:",best_nSigs))
+
+price2 <- price
+kst <- KST(price2$close,n=best_nScale * c(10, 10, 10, 15) ,
+  nROC= best_nrocScale * c(10, 15, 20, 30),
+  nSig=best_nSigs, fee=fee)
+
+price2 <- cbind(price2,kst)
+price2$higher <- price2$kst > price2$signal
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+kst_dat <- c("indicator"="KST",
+  "parameter"=paste(best_nScale,best_nrocScale,best_nSigs,sep=",")  ,
+  "meanROI"= mean(trades$diff) ,
+  "totalROI"= prod(trades$diff) ,
+  "ntrades"= nrow(trades) ,
+  "ndays"= nrow(price) ,
+  "xhodl"= prod(trades$diff)/hodl )
+
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+HEADER="KST"
+par(mfrow=c(2,1))
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(kst[,1] ~ as.Date(price$date),type="l",col="blue",
+  xlab="Date",ylab="KST",main="KST")
+lines(as.Date(price$date), kst[,2]  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+```
+
+## Recent action
+
+```{r,recent,fig.height=8,fig.width=8}
+
+HEADER="KST"
+par(mfrow=c(2,1))
+plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tail(kst[,1],200) ~ tail(as.Date(price$date),200),type="l",col="blue",
+  xlab="Date",ylab="KST",main="KST")
+lines(tail(as.Date(price$date),200), tail(kst[,2],200) , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+```
+
+## Effect of fees
+
+It is important to factor in the effect of fees because higher exchange fees will erode profits.
+
+```{r,fees,fig.width=8,fig.height=7}
+
+fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
+
+res_fees <- sapply(fee_levels,function(x) {
+
+
+  suppressWarnings(
+    mykst(price,nScale=nScale,nrocScale=nrocScale,nSig=nSigs,fee=x)
+  )
+
+} )
+
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Trades by year
+
+It is good to see whether the strategy gives consistent returns over the years.
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
+yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+yearly <- yearly[which(lapply(yearly,length)>0)]
+vioplot(yearly)
+
+yr <- sapply(yearly,prod)
+barplot(yr,ylab="fold return per year")
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+```
+
+## Data export
+
+Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
+
+```{r,export}
+
+filename <- paste("BTC","_dat.txt",sep="")
+write.table(t(kst_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
+
+```
+
+## Session information
+
+For reproducibility
+
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
+
+</details>

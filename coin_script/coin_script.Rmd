@@ -140,7 +140,7 @@ TICKERS <- TICKERS[which(! TICKERS %in% EXCLUDE)]
 writeLines(TICKERS,con="tickers.txt")
 mydate <- Sys.Date()-1
 
-#TICKERS=c("BTC","ETH","XMR","XHV")
+TICKERS=c("BTC","ETH","XMR","XHV")
 
 for ( TICKER in TICKERS ) {
   DATNAME=paste(TICKER,"_dat.txt",sep="")
