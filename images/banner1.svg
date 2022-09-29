@@ -2,24 +2,23 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="130.89157mm"
    height="21.562447mm"
    viewBox="0 0 130.89157 21.562447"
    version="1.1"
    id="svg8"
-   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
    sodipodi:docname="banner1.svg"
-   inkscape:export-filename="/home/mdz/projects/crypto/cryptoblog/images/banner1.png"
+   inkscape:export-filename="/home/mdz/projects/cryptoblog/images/banner2.png"
    inkscape:export-xdpi="150"
-   inkscape:export-ydpi="150">
+   inkscape:export-ydpi="150"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs2">
     <marker
@@ -39,7 +38,7 @@
     </marker>
     <linearGradient
        id="linearGradient8685"
-       osb:paint="solid">
+       inkscape:swatch="solid">
       <stop
          style="stop-color:#ffac00;stop-opacity:1;"
          offset="0"
@@ -81,8 +80,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.979899"
-     inkscape:cx="303.81107"
-     inkscape:cy="56.3672"
+     inkscape:cx="189.65614"
+     inkscape:cy="56.568542"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -92,10 +91,11 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:window-width="1920"
-     inkscape:window-height="1016"
+     inkscape:window-height="1163"
      inkscape:window-x="0"
-     inkscape:window-y="27"
-     inkscape:window-maximized="1" />
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:pagecheckerboard="0" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -104,7 +104,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -114,29 +114,30 @@
      id="layer1"
      transform="translate(0.44578552,-266.56424)">
     <rect
-       style="opacity:0.98999999;fill:#ff0000;fill-opacity:1;stroke:#ffffff;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.99607843"
+       style="opacity:0.99;fill:#ff0000;fill-opacity:1;stroke:#ffffff;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.996078"
        id="rect817"
-       width="129.89157"
+       width="129.892"
        height="20.562447"
        x="0.054214478"
        y="267.06424"
-       ry="5.3641191"
+       ry="2.5400269"
        rx="0" />
     <flowRoot
        xml:space="preserve"
        id="flowRoot835"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.33333397px;line-height:1.25;font-family:ubuntu;-inkscape-font-specification:ubuntu;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.3333px;line-height:1.25;font-family:ubuntu;-inkscape-font-specification:ubuntu;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
        transform="matrix(0.26458333,0,0,0.26458333,-7.2247433,263.21741)"><flowRegion
          id="flowRegion837"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.33333397px;font-family:ubuntu;-inkscape-font-specification:ubuntu"><rect
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.3333px;font-family:ubuntu;-inkscape-font-specification:ubuntu"><rect
            id="rect839"
            width="522.24738"
            height="65.384689"
            x="30.714285"
            y="13.742969"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.33333397px;font-family:ubuntu;-inkscape-font-specification:ubuntu" /></flowRegion><flowPara
-         style="font-weight:bold;font-size:29.33333397px;line-height:0;fill:#ffffff;fill-opacity:1"
-         id="flowPara847">ADVERTISE YOUR BUSINESS HERE</flowPara></flowRoot>    <flowRoot
+         style="font-weight:bold;font-size:29.3333px;line-height:0;fill:#ffffff;fill-opacity:1"
+         id="flowPara847">ADVERTISE YOUR BUSINESS HERE</flowPara></flowRoot>
+    <flowRoot
        xml:space="preserve"
        id="flowRoot851"
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
@@ -148,11 +149,15 @@
            x="47.477169"
            y="68.939117" /></flowRegion><flowPara
          id="flowPara857"
-         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:20px;font-family:calibri;-inkscape-font-specification:calibri;fill:#ffffff;fill-opacity:1">REGISTER YOUR INTEREST:</flowPara></flowRoot>    <flowRoot
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:20px;font-family:calibri;-inkscape-font-specification:calibri;fill:#ffffff;fill-opacity:1">REGISTER YOUR INTEREST:</flowPara></flowRoot>
+    <flowRoot
        xml:space="preserve"
        id="flowRoot7209"
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#fffff7;fill-opacity:1;stroke:none"
-       transform="matrix(0.21397878,0,0,0.26458333,62.568005,236.87174)"><flowRegion
+       transform="matrix(0.21397878,0,0,0.26458333,63.626339,236.87174)"
+       inkscape:export-filename="/home/mdz/projects/cryptoblog/images/banner2.png"
+       inkscape:export-xdpi="150"
+       inkscape:export-ydpi="150"><flowRegion
          id="flowRegion7211"
          style="fill:#fffff7;fill-opacity:1"><rect
            id="rect7213"
@@ -162,5 +167,6 @@
            y="140.15486"
            style="fill:#fffff7;fill-opacity:1" /></flowRegion><flowPara
          id="flowPara7215"
-         style="font-weight:bold;font-size:13.33333397px;fill:#fffff7;fill-opacity:1">mark.ziemann@gmail.com</flowPara></flowRoot>  </g>
+         style="font-weight:bold;font-size:13.3333px;fill:#fffff7;fill-opacity:1">info@mdz-analytics.com</flowPara></flowRoot>
+  </g>
 </svg>
