@@ -1,6 +1,5 @@
 ---
 title: "<br>Trading based on DMI"
-author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 ---
 

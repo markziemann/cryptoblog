@@ -1,6 +1,5 @@
 ---
 title: "<br>Trading ETH based on the Know Sure Thing (KST) indicator"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 

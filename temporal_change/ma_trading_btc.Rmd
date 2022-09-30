@@ -1,6 +1,5 @@
 ---
 title: "Mastering temporal changes in MA and EMA profitability"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
   html_document:

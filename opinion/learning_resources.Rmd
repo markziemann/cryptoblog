@@ -1,6 +1,5 @@
 ---
 title: "<br>Crypto 101: Why bother with digital currencies?"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "2022-01-09"
 ---
 

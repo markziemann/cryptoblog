@@ -1,6 +1,5 @@
 ---
 title: "<br>Stablecoin dominance: a tool for timing the market top?"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 

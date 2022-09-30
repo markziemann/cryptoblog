@@ -1,6 +1,5 @@
 ---
 title: "<br>Trading BTC based on the Chande momentum oscillator"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 

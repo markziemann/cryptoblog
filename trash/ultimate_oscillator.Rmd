@@ -1,6 +1,5 @@
 ---
 title: "<br>Ultimate Ocillator for BTC and ETH"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
     fig_width: 10

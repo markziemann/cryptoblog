@@ -1,6 +1,5 @@
 ---
 title: "<br>MDZ Analytics"
-author: "Mark Ziemann"
 ---
 
 <br>

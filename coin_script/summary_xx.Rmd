@@ -1,6 +1,5 @@
 ---
 title: "Summarising TICKER indicator performance"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 

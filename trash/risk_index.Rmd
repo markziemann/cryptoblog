@@ -1,6 +1,5 @@
 ---
 title: "<br>A BTC risk index for measuring the temperature of the market"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 output:
     fig_width: 10

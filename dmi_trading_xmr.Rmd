@@ -1,6 +1,5 @@
 ---
 title: "<br>Trading XMR based on Directional Movement Index (DMI)"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 

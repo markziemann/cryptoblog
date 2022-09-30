@@ -1,6 +1,5 @@
 ---
 title: "Trading TICKER based on indicator ensembles"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 

@@ -1,6 +1,5 @@
 ---
 title: "Trading XMR based on MA and EMAs"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 

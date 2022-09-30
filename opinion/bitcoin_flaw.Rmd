@@ -1,6 +1,5 @@
 ---
 title: "<br>Bitcoin's fatal flaw"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "2022-03-08"
 ---
 

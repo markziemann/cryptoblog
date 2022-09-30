@@ -1,6 +1,5 @@
 ---
 title: "Trading BTC based on True Strength Index (TSI) with log transformed data"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 

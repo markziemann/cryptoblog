@@ -1,6 +1,5 @@
 ---
 title: "<br>Trading based on MA and HMA crosses"
-author: "Mark Ziemann"
 date: "`r Sys.Date()`"
 ---
 
