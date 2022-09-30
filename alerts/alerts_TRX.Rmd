@@ -1,6 +1,5 @@
 ---
 title: "<br>Daily trade alerts for TRX"
-author: "Mark Ziemann https://mdz-analytics.com"
 date: "`r Sys.Date()`"
 ---
 
