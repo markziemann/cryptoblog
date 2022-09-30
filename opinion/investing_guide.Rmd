@@ -3,9 +3,9 @@ title: "<br>A sane person's guide to building a cryptocurrency portfolio"
 date: "2022-02-16"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/investing_guide.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/investing_guide.Rmd)
 
-This document is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This document is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />

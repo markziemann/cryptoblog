@@ -3,7 +3,7 @@ title: "<br>Trading BTC based on MA and EMA crosses"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/ma_trading_4hr.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/ma_trading_4hr.Rmd)
 
 If you find this resource useful, consider a small tip.
 

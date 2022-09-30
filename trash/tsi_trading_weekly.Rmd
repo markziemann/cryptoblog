@@ -3,7 +3,7 @@ title: "<br>Trading BTC based on the weekly True Strength Index (TSI)"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/tsi_trading_weekly.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/tsi_trading_weekly.Rmd)
 
 If you find this resource useful, consider a small tip.
 

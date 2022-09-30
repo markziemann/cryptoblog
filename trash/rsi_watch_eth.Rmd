@@ -3,7 +3,7 @@ title: "<br>Watching the weekly ETH RSI"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/rsi_watch_eth.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/rsi_watch_eth.Rmd)
 
 If you find this resource useful, consider a small tip.
 

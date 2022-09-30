@@ -1,0 +1,6 @@
+BTC
+ETH
+TRX
+XMR
+XHV
+XRP

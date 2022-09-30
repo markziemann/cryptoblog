@@ -1,0 +1,886 @@
+---
+title: "<br>Daily trade alerts for ETH"
+author: "Mark Ziemann https://mdz-analytics.com"
+date: "`r Sys.Date()`"
+---
+
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/alerts_ETH.Rmd)
+
+## Intro
+
+In the backtesting analysis, I have established several different profitable strategies for timing entry/exits.
+Visit the [ETH page](https://mdz-analytics.com/coins/ETH/) to see how these signals were identified.
+
+1. Simple moving average (SMA)
+
+2. Exponential moving average (EMA)
+
+3. SMA crosses
+
+4. EMA crosses
+
+5. Directional movement index (DMI)
+
+6. True strength index (TSI) **BEST**
+
+7. Stochastic oscillator (stoch)
+
+8. Double RSI
+
+9. Donchian channel
+
+10. Know sure thing (KST)
+
+11. Ensembl indicator
+
+This script will examine the price action and these trade signals just before the daily close.
+If the signal is TRUE, it is bullish and if FALSE it is bearish.
+When there is a switch from bearish to bullish it is a buy signal and when it switches from bullish to bearish it is a sell signal.
+This HTML is updated just before the daily close each day, but push notifications for any trade signals are also sent by push bullet.
+
+To receive these signals in real-time, subscribe to the following channels - it's free for a limited time!
+
+https://www.pushbullet.com/channel?tag=eth_signal
+
+<a class="pushbullet-subscribe-widget" data-channel="eth_signal" data-widget="button" data-size="small"></a>
+<script type="text/javascript">(function(){var a=document.createElement('script');a.type='text/javascript';a.async=true;a.src='https://widget.pushbullet.com/embed.js';var b=document.getElementsByTagName('script')[0];b.parentNode.insertBefore(a,b);})();</script>
+
+If you need some help to design your own trading signals/strategies, I am happy to help for a fee.
+email me at mark.ziemann{αt}gmail.com for any enquiries/suggestions/feedback.
+
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+Reminder: this analysis is not financial advice.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("RPushbullet")
+  library("kableExtra")
+})
+
+TESTING = FALSE
+
+MYNOTE = NULL
+
+```
+
+```{r,time}
+
+mydate <- Sys.time()
+attr(mydate, "tzone") <- "UTC"
+mydate <- as.Date(mydate)
+
+```
+
+## Get ETH parameters
+
+```{r,params}
+
+params <- read.table("https://mdz-analytics.com/coins/ETH/ETH_dat.txt", header=TRUE)
+params %>% kbl(caption="optimised backtested parameters") %>%  kable_styling("hover", full_width = F)
+
+```
+
+## Get ETH price data
+
+Obtaining ETH price data (daily) for the last 300 days and today's price.
+
+```{r,eth_data1}
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&count=300"
+download.file(URL,destfile="ethdat.txt")
+ethdat <- fromJSON("ethdat.txt")
+price <- ethdat$data$quotes
+price <- data.frame(  as.Date(price$time_close) , price$quote$USD$high, price$quote$USD$low, price$quote$USD$close)
+colnames(price) <- c("date","high","low","close")
+
+URL="https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=hourly&time_period=hourly&count=11"
+download.file(URL,destfile="ethdat.txt")
+ethdat <- fromJSON("ethdat.txt")
+price2 <- ethdat$data$quotes
+price2 <- data.frame( as.Date(price2$time_close) , price2$quote$USD$high, price2$quote$USD$low, price2$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price2) <- c("date","high","low","close")
+
+high <- max(price2[,2])
+low <-  min(price2[,3])
+close <- price2[nrow(price2),4]
+
+df <- data.frame(date=mydate,high=high,low=low,close=close,stringsAsFactors=FALSE)
+price <- rbind(price,df)
+tail(price) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
+
+if ( TESTING == TRUE) {
+  price[nrow(price),"Close"] <- price[nrow(price),"Close"] * 2
+}
+
+```
+
+## ETH SMA indicator
+
+Now to determine whether ETH has crossed the SMA line.
+
+```{r, eth_sma}
+
+price2 <- price
+
+n <- as.numeric(params[params$indicator == "SMA",2])
+
+price2$ma <- SMA(Cl(price2),n=n)
+price2$signal <- price2$close > price2$ma
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_SMA=TRUE
+} else {
+  ens_SMA=FALSE
+}
+
+message(paste("ETH SMA signal:",eth_signal))
+
+```
+
+```{r, eth_sma_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH w SMA")
+grid()
+lines(price2$ma~ as.Date(price2$date) ,col="red")
+
+```
+
+```{r,eth_sma_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste("The ETH SMA signal is", eth_signal,".")
+}
+
+```
+
+## ETH EMA indicator
+
+Now to determine whether ETH has crossed the EMA line.
+
+```{r, eth_ema}
+
+price2 <- price
+
+n <- as.numeric(params[params$indicator == "EMA",2])
+
+price2$ma <- EMA(Cl(price2),n=n)
+price2$signal <- price2$close > price2$ma
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_EMA=TRUE
+} else {
+  ens_EMA=FALSE
+}
+
+message(paste("ETH EMA signal:",eth_signal))
+
+```
+
+```{r, eth_ema_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH EMA")
+grid()
+lines(price2$ma~ as.Date(price2$date) ,col="red")
+
+```
+
+```{r,eth_ema_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste("The ETH EMA signal is", eth_signal,".")
+}
+
+```
+
+## ETH SMA cross indicator
+
+The SMA cross is a reasonably good strategy.
+
+```{r, eth_cross}
+
+price2 <- price
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "SMAcross",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+price2$ma1 <- SMA(Cl(price2),n=n1)
+price2$ma2 <- SMA(Cl(price2),n=n2)
+
+price2$signal <- price2$ma2 > price2$ma1
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_SMAcross=TRUE
+} else {
+  ens_SMAcross=FALSE
+}
+
+message(paste("ETH SMA cross signal:",eth_signal))
+
+```
+
+```{r, eth_cross_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH w SMA cross")
+grid()
+lines(price2$ma1~ as.Date(price2$date) ,col="red")
+lines(price2$ma2~ as.Date(price2$date) ,col="blue")
+
+```
+
+```{r,eth_smacross_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE, "The ETH SMA cross signal is", eth_signal,".")
+}
+
+```
+
+## ETH EMA cross indicator
+
+The EMA cross is a moderately profitable strategy.
+
+```{r, eth_ema_cross}
+
+price2 <- price
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "EMAcross",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+price2$ma1 <- EMA(Cl(price2),n=n1)
+price2$ma2 <- EMA(Cl(price2),n=n2)
+
+price2$signal <- price2$ma2 > price2$ma1
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_EMAcross=TRUE
+} else {
+  ens_EMAcross=FALSE
+}
+
+message(paste("ETH EMA cross signal is",eth_signal))
+
+```
+
+```{r, eth_ema_cross_plot,fig.height=8,fig.width=8}
+
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH EMA cross")
+grid()
+lines(price2$ma1~ as.Date(price2$date) ,col="red")
+lines(price2$ma2~ as.Date(price2$date) ,col="blue")
+
+```
+
+```{r,eth_emacross_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE, "The ETH EMA cross signal is", eth_signal,".")
+}
+
+```
+
+## ETH DMI indicator
+
+Directional movement indicator is a good approach to identify trend changes.
+
+```{r,eth_dmi,fig.height=10,fig.width=8}
+
+n <- as.numeric(params[params$indicator == "DMI",2])
+
+dmi.adx <- ADX(price[,c("high","low","close")],n=n)
+price2 <- cbind(price,dmi.adx)
+price2$signal <- dmi.adx[,1] > dmi.adx[,2]
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_DMI=TRUE
+} else {
+  ens_DMI=FALSE
+}
+
+message(paste("ETH DMI signal:",eth_signal))
+
+```
+
+```{r,eth_dmi_plot,fig.height=10,fig.width=8}
+
+price2 <- as.data.frame(price2)
+par(mfrow=c(2,1))
+plot(price2$close~as.Date(price2$date),type="l",
+  xlab="Date",ylab="price (USD)",main="ETH USD price")
+grid()
+plot(price2$DIp~as.Date(price2$date),type="l", col="blue",
+  xlab="Date",ylab="price (USD)",main="ETH DMI")
+grid()
+lines(price2$DIn ~ as.Date(price2$date) ,col="red")
+
+```
+
+```{r,eth_dmi_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE,"ETH DMI signal is", eth_signal,".")
+}
+
+```
+
+## ETH TSI indicator
+
+True Strength Indicator is one of the more profitable approaches.
+Its success lies in how it changes rapidly when momentum shifts.
+For most coins, this indicator performs "best" in backtesting analysis, which means it
+should carry relatively more weight than other indicators.
+
+```{r,eth_tsi,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "TSI",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+ns <- n[3]
+
+TSI <- function(x, n.first = 25, n.second = 13, n.signal = 7) {
+  #True Strength Indicator
+  #https://school.stockcharts.com/doku.php?id=technical_indicators:true_strength_index
+  x <- try.xts(x, error = as.matrix)
+  pc <- x - lag.xts(x, na.pad = T) #force lag.xts to get na padding
+  dspc <- EMA(EMA(pc, n = n.first), n = n.second)
+  dsapc <- EMA(EMA(abs(pc), n = n.first), n = n.second)
+
+  tsi <- 100 * (dspc/dsapc)
+  signal <- EMA(tsi, n = n.signal)
+  r <- cbind(tsi, signal)
+  r <- reclass(r, x)
+  if (!is.null(dim(r))) colnames(r) <- c("tsi", "signal")
+  return(r)
+}
+
+tsi <- TSI(price$close , n.first = n1, n.second = n2, n.signal = ns )
+colnames(tsi) <- c("tsi","sig")
+
+price2 <- cbind(price,tsi)
+price2$signal <- tsi[,1] > tsi[,2]
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_TSI=TRUE
+} else {
+  ens_TSI=FALSE
+}
+
+message(paste("ETH TSI signal:",eth_signal))
+
+```
+
+```{r,eth_tsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tsi[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="TSI",main="TSI")
+lines(as.Date(price2$date), tsi[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+```{r,eth_tsi_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE,"ETH TSI signal is", eth_signal,".")
+}
+
+```
+
+## ETH stochastic oscillator indicator
+
+Similar to the TSI, the stoch can pinpoint early changes in momentum, however it may give many
+false positives.
+
+```{r,eth_stoch,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "stoch",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+n3 <- n[3]
+
+sto <- stoch(HLC(price), nFastK=n1 , nFastD=n2 , nSlowD=n2 , bounded = TRUE, smooth=n3)
+
+price2 <- cbind(price,sto)
+price2$signal <- price2$fastK > price2$fastD
+
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_stoch=TRUE
+} else {
+  ens_stoch=FALSE
+}
+
+message(paste("ETH stoch signal:",eth_signal))
+
+```
+
+```{r,eth_stoch_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$fastK ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="stochastic oscillator")
+lines(as.Date(price2$date), price2$fastD  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+```{r,eth_stoch_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE,"ETH Stoch signal is", eth_signal,".")
+}
+
+```
+
+## ETH double RSI indicator
+
+Double RSI is simply two RSI lines.
+
+```{r,eth_rsi1,fig.height=10,fig.width=8}
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "RSI2",2],",")))
+n1 <- n[1]
+n2 <- n[2]
+
+rsi1 <- RSI(price$close,n=n1,maType=EMA)
+rsi2 <- RSI(price$close,n=n2,maType=EMA)
+
+price2 <- cbind(price,rsi1,rsi2)
+price2$signal <- price2$rsi1 > price2$rsi2
+
+tail(price2) %>% kbl(row.names = FALSE) %>% kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"signal"]
+previous_signal <- price2[(nrow(price2)-1),"signal"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    eth_signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    eth_signal="SELL"
+  }
+} else {
+  eth_signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_RSI2=TRUE
+} else {
+  ens_RSI2=FALSE
+}
+
+message(paste("ETH RSI signal:",eth_signal))
+
+```
+
+```{r,eth_rsi_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1 ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="index",main="double RSI")
+lines(as.Date(price2$date), price2$rsi2  , col="red"  )
+grid()
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price2$rsi1/price2$rsi2 ~ as.Date(price2$date),type="l",
+  xlab="Date",ylab="RSI ratio",main="double RSI")
+grid()
+abline(h=1,lty=2,lwd=2)
+par(mfrow=c(1,1))
+
+```
+
+```{r,eth_rsi_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE,"ETH RSI2 signal is", eth_signal,".")
+}
+
+```
+
+## ETH Donchian channel indicator
+
+```{r,eth_dc1,fig.height=10,fig.width=8}
+
+n <- as.numeric(params[params$indicator == "DC",2])
+
+price2 <- price[1:nrow(price)-1,]
+dc <- DonchianChannel(price2$close,n=n)
+
+price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"high"] > dc[(i-1),"high"]
+} ))
+price2$lower <- c(NA,sapply(2:nrow(dc),function(i) {
+  dc[i,"low"] < dc[(i-1),"low"]
+} ))
+price2 <- price2[price2$higher != price2$lower,]
+# show changing rows only
+price2 <- price2[c(NA,unlist(lapply(2:nrow(price2) , function(i) {
+  price2$higher[i] != price2$higher[i-1]
+}))),]
+price2 <- price2[!is.na(price2$higher),]
+
+previous_signal <- price2[nrow(price2),"higher"]
+
+price2 <- price
+dc <- DonchianChannel(price2$close,n=n)
+colnames(dc) <- c("dchigh","dcmid","dclow")
+price2 <- cbind(price2,dc)
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+eth_signal="NONE"
+
+# if we in negative territory, check whether time to buy
+if ( previous_signal == FALSE ) {
+  if ( price2[nrow(price2),"dchigh"] > price2[nrow(price2)-1,"dchigh"] ) {
+    eth_signal="BUY"
+  }
+}
+
+# if we in positive territory, check whether time to sell
+if ( previous_signal == TRUE ) {
+  if ( price2[nrow(price2),"dclow"] < price2[nrow(price2)-1,"dclow"] ) {
+    eth_signal="SELL"
+  }
+}
+
+if ( eth_signal=="NONE" ) {
+  today_signal=previous_signal
+} else {
+  if (eth_signal=="BUY") { today_signal = TRUE }
+  if (eth_signal=="SELL") { today_signal = FALSE }
+}
+
+if (today_signal==TRUE) {
+  ens_DC=TRUE
+} else {
+  ens_DC=FALSE
+}
+
+message(paste("ETH DC signal:",eth_signal))
+
+```
+
+```{r,eth_dc_plot,fig.height=10,fig.width=8}
+
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
+grid()
+
+lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
+lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
+
+price2 <- tail(price2,100)
+
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
+grid()
+
+lines(price2$dclow~ as.Date(price2$date),lwd=1.5,col="red")
+lines(price2$dcmid~ as.Date(price2$date),lwd=1.5,col="gray")
+lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
+
+```
+
+```{r,eth_dc_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE,"ETH Donchian channel signal is", eth_signal,".")
+}
+
+```
+
+## ETH KST indicator
+
+Another high-performing indicator across different price series data.
+
+```{r,eth_kst,fig.height=10,fig.width=8}
+
+price2 <- price
+
+n <- as.numeric(unlist(strsplit(params[params$indicator == "KST",2],",")))
+nScale <- n[1]
+nrocScale <- n[2]
+nSigs <- n[3]
+
+kst <- KST(price2$close,n=nScale * c(10, 10, 10, 15) ,
+  nROC=nrocScale * c(10, 15, 20, 30),
+  nSig=nSigs)
+
+price2 <- cbind(price2,kst)
+price2$KST <- as.numeric(kst[,1]>kst[,2])
+
+tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
+
+today_signal <- price2[nrow(price2),"KST"]
+previous_signal <- price2[(nrow(price2)-1),"KST"]
+if (today_signal != previous_signal ) {
+  if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
+    signal="BUY"
+  }
+  if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
+    signal="SELL"
+  }
+} else {
+  signal <- "NONE"
+}
+
+if (today_signal==TRUE) {
+  ens_DMI=TRUE
+} else {
+  ens_DMI=FALSE
+}
+
+message(paste("ETH KST signal:",eth_signal))
+
+```
+
+```{r,eth_kst_plot,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(kst[,1] ~ as.Date(price2$date),type="l",col="blue",
+  xlab="Date",ylab="KST",main="KST")
+lines(as.Date(price2$date), kst[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+```{r,eth_kst_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE,"ETH KST signal is", eth_signal,".")
+}
+
+```
+
+## ETH Ensemble indicator
+
+This is a combination of a number of indicators.
+
+```{r,eth_ens1,fig.height=10,fig.width=8}
+
+ens <- params[params$indicator=="Ensemble","parameter"]
+myrev <- intToUtf8(rev(utf8ToInt(ens)))
+myrev <- unlist(strsplit(myrev,","))
+# get thresh
+n <- as.numeric(myrev[1])
+myrev <- myrev[2:length(myrev)]
+# get combination
+combo <- sapply(myrev,function(s) { intToUtf8(rev(utf8ToInt(s))) })
+
+message(paste("The combination is",paste(combo,collapse=" ")))
+
+message(paste("The buy threshold is",n))
+
+indicators <- c("SMA"=ens_SMA,
+  "EMA"=ens_EMA,
+  "SMAcross"=ens_SMAcross,
+  "EMAcross"=ens_EMAcross,
+  "DMI"=ens_DMI,
+  "TSI"=ens_TSI,
+  "stoch"=ens_stoch,
+  "RSI2"=ens_RSI2,
+  "DC"=ens_DC)
+
+indicators <- indicators[names(indicators) %in% combo]
+message("State of the indicators:")
+indicators
+today_count <- sum(indicators)
+message(paste("today_count_ETH",today_count,sep="="))
+today_signal <- today_count>=n
+
+prev_html <- readLines("https://mdz-analytics.com/coins/ETH/alerts_ETH.html")
+prev_signal <- length(grep("ETH ensemble indicator is BULLISH",prev_html))>2
+
+eth_signal <- "NONE"
+
+if ( today_signal != prev_signal ) {
+  if ( today_signal == TRUE ) {
+    eth_signal="BUY"
+  } else {
+    eth_signal="SELL"
+  }
+}
+
+if (today_signal==TRUE) {
+  message("ETH ensemble indicator is BULLISH")
+} else {
+  message("ETH ensemble indicator is BEARISH")
+}
+
+message(paste("ETH ENS signal:",eth_signal))
+
+```
+
+```{r,eth_ens_push}
+
+if ( eth_signal != "NONE") {
+  MYNOTE <- paste(MYNOTE,"ETH Ensemble indicator is", eth_signal,".")
+}
+
+```
+
+## Send a push notification.
+
+```{r,push}
+
+MYNOTE
+
+if ( !is.null(MYNOTE) ) {
+  MYNOTE <- paste(MYNOTE, ". Visit https://mdz-analytics.com/coins/ETH/alerts_ETH.html for the details")
+  MYNOTE
+  pbPost("note", "Crypto Alert", MYNOTE ,channel="eth_signal")
+}
+
+```
+
+## Session information
+
+For reproducibility
+
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
+
+</details>

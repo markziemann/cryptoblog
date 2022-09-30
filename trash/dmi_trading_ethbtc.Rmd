@@ -3,7 +3,7 @@ title: "<br>Trading ETH/BTC based on Directional Movement Index (DMI)"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/dmi_trading_ethbtc.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/dmi_trading_ethbtc.Rmd)
 
 If you find this resource useful, consider a small tip.
 
