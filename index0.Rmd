@@ -49,8 +49,8 @@ Current state if the indicators as at MYTIME:
 <tr class="even">
 <td>EMA</td>
 <td style="color:BTC_EMA_COL"><b>BTC_EMA_DAILY</b></td>
-<td style="color:ETH_EMA_COL"><b>ETH_SMA_DAILY</b></td>
-<td style="color:XMR_EMA_COL"><b>XMR_SMA_DAILY</b></td>
+<td style="color:ETH_EMA_COL"><b>ETH_EMA_DAILY</b></td>
+<td style="color:XMR_EMA_COL"><b>XMR_EMA_DAILY</b></td>
 </tr>
 <tr class="odd">
 <td>SMA cross</td>
