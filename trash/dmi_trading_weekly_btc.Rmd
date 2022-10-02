@@ -92,7 +92,7 @@ par(mfrow=c(1,1))
 
 ## DMI trading function
 
-Assuming 0.1% trading fee, as per binance current rate.
+Assuming 0.5% trading fee.
 
 ```{r,sma}
 

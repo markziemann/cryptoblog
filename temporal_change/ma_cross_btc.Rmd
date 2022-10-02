@@ -204,7 +204,7 @@ if (n1 != n2) {
 Now let's go back in time to test the performance of the different MA cross strategies on the daily
 timeframe, using MA intervals from 4 to 200 days.
 
-Let's assume a 0.1% trading fee, as per binance current rate.
+Let's assume a 0.5% trading fee.
 
 First looking at SMA crosses.
 Below, I show the 20 highest returning indicators.

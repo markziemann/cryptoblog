@@ -135,7 +135,7 @@ parameters:
 
 * n=10:20
 
-Let's assume a 0.1% trading fee, as per binance current rate.
+Let's assume a 0.5% trading fee.
 
 Here is a table of results.
 

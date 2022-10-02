@@ -334,7 +334,7 @@ timeframe, here are the ranges tested:
 
 * n2: from 20 to 500 days
 
-Let's assume a 0.1% exchange fee, as per binance current rate.
+Let's assume a 0.5% exchange fee.
 
 There are a lot of possibilities, so the best way to get a feel for the results is to see which combinations of parameters performed best using different
 performance metrics.

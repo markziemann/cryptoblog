@@ -139,7 +139,7 @@ arn <- function(price,n,fee) {
 Now let's go back in time to test the performance of the indicator using different 
 intervals from 4 days to 200 days.
 
-Let's assume a 0.1% trading fee, as per binance current rate.
+Let's assume a 0.5% trading fee.
 
 Here is a table of results.
 

@@ -56,7 +56,7 @@ hodl
 
 ## RSI analysis
 
-FEES: Assuming 0.1% trading fee, as per binance current rate.
+FEES: Assuming 0.5% trading fee.
 
 The idea here is to enter after RSI recovers from a low point and then recovers to positive territory.
 
