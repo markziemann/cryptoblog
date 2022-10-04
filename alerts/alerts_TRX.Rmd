@@ -756,9 +756,9 @@ if (today_signal != previous_signal ) {
 }
 
 if (today_signal==TRUE) {
-  ens_DMI=TRUE
+  ens_KST=TRUE
 } else {
-  ens_DMI=FALSE
+  ens_KST=FALSE
 }
 
 message(paste("TRX KST signal:",trx_signal))
