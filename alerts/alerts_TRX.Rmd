@@ -816,7 +816,8 @@ indicators <- c("SMA"=ens_SMA,
   "TSI"=ens_TSI,
   "stoch"=ens_stoch,
   "RSI2"=ens_RSI2,
-  "DC"=ens_DC)
+  "DC"=ens_DC,
+  "KST"=ensKST)
 
 indicators <- indicators[names(indicators) %in% combo]
 message("State of the indicators:")
