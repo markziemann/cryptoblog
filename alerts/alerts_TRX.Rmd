@@ -738,21 +738,22 @@ kst <- KST(price2$close,n=nScale * c(10, 10, 10, 15) ,
   nSig=nSigs)
 
 price2 <- cbind(price2,kst)
-price2$KST <- as.numeric(kst[,1]>kst[,2])
+price2$KST <- kst[,1]>kst[,2]
 
 tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"KST"]
 previous_signal <- price2[(nrow(price2)-1),"KST"]
+
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    signal="BUY"
+    trx_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    signal="SELL"
+    trx_signal="SELL"
   }
 } else {
-  signal <- "NONE"
+  trx_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
