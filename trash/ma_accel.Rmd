@@ -58,7 +58,7 @@ hodl
 
 ## Moving average function
 
-Assuming 0.1% trading fee, as per binance current rate.
+Assuming 0.5% trading fee.
 
 ```{r,sma,fig.width=8,fig.height=8}
 

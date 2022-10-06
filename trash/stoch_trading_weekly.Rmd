@@ -169,7 +169,7 @@ message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
 ## Stoch trading function
 
-Assuming 0.1% trading fee, as per binance current rate.
+Assuming 0.5% trading fee.
 
 
 ```{r,stofunc1}

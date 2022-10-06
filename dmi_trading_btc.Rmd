@@ -140,7 +140,7 @@ dmi <- function(price,n,fee) {
 Now let's go back in time to test the performance of the DMI indicator using different 
 intervals from 4 days to 200 days.
 
-Let's assume a 0.1% trading fee, as per binance current rate.
+Let's assume a 0.5% trading fee.
 
 Here is a table of results.
 
@@ -203,120 +203,15 @@ abline(h=hodl,col="red")
 
 ```
 
-## 129 day DMI
+## Best DMI
 
-The 129 day interval gives a high probability of high returns but occurs rarely.
-
-Below is a table of the trades made.
-
-```{r,best_sma1,fig.width=10,fig.height=8}
-
-best_n = 129
-message(paste("Selected DMI period:",best_n))
-
-dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
-price2 <- price
-price2 <- cbind(price2,dmi.adx)
-price2$higher <- price2$DIp > price2$DIn
-yesterday <- price2$higher
-yesterday <- c(NA,yesterday)
-yesterday <- yesterday[1:(length(yesterday)-1)]
-price2$yesterday <- yesterday
-price2$trade <- price2$higher - price2$yesterday
-price2 <- price2[which(price2$trade!=0),]
-if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c("date","close")]
-colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c("date","close")]
-colnames(sell) <- c("sell_date","sell_price")
-if( nrow(buy) != nrow(sell) ) {
-  MIN=min(nrow(buy),nrow(sell))
-  buy <- buy[1:MIN,]
-  sell <- sell[1:MIN,]
-}
-trades <- cbind(buy,sell)
-trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-message(paste("Number of trades:",nrow(trades)))
-message(paste("Total ROI:",prod(trades$diff)))
-message(paste("Returns over hodl:",prod(trades$diff)/hodl))
-
-trades %>% kbl(row.names=FALSE) %>%  kable_styling()
-
-HEADER=paste(best_n,"DMI")
-par(mfrow=c(2,1))
-plot(price$close~as.Date(price$date),type="l",log="y",
-  xlab="Date",ylab="price (USD)",main="USD price")
-grid()
-
-plot(dmi.adx[,1] ~ as.Date(price$date),type="l",col="blue",
-  xlab="Date",ylab="DMI",main="DMI 129d",ylim=c(0,60))
-lines(as.Date(price$date), dmi.adx[,2]  , col="red"  )
-grid()
-par(mfrow=c(1,1))
-
-```
-
-## 8 day DMI
-
-This indicator gives a very high return, but trades are executed very frequently and the mean ROI is less than 1.1.
-This requires a lot of work for manual execution, and may not be sustainable.
-
-```{r,best_sma3,fig.width=10,fig.height=8}
-
-best_n = 8
-message(paste("Selected DMI period:",best_n))
-
-dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
-price2 <- price
-price2 <- cbind(price2,dmi.adx)
-price2$higher <- price2$DIp > price2$DIn
-yesterday <- price2$higher
-yesterday <- c(NA,yesterday)
-yesterday <- yesterday[1:(length(yesterday)-1)]
-price2$yesterday <- yesterday
-price2$trade <- price2$higher - price2$yesterday
-price2 <- price2[which(price2$trade!=0),]
-if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-buy <- subset(price2,trade==1)[,c("date","close")]
-colnames(buy) <- c("buy_date","buy_price")
-sell <- subset(price2,trade==-1)[,c("date","close")]
-colnames(sell) <- c("sell_date","sell_price")
-if( nrow(buy) != nrow(sell) ) {
-  MIN=min(nrow(buy),nrow(sell))
-  buy <- buy[1:MIN,]
-  sell <- sell[1:MIN,]
-}
-trades <- cbind(buy,sell)
-trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-message(paste("Number of trades:",nrow(trades)))
-message(paste("Total ROI:",prod(trades$diff)))
-message(paste("Returns over hodl:",prod(trades$diff)/hodl))
-
-trades %>% kbl(row.names=FALSE) %>%  kable_styling()
-
-HEADER=paste(best_n,"DMI")
-par(mfrow=c(2,1))
-plot(price$close~as.Date(price$date),type="l",log="y",
-  xlab="Date",ylab="price (USD)",main="USD price")
-grid()
-
-plot(dmi.adx[,1] ~ as.Date(price$date),type="l",col="blue",
-  xlab="Date",ylab="DMI 8d",main="DMI",ylim=c(0,60))
-lines(as.Date(price$date), dmi.adx[,2]  , col="red"  )
-grid()
-par(mfrow=c(1,1))
-
-```
-
-## 32 day DMI
-
-This is good indicator because the frequency is lower, but the gains are still very good.
+Here is the time-frame with the best overall performance.
 
 ```{r,best_sma2,fig.width=10,fig.height=8}
 
-best_n = 32
+res <- res[order(-res$returns),]
+
+best_n = as.numeric(res[1,"period"])
 message(paste("Selected DMI period:",best_n))
 
 dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
@@ -355,14 +250,14 @@ plot(price$close~as.Date(price$date),type="l",log="y",
 grid()
 
 plot(dmi.adx[,1] ~ as.Date(price$date),type="l",col="blue",
-  xlab="Date",ylab="DMI",main="DMI 32d",ylim=c(0,60))
+  xlab="Date",ylab="DMI",main="DMI",ylim=c(0,60))
 lines(as.Date(price$date), dmi.adx[,2]  , col="red"  )
 grid()
 par(mfrow=c(1,1))
 
 ```
 
-## 32d DMI recent action
+## Recent action
 
 ```{r,recent1,fig.height=8,fig.width=8}
 
@@ -373,7 +268,7 @@ plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
 grid()
 
 plot(tail(dmi.adx[,1],200) ~ tail(as.Date(price$date),200),type="l",col="blue",
-  xlab="Date",ylab="DMI",main="DMI 32d",ylim=c(10,40))
+  xlab="Date",ylab="DMI",main="DMI",ylim=c(10,40))
 lines(tail(as.Date(price$date),200), tail(dmi.adx[,2],200)  , col="red"  )
 grid()
 par(mfrow=c(1,1))
@@ -418,16 +313,8 @@ abline(h=1,col="red",lty=2)
 
 ## Conclusion
 
-For the DMI, adjusting the interval length reveals a trade-off.
-Shorter timeframes give high returns, however require frequent trades, every few days.
-This may not be sustainable in the long term if trades are executed manually.
-Longer timeframes give a lower return overall, but the signals have a lower false positive rate.
-The 8-day DMI gave returns of 9.8x the hodl ROI, which is significantly better than the moving average 
-strategies which yielded returns around 3-6x the hodl ROI.
-
-If you would like to receive trade alerts on these strategies, let me know by email info@mdz-analytics.com.
-These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
-Subscribing to alerts costs 0.0005 BTC per year.
+The DMI is a solid indicator of market momentum, but the performance is not
+as good as the TSI.
 
 ## Session information
 

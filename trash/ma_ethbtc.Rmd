@@ -64,7 +64,7 @@ hodl
 
 ## Moving average function
 
-Assuming 0.1% trading fee, as per binance current rate.
+Assuming 0.5% trading fee.
 
 ```{r,sma}
 
@@ -298,7 +298,7 @@ abline(h=1,col="red",lty=2)
 ## Conclusion
 
 Hodling ETH over this period gave a 521 fold return.
-The best simple moving average was 34 days, which gave a 20970 fold return (with fees at 0.1%).
+The best simple moving average was 34 days, which gave a 20970 fold return (with fees at 0.5%).
 The best exponential moving average was 17 days, which gave a return of 10492 fold.
 The fee rate affects the fold return a bit less than BTC. 
 Still, it is definitely worthwhile to seek lower price exchanges.

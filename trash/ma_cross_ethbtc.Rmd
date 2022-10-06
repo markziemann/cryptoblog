@@ -63,7 +63,7 @@ hodl
 
 ## Moving average function
 
-Assuming 0.1% trading fee, as per binance current rate.
+Assuming 0.5% trading fee.
 
 ```{r,sma}
 
@@ -384,7 +384,7 @@ abline(h=1,col="red",lty=2)
 ## Conclusion
 
 Hodling BTC over this period gave a 378 fold return.
-The best simple moving average was 18 days, which gave a 1366 fold return (with fees at 0.1%).
+The best simple moving average was 18 days, which gave a 1366 fold return (with fees at 0.5%).
 The best exponential moving average was 16 days, which gave a return of 1680 fold.
 The fee rate strongly affects the fold return, so it is definitely worthwhile to seek lower price exchanges.
 Profitability varies strongly by year with bull market most profitable and bear market least profitable.
