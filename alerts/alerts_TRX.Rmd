@@ -224,7 +224,7 @@ lines(price2$ma~ as.Date(price2$date) ,col="red")
 ```{r,trx_ema_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste("The TRX EMA signal is", trx_signal,".")
+  MYNOTE <- paste(MYNOTE, "The TRX EMA signal is", trx_signal,".")
 }
 
 ```
