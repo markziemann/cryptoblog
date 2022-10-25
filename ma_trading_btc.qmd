@@ -12,10 +12,10 @@ but if you find it useful, consider a small tip.
 
 ## Intro
 
-Trading off simple moving averages (SMA), exponenial moving averages (EMA) and crosses between these is 
-a popular method for timing entry and exit of positions.
-In this blog post I will be exploring MA strategies on the daily timeframe to find the ones which 
-perform best.
+Trading off simple moving averages (SMA), exponenial moving averages (EMA) and
+crosses between these is a popular method for timing entry and exit of positions.
+In this blog post I will be exploring MA strategies on the daily timeframe to find
+the ones which perform best.
 
 ```{r}
 #| label: libs
@@ -299,6 +299,8 @@ lines(ma~ as.Date(price$date) ,col="red")
 
 ```{r}
 #| label: recent
+#| fig-height: 8
+#| fig-width: 10
 
 plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=SMA_HEADER)
@@ -357,6 +359,9 @@ lines(ma~ as.Date(price$date) ,col="red")
 
 ```{r}
 #| label: ema_recent
+#| fig-height: 8
+#| fig-width: 10
+
 plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=EMA_HEADER)
 grid()
@@ -422,19 +427,10 @@ abline(h=1,col="red",lty=2)
 
 ## Conclusion
 
-The best SMAs were 11 and 43 days, and the returns were approx 3x better than simply hodling.
-The best EMAs was 7 and 14 days.
-Based on minimising the number of trades for only a small reduction of returns, it appears 
-the 43d SMA is preferred.
-Another reason why I like the 43 day is that the range from 40-44 are all giving good 
-returns, this gives more confidence to this range as being profitable in future.
-The fee rate strongly affects the fold return, so it is definitely worthwhile to seek 
-exchanges with lower fees.
-Profitability varies strongly by year with bull market most profitable and bear market least 
-profitable, meaning it is probably a good idea to sit funds in fiat for 12 months following
- a cycle top.
+These SMA and EMA strategies are simple and profitable, but the hit rate is low in
+comparison to other approaches.
 
-If you would like to receive trade alerts on these strategies, let me know by email info@mdz-analytics.com.
+If you would like to receive trade alerts on these strategies, let me know by email: info@mdz-analytics.com.
 These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
 Subscribing to alerts costs 0.0005 BTC per year.
 
