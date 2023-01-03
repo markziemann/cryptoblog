@@ -1,0 +1,467 @@
+---
+title: "<br>XMR MA/EMA cross 2022 review"
+date: "`r Sys.Date()`"
+---
+
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/ma_cross.Rmd)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="../images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+In this analysis I'm developing indicators based on price data from 2013 to 2021,
+and then checking to see how those indicators performed in 2022.
+
+This should prove whether backtesting based indicators are worth it or not.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("reshape2")
+  library("gplots")
+  library("parallel")
+  library("kableExtra")
+})
+
+NUMCORES=detectCores()
+
+Sys.Date()
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining XMR historical data (daily) from CoinMarketCap.com from June 2013 to end 2021.
+
+```{r,getdata}
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&time_start=2013-06-01&time_end=2021-12-31",sep="")
+download.file(URL,destfile="xmrdat.txt")
+xmrdat <- fromJSON("xmrdat.txt")
+price <- xmrdat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","Close")
+price$date <- sapply(strsplit(price$date,"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+From 2013 to end of 2021.
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),2][2]
+mystart <- price[c(1,nrow(price)),2][1]
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## Moving average cross function
+
+Here are the functions for trading based on SMA and EMA crosses, buying when line 1 breaks through line2
+and sell when it falls below.
+All trades are executed at the end of the daily session (UTC midnight).
+
+```{r,sma}
+
+smacross <- function(price,n,fee) {
+n1=mas[n,1]
+n2=mas[n,2]
+if (n1 != n2) {
+  ma1 <- SMA(Cl(price),n=n1)
+  ma2 <- SMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+} else {
+  return(c(1,0))
+}
+}
+
+emacross <- function(price,n,fee) {
+n1=mas[n,1]
+n2=mas[n,2]
+if (n1 != n2) {
+  ma1 <- EMA(Cl(price),n=n1)
+  ma2 <- EMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+} else {
+  return(c(1,0))
+}
+}
+
+```
+
+## Backtesting
+
+Now let's go back in time to test the performance of the different MA cross strategies on the daily
+timeframe, using MA intervals from 4 to 200 days.
+
+Let's assume a 0.5% trading fee.
+
+First looking at SMA crosses.
+Below, I show the 20 highest returning indicators.
+
+```{r,backtestsma}
+
+fee=0.005
+
+mas <- expand.grid(5:200,5:200)
+#mas <- expand.grid(4:20,10:30)
+mas <- mas[which( mas$Var2 < mas$Var1) ,]
+
+res_sma <- mclapply(1:nrow(mas),function(n) {
+ smacross(price,n,fee)
+} , mc.cores=NUMCORES)
+res_sma <- do.call(rbind,res_sma)
+mas1 <- as.data.frame(mas,stringsAsFactors=FALSE)
+res_sma <- cbind(mas1,res_sma)
+colnames(res_sma) <- c("MA1","MA2","returns","trades")
+res_sma$mean <- res_sma$returns^(1/res_sma$trades)
+
+res_sma <- subset(res_sma,mean>1.1)
+
+res_sma <- res_sma[order(-res_sma$returns),]
+
+head(res_sma,20) %>% kbl(caption="Top SMA strategies",row.names=FALSE) %>%  kable_styling()
+
+```
+
+Now we'll do the backtesting for EMA crosses.
+Here are the best 20 EMA cross strategies.
+
+```{r,backtestema}
+
+res_ema <- mclapply(1:nrow(mas),function(n) {
+ emacross(price,n,fee)
+} , mc.cores=NUMCORES)
+res_ema <- do.call(rbind,res_ema)
+mas1 <- as.data.frame(mas,stringsAsFactors=FALSE)
+res_ema <- cbind(mas1,res_ema)
+colnames(res_ema) <- c("MA1","MA2","returns","trades")
+res_ema$mean <- res_ema$returns^(1/res_ema$trades)
+
+res_ema <- subset(res_ema,mean>1.1)
+
+res_ema <- res_ema[order(-res_ema$returns),]
+
+head(res_ema,20) %>% kbl(caption="Top EMA strategies",row.names=FALSE) %>%  kable_styling()
+
+```
+
+## SMA cross optimisation
+
+Now let's take a closer look at the best SMA cross strategy.
+
+```{r,best_sma,fig.width=10,fig.height=8}
+
+n1=res_sma[1,1]
+n2=res_sma[1,2]
+message(paste("Best short SMA period:",n2))
+message(paste("Best long SMA period:",n1))
+if (n1 != n2) {
+  ma1 <- SMA(Cl(price),n=n1)
+  ma2 <- SMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  returns <- prod(trades$diff)
+} else {
+  returns <- 1
+}
+sma_trades <- trades
+message(paste("Number of trades:",nrow(sma_trades)))
+message(paste("Total ROI:",prod(sma_trades$diff)))
+message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
+
+sma_trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+## EMA cross optimisation
+
+Same thing for the best EMA cross strategy.
+
+```{r,best_ema,fig.width=10,fig.height=8}
+
+n1=res_ema[1,1]
+n2=res_ema[1,2]
+message(paste("Best short EMA period:",n2))
+message(paste("Best long EMA period:",n1))
+if (n1 != n2) {
+  ma1 <- EMA(Cl(price),n=n1)
+  ma2 <- EMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  returns <- prod(trades$diff)
+} else {
+  returns <- 1
+}
+ema_trades <- trades
+message(paste("Number of trades:",nrow(ema_trades)))
+message(paste("Total ROI:",prod(ema_trades$diff)))
+message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
+
+ema_trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+## Download 2022 data
+
+```{r,getdata2}
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&time_start=2013-06-01&time_end=2022-12-31",sep="")
+download.file(URL,destfile="xmrdat.txt")
+xmrdat <- fromJSON("xmrdat.txt")
+price <- xmrdat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","Close")
+price$date <- sapply(strsplit(price$date,"T"),"[[",1)
+
+```
+
+## SMA cross recent action
+
+```{r,sma_recent}
+
+n1=res_sma[1,1]
+n2=res_sma[1,2]
+message(paste("Best short SMA period:",n2))
+message(paste("Best long SMA period:",n1))
+if (n1 != n2) {
+  ma1 <- SMA(Cl(price),n=n1)
+  ma2 <- SMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  returns <- prod(trades$diff)
+} else {
+  returns <- 1
+}
+sma_trades <- trades
+message(paste("Number of trades:",nrow(sma_trades)))
+message(paste("Total ROI:",prod(sma_trades$diff)))
+message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
+
+sma_trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+## EMA cross recent action
+
+```{r,ema_recent}
+
+n1=res_ema[1,1]
+n2=res_ema[1,2]
+message(paste("Best short EMA period:",n2))
+message(paste("Best long EMA period:",n1))
+if (n1 != n2) {
+  ma1 <- EMA(Cl(price),n=n1)
+  ma2 <- EMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  returns <- prod(trades$diff)
+} else {
+  returns <- 1
+}
+ema_trades <- trades
+message(paste("Number of trades:",nrow(ema_trades)))
+message(paste("Total ROI:",prod(ema_trades$diff)))
+message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
+
+ema_trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+## Trades by year
+
+It is good to see whether the strategy gives consistent returns over the years.
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+sma_trades$year <- sapply(strsplit(sma_trades[,"sell_date"],"-"),"[[",1)
+sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,"diff"] } )
+sma_yearly <- sma_yearly[which(lapply(sma_yearly,length)>0)]
+vioplot(sma_yearly,ylab="trade ROI distribution",main="XMR daily SMA cross strategy")
+
+yr <- sapply(sma_yearly,prod)
+barplot(yr,ylab="yearly fold returns",main="XMR daily SMA cross strategy")
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+ema_trades$year <- sapply(strsplit(ema_trades[,"sell_date"],"-"),"[[",1)
+ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,"diff"] } )
+ema_yearly <- ema_yearly[which(lapply(ema_yearly,length)>0)]
+vioplot(ema_yearly,ylab="trade ROI distribution",main="XMR daily EMA cross strategy")
+
+yr <- sapply(ema_yearly,prod)
+barplot(yr,ylab="yearly fold returns",main="XMR daily EMA cross strategy")
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+```
+
+## Conclusion
+
+Best SMA cross strategy (as at last script edit) was 12/21d, with returns roughly double the best single SMA strategy (43d), achieved with fewer trades.
+Best EMA cross strategy was 27/48d and got returns 2.9 times hodl, but with only 15 trades.
+In conclusion, these strategies give better returns than single MA strategies.
+
+If you would like to receive trade alerts on these strategies, let me know by email info@mdz-analytics.com.
+These alerts are sent at 30 mins before the close of the daily session and will assist you in sticking to your desired strategy.
+Subscribing to alerts costs 0.0005 XMR per year.
+
+## Session information
+
+For reproducibility
+
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
+
+</details>
