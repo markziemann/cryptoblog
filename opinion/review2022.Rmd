@@ -1,0 +1,169 @@
+---
+title: "<br>2022 Year in Review"
+date: "2023-01-05"
+---
+
+[Source code](https://github.com/MDZanalytics/cryptoblog/tree/main/opinion/review2022.Rmd)
+
+This document is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+**Note:** This is not financial advice - it is for educational and informational purposes only.
+
+```{r,lib, echo=FALSE}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+
+```
+
+2022 has been an absolutely crazy year in the cryptocurrency space.
+Bitcoin began the year at US$46k and closed it at $16.5k marking one of the
+worst calendar years for the premier cryptocurrency since it's inception (a 64% drop).
+
+Even though cryptocurrency markets have been plummeting, there have been significant
+opportunities, especially for short traders and for those who sold a chunk of their
+stack while the price was in the >$40k range.
+These folks will be able to rebuy at much lower prices and grow their stack
+significantly, as compared to "hodlers".
+
+Here at MDZ Analytics, we pride ourselves on providing a fantastic set of
+cryptocurrency market analyses and indicators, so let's look back at the market
+indicators of 2022 and see how they performed for BTC, ETH and XMR.
+To make this analysis work I performed backtesting based optimisation of indicators
+using data up to end of 2021, and then traced the performance of these indicators in
+2022.
+
+For an explanation of the indicators, visit the [MDZ analytics homepage](mdz-analytics.com).
+
+Detailed analysis and parameters used can be found [here](mdz-analytics.com/year_review/).
+
+The code is located [here](https://github.com/MDZanalytics/cryptoblog/tree/main/year_review).
+
+## Bitcoin	
+
+<img src="images/BTCUSDT_2023-01-04_22-08-55.png" alt="BTC price action 2022" height="450" width="600" border="0" />
+
+Below we can tabulate the different strategies in the period 2013-2022 and just 2022.
+HODL yielded a 377x increase in the 2013-2022 timeframe, but some of the indicators gave
+significantly higher returns than that.
+In 2022, BTC lost 64% of its value, meaning holders retained only 36% of their USD value.
+Those who sold at the end of 2021 and stayed out of the market fared comparatively well,
+retaining 100% of their USD value.
+
+Regarding the indicators, their performance was between 0.40 and 1.0, which importantly
+exceeded the HODL returns.
+The poorest performing indicators were KST, TSI, DC, Stoch and dRSI.
+SMA cross was marginally better at 0.57, followed by SMA at 0.75.
+At the top end, the EMA was better at retaining value at 0.85, along with the
+EMA cross at 0.88, but the overall best performer was the DMI which flashed a sell
+signal in 2021 at $53.6k.
+
+| Strategy | Total returns | 2022 trades | 2022 returns |
+| --- | --- | --- | --- |
+| HODL | 377 |0 | 0.36 |
+| DMI | 2.5x | 0 | 1.00 |
+| DC | 1.3x | 7 | 0.46 |
+| dRSI | 0.87x | 12 | 0.49 |
+| Stoch | 1.3x | 9 | 0.49 |
+| TSI | 1.5x | 8 | 0.43 |
+| KST | 2.4x | 11 | 0.40 |
+| SMA | 1.2x | 7 | 0.75 |
+| EMA | 1.6x | 7 | 0.85 |
+| SMAcross | 3.1x | 6 | 0.57 |
+| EMAcross | 3.4x | 1 | 0.88 |
+
+One of the highlights from this analysis was that overall, strtegies that flash less frequently
+performed better, and secondly it underscores the importance of EMA ribbons in BTCs price action.
+
+## Ethereum
+
+<img src="images/ETHUSDT_2023-01-04_22-09-30.png" alt="ETH price action 2022" height="450" width="600" border="0" />
+
+Ethereum is a newer coin than BTC and so since listing on coinmarketcap.com it has recorded a
+larger appreciation (1372x).
+It is also a more volatile market, meaning that our indicators outperformed holders since 2015.
+While ETH lost 67% of its value over the calendar year, adherents to our indicator set would
+have fared much better.
+KST fared the worst at 0.55.
+The best performing strategies were Stoch, EMA, DMI, and SMA retaining in excess of 68% of
+capital.
+
+| Strategy | Total returns | 2022 trades | 2022 returns |
+| --- | --- | --- | --- |
+| HODL | 1372 | 0 | 0.33 |
+| DMI | 10.1x | 7 | 0.75 |
+| DC | 14.2x | 9 | 0.60 |
+| dRSI | 4.2x | 12 | 0.60 |
+| Stoch | 8.1x | 10 | 0.68 |
+| TSI | 5.2x | 8 | 0.69 |
+| KST | 6.8x | 8 | 0.55 |
+| SMA | 16.6x | 8 | 1.0 |
+| EMA | 5.1x | 8 | 0.70 |
+| SMAcross | 12.5x | 6 | 0.69 |
+| EMAcross | 14.2x | 6 | 0.63 |
+
+## Monero
+
+<img src="images/XMRUSDT_2023-01-04_22-09-45.png" alt="XMR price action 2022" height="450" width="600" border="0" />
+
+In contrast to BTC and ETH, XMR had a less severe drawdown of only 36% in 2022, which I think is
+due to its undervaluation relative to utility and demonstrated real-world growth in 2022.
+
+Again, we can see that the trend of the indicators with lower frequency signals performing better
+continued, with DMI and SMA cross performing best, retaining >83% of capital.
+
+The poorest were the EMA, dRSI and SMA, retaining less than 40% of capital.
+
+Reasons why some of these indicators performed worse than the "buy and hold" strategy include
+ (i) the XMR/BTC pair is more influential, so BTC moves relative to USD influence the
+available liquidity into coins like XMR; and (ii) that while overall XMR price was sideways in
+USD terms there were some significant volatility events that could be construed as "bull traps",
+where the price action turned positive temporarily, followed by short violent downturns.
+
+| Strategy | Total returns | 2022 trades | 2022 returns |
+| --- | --- | --- | --- |
+| HODL | 142 | 0 | 0.64 |
+| DMI | 4.7x | 3 | 0.84 |
+| DC | 2.9x | 3 | 0.74 |
+| dRSI | 0.1x | 22 | 0.26 |
+| Stoch | 2.8x | 6 | 0.46 |
+| TSI | 4.4x | 12 | 0.56 |
+| KST | 16.3x | 11 | 0.58 |
+| SMA | 0.24x | 18 | 0.37 |
+| EMA | 0.25x | 18 | 0.27 |
+| SMAcross | 11.8x | 1 | 0.83 |
+| EMAcross | 3.9x | 4 | 0.65 |
+
+## Conclusion
+
+Overall, this analysis shows that trading using these indicators was superior than simply buying
+and holding.
+This is a validation of backtesting based indicator optimisation and a good reason why you
+should incorporate these indicators into your own strategy.
+
+Here we've demonstrated that low frequency indicators perform better during bear markets.
+The SMA cross, EMA cross and DMI all outperformed hodlers, while dRSI, KST and TSI
+performed relatively poorly.
+
+Those hodling XMR fared relatively better than those with BTC or ETH, potentially due to
+the lower speculative demand of XMR, together with XMRs real world adoption on DNMs.
+Based on this it might be wise to adjust your long term holdings by increasing the alloation
+towards XMR away from BTC and ETH.
+Nevertheless there are some risks associated with XMR such as delistings and regulatory
+scrutiny which could sour market sentiment.
+
+It will be useful in future to determine whether these signals can perform well with leveraged
+longs and shorts.
+
+

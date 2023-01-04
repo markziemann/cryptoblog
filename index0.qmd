@@ -238,6 +238,10 @@ Backtesting: [BTC](crypto/ensembl_trading_btc.html), [ETH](crypto/ensembl_tradin
 
 <hr>
 
+## Year in review
+
+* [2022 Cryptocurrency market and indicators in review](https://mdz-analytics.com/crypto/review2022.html).
+
 ## Discussion
 
 Join the discussion on Discord.

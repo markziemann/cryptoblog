@@ -240,6 +240,10 @@ Backtesting: [BTC](crypto/ensembl_trading_btc.html), [ETH](crypto/ensembl_tradin
 
 * [Bitcoin's fatal flaw nobody is talking about](crypto/bitcoin_flaw.html)
 
+## Year in review
+
+* [2022 Cryptocurrency market and indicators in review](https://mdz-analytics.com/crypto/review2022.html).
+
 <hr>
 
 ## <br>Discussion

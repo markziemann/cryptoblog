@@ -1,0 +1,383 @@
+---
+title: "<br>ETH MA/EMA 2022 review"
+date: "`r Sys.Date()`"
+---
+
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/ma_trading_eth.Rmd)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="../images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+In this analysis I'm developing indicators based on price data from 2013 to 2021,
+and then checking to see how those indicators performed in 2022.
+
+This should prove whether backtesting based indicators are worth it or not.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+Sys.Date()
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining ETH historical data (daily) from CoinMarketCap.com from June 2013 to end 2021.
+
+```{r,getdata}
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=2021-12-31",sep="")
+download.file(URL,destfile="ethdat.txt")
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+From 2013 to end of 2021.
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),2][2] 
+mystart <- price[c(1,nrow(price)),2][1] 
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## Moving average function
+
+Here are the functions for trading based on SMA and EMAs, buying when the price breaks through the
+MA line and sell when it falls below the MA line. All trades are executed at the end of the daily session (UTC midnight).
+
+```{r,functions}
+
+sma <- function(price,n,fee) {
+ma <- SMA(Cl(price),n=n)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(c(prod(trades$diff),nrow(trades)))
+}
+
+ema <- function(price,n,fee) {
+ma <- EMA(Cl(price),n=n)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(c(prod(trades$diff),nrow(trades)))
+}
+
+```
+
+## Backtesting
+
+Let's look back in time and trial SMA and EMA strategies with an interval from 3 to 200 days.
+
+Let's assume a 0.5% trading fee.
+
+
+```{r,backtest}
+
+fee=0.005
+
+myrange <- 3:200
+
+res <- t(sapply(myrange,function(n) { sma(price,n,fee) } ))
+res <- as.data.frame(cbind(myrange,res))
+colnames(res) <- c("MAperiod","returns","trades")
+res$mean <- res$returns^(1/res$trades)
+res_sma <- res
+
+res <- t(sapply(myrange,function(n) { ema(price,n,fee) } )) 
+res <- as.data.frame(cbind(myrange,res))
+colnames(res) <- c("MAperiod","returns","trades")
+res$mean <- res$returns^(1/res$trades)
+res_ema <- res
+
+```
+
+## Filter
+
+```{r,filt}
+
+res_ema <- subset(res_ema,mean>1.1)
+res_ema <- res_ema[order(-res_ema$returns),]
+head(res_ema)
+
+res_sma <- subset(res_sma,mean>1.1)
+res_sma <- res_sma[order(-res_sma$returns),]
+head(res_sma)
+
+```
+
+### Best SMA
+
+```{r,best_sma,fig.width=10,fig.height=8}
+
+best_sma = head(res_sma[order(-res_sma$returns),"MAperiod"],1)
+message(paste("Best SMA period:",best_sma))
+ma <- SMA(Cl(price),n=best_sma)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]  
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+sma_trades <- cbind(buy,sell)
+message(paste("Number of trades:",nrow(sma_trades)))
+sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trades$buy_price ) +1 - (2 * fee )
+message(paste("Total ROI:",prod(sma_trades$diff)))
+message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
+sma_trades  %>% kbl(row.names = FALSE) %>%  kable_styling()
+
+```
+
+### Best EMA
+
+Now have a look at the best EMA option.
+
+```{r,best_ema,fig.width=10,fig.height=8}
+
+best_ema = head(res_ema[order(-res_ema$returns),"MAperiod"],1)
+message(paste("Best EMA period:",best_ema))
+ma <- EMA(Cl(price),n=best_ema)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+ema_trades <- cbind(buy,sell)
+ema_trades$diff <- ( ( ema_trades$sell_price - ema_trades$buy_price ) / ema_trades$buy_price ) +1 - ( 2 * fee )
+message(paste("Number of trades:",nrow(ema_trades)))
+message(paste("Total ROI:",prod(ema_trades$diff)))
+message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
+sma_trades  %>% kbl(row.names = FALSE) %>%  kable_styling()
+EMA_HEADER=paste(best_ema,"day exponential moving average")
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=EMA_HEADER)
+grid()
+lines(ma~ as.Date(price$date) ,col="red")
+
+```
+
+## Get 2022 data
+
+```{r,dl2}
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ETH&convert=USD&interval=daily&time_start=2013-06-01&time_end=2022-12-31",sep="")
+download.file(URL,destfile="ethdat.txt")
+dat <- fromJSON("ethdat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+### SMA recent action
+
+```{r,sma_recent}
+
+ma <- SMA(Cl(price),n=best_sma)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]  
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+sma_trades <- cbind(buy,sell)
+message(paste("Number of trades:",nrow(sma_trades)))
+sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trades$buy_price ) +1 - (2 * fee )
+message(paste("Total ROI:",prod(sma_trades$diff)))
+message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
+sma_trades  %>% kbl(row.names = FALSE) %>%  kable_styling()
+
+```
+
+### EMA recent action
+
+```{r,ema_recent}
+
+ma <- EMA(Cl(price),n=best_ema)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+ema_trades <- cbind(buy,sell)
+ema_trades$diff <- ( ( ema_trades$sell_price - ema_trades$buy_price ) / ema_trades$buy_price ) +1 - ( 2 * fee )
+message(paste("Number of trades:",nrow(ema_trades)))
+message(paste("Total ROI:",prod(ema_trades$diff)))
+message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
+sma_trades  %>% kbl(row.names = FALSE) %>%  kable_styling()
+EMA_HEADER=paste(best_ema,"day exponential moving average")
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=EMA_HEADER)
+grid()
+lines(ma~ as.Date(price$date) ,col="red")
+
+```
+
+## Trades by year
+
+We know that bitcoin moves in four year cycles. Lets take a look at profits over the years.
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+sma_trades$year <- sapply(strsplit(sma_trades[,3],"-"),"[[",1)
+sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,5] } )
+sma_yearly <- sma_yearly[which(lapply(sma_yearly,length)>0)]
+vioplot(sma_yearly,ylab="trade ROI distribution",main="ETH daily SMA strategy")
+
+yr <- sapply(sma_yearly,prod)
+barplot(yr,ylab="yearly fold returns",main="ETH daily SMA strategy")
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+ema_trades$year <- sapply(strsplit(ema_trades[,3],"-"),"[[",1)
+ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,5] } )
+ema_yearly <- ema_yearly[which(lapply(ema_yearly,length)>0)]
+vioplot(ema_yearly,ylab="trade ROI distribution",main="ETH daily EMA strategy")
+
+yr <- sapply(ema_yearly,prod)
+barplot(yr,ylab="yearly fold returns",main="ETH daily EMA strategy")
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+```
+
+## Conclusion
+
+MA and EMA seems to have had good performance.
+
+## Session information
+
+For reproducibility
+
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
+
+</details>
