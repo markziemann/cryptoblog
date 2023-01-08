@@ -36,7 +36,7 @@ suppressPackageStartupMessages({
 
 Sys.Date()
 
-CORES = detectCores()/2
+CORES = detectCores()
 ```
 
 Reminder: this is not financial advice.
@@ -48,13 +48,17 @@ Obtaining historical data (daily) from CoinMarketCap.com from 2014 to present.
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=BTC&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
 download.file(URL,destfile="xmrdat.txt")
 dat <- fromJSON("xmrdat.txt")
 price <- dat$data$quotes
-price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+price <- data.frame(price$time_close, price$quote$BTC$high, price$quote$BTC$low, price$quote$BTC$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+for (narow in which(is.na(price$close)) ) {
+  price[narow,] <- price[narow-1,]
+}
 
 ```
 
