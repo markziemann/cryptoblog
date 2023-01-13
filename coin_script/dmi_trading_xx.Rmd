@@ -210,15 +210,28 @@ abline(h=hodl,col="red")
 
 ```
 
+## Filtering
+
+Discard strategies with mean < 1.1 and select the one with the highest overall return.
+
+```{r,filt2}
+
+if ( nrow(subset(res,mean>1.1)) == 0 ) {
+  res <- head(res[order(-res$mean),],1)
+} else {
+  res <- subset(res,mean>1.1)
+  res <- res[order(-res$returns),]
+}
+
+```
 ## Best DMI
 
 This is good indicator because the frequency is lower, but the gains are still very good.
 
 ```{r,best_sma2,fig.width=10,fig.height=8}
 
-res <- res[order(-res$returns),]
+best_n = as.numeric(head(res$period,1))
 
-best_n = as.numeric(head(res[order(-res$returns),"period"],1))
 message(paste("Selected DMI period:",best_n))
 
 dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)

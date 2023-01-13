@@ -171,11 +171,11 @@ res <- cbind(params,res,stringsAsFactors=FALSE)
 
 Here is a table of results.
 
-```{r,filt1}
+```{r,filt0}
 
 res2 <- res[order(-res$returns),]
 
-head(res2,20) %>% 
+head(res2,20) %>%
   kbl(caption="highest returning strategies") %>%
   kable_styling("hover", full_width = F)
 
@@ -194,6 +194,22 @@ head(res2,20) %>%
 ```
 
 I also tried SMA but the results were disappointing.
+
+
+## Filtering1
+
+Discard strategies with mean < 1.1 and select the one with the highest overall return.
+
+```{r,filt1}
+
+if ( nrow(subset(res2,mean>1.1)) == 0 ) {
+  res2 <- head(res2[order(-res2$mean),],1)
+} else {
+  res2 <- subset(res2,mean>1.1)
+  res2 <- res2[order(-res2$returns),]
+}
+
+```
 
 ## Plots
 

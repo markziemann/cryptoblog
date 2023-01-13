@@ -40,7 +40,7 @@ suppressPackageStartupMessages({
 
 Sys.Date()
 
-CORES=detectCores()/2
+CORES=detectCores()
 
 ```
 
@@ -236,13 +236,28 @@ mtext("Mean and total returns")
 
 ```
 
+## Filtering
+
+Discard strategies with mean < 1.1 and select the one with the highest overall return.
+
+```{r,filt2}
+
+if ( nrow(subset(res,mean>1.1)) == 0 ) {
+  res <- head(res[order(-res$mean),],1)
+} else {
+  res <- subset(res,mean>1.1)
+  res <- res[order(-res$returns),]
+}
+
+```
+
 ## Optimised strategy
 
 Optimise for highest returns.
 
 ```{r,best1,fig.width=10,fig.height=8}
 
-best_n = head(res[order(-res$returns),],1)$nr
+best_n = res$nr[1]
 
 message(paste("Selected n period:",best_n))
 

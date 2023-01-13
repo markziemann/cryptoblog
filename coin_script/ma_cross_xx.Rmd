@@ -259,6 +259,13 @@ Now let's take a closer look at the best SMA cross strategy.
 
 ```{r,best_sma,fig.width=10,fig.height=8}
 
+if ( nrow(subset(res_sma,mean>1.1)) == 0 ) {
+  res_sma <- head(res_sma[order(-res_sma$mean),],1)
+} else {
+  res_sma <- subset(res_sma,mean>1.1)
+  res_sma <- res_sma[order(-res_sma$returns),]
+}
+
 n1=best_sma[1,1]
 n2=best_sma[1,2]
 message(paste("Best short SMA period:",n2))
@@ -345,6 +352,13 @@ lines(tail(ma2,200) ~ tail(as.Date(price$date),200) ,col="blue")
 Same thing for the best EMA cross strategy.
 
 ```{r,best_ema,fig.width=10,fig.height=8}
+
+if ( nrow(subset(res_ema,mean>1.1)) == 0 ) {
+  res_ema <- head(res_ema[order(-res_ema$mean),],1)
+} else {
+  res_ema <- subset(res_ema,mean>1.1)
+  res_ema <- res_ema[order(-res_ema$returns),]
+}
 
 n1=best_ema[1,1]
 n2=best_ema[1,2]

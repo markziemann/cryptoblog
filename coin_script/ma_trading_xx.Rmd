@@ -266,7 +266,15 @@ Now let's select the two best approaches and show the history of trades.
 
 ```{r,best_sma,fig.width=10,fig.height=8}
 
-best_sma = as.numeric(rownames(head(res_sma[order(-res_sma$returns),],1)))
+if ( nrow(subset(res_sma,mean>1.1)) == 0 ) {
+  res_sma <- head(res_sma[order(-res_sma$mean),],1)
+} else {
+  res_sma <- subset(res_sma,mean>1.1)
+  res_sma <- res_sma[order(-res_sma$returns),]
+}
+
+best_sma = as.numeric(rownames(res_sma)[1])
+#as.numeric(rownames(head(res_sma[order(-res_sma$returns),],1)))
 if( length(best_sma) == 0 ) { best_sma=2 }
 message(paste("Best SMA period:",best_sma))
 ma <- SMA(Cl(price),n=best_sma)
@@ -331,7 +339,14 @@ Now have a look at the best EMA option.
 
 ```{r,best_ema,fig.width=10,fig.height=8}
 
-best_ema = as.numeric(rownames(head(res_ema[order(-res_ema$returns),],1)))
+if ( nrow(subset(res_ema,mean>1.1)) == 0 ) {
+  res_ema <- head(res_ema[order(-res_ema$mean),],1)
+} else {
+  res_ema <- subset(res_ema,mean>1.1)
+  res_ema <- res_ema[order(-res_ema$returns),]
+}
+
+best_ema = as.numeric(rownames(res_ema)[1])
 if( length(best_ema) == 0 ) { best_ema=2 }
 message(paste("Best EMA period:",best_ema))
 ma <- EMA(Cl(price),n=best_ema)

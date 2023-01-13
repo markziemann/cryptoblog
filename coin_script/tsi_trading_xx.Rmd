@@ -244,7 +244,6 @@ head(res3,20) %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
-
 ## Plots
 
 Another approach to selecting "good" parameters could be to begin with the default values and then
@@ -264,6 +263,22 @@ plot(res3$mean , res3$returns, log="y",xlab="mean ROI", ylab="total returns")
 points(basic_mean,basic_returns,col="red",pch=19,cex=2)
 abline(h=hodl,col="red")
 grid()
+
+```
+
+## Filter part 1
+
+The strategy is to discard any strategies with a mean ROI<1.1 and then select the one with the
+highest overall return.
+
+```{r,filt1}
+
+if ( nrow(subset(res3,mean>1.1)) == 0 ) {
+  res3 <- head(res3[order(-res3$mean),],1)
+} else {
+  res3 <- subset(res3,mean>1.1)
+  res3 <- res3[order(-res3$returns),]
+}
 
 ```
 
@@ -317,6 +332,21 @@ This is less optimal if trades are executed manually.
 
 res2 <- res2[order(-res2$returns),]
 head(res2,20) %>% kbl() %>%  kable_styling("hover", full_width = F)
+
+```
+
+## Filtering part 2
+
+Same filtering approach as above.
+
+```{r,filt2}
+
+if ( nrow(subset(res2,mean>1.1)) == 0 ) {
+  res2 <- head(res2[order(-res2$mean),],1)
+} else {
+  res2 <- subset(res2,mean>1.1)
+  res2 <- res2[order(-res2$returns),]
+}
 
 ```
 
