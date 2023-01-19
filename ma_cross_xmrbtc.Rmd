@@ -1,5 +1,5 @@
 ---
-title: "Trading TICKER based on MA and EMA crosses"
+title: "<br>Trading XMR based on MA and EMA crosses"
 date: "`r Sys.Date()`"
 ---
 
@@ -14,9 +14,10 @@ but if you find it useful, consider a small tip.
 
 Trading off simple moving averages (SMAs), exponenial moving averages (EMAs) and crosses between these 
 lines are popular methods for timing entry and exit of positions.
-In this blog post I will be back-testing simple moving averages to find the one which performed the best.
+In this blog post I will be back-testing simple moving averages to find the one which performed the best for
+XMR's price history.
 
-This report is time sensitive - today's date is shown below.
+This page is designed to be updated daily - today's date is shown below.
 
 ```{r,lib}
 
@@ -43,18 +44,22 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining historical data (daily) from CoinMarketCap.com from June 2013 to present.
+Obtaining historical data (daily) from CoinMarketCap.com from 2014 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=TICKER&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
-#download.file(URL,destfile="dat.txt")
-dat <- fromJSON("dat.txt")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=BTC&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="xmrdat.txt")
+dat <- fromJSON("xmrdat.txt")
 price <- dat$data$quotes
-price <- data.frame(price$time_close,price$quote$USD$close,stringsAsFactors=FALSE)
+price <- data.frame(price$time_close,price$quote$BTC$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","Close")
 price$date <- sapply(strsplit(price$date,"T"),"[[",1)
+
+for (narow in which(is.na(price$Close)) ) {
+  price[narow,] <- price[narow-1,]
+}
 
 ```
 
@@ -97,24 +102,22 @@ if (n1 != n2) {
   price2$yesterday <- yesterday
   price2$trade <- price2$higher - price2$yesterday
   price2 <- price2[which(price2$trade!=0),]
-  if ( nrow(price2) >0 ) {
-    if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-    if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-    buy <- subset(price2,trade==1)[,c(1,2)]
-    colnames(buy) <- c("buy_date","buy_price")
-    sell <- subset(price2,trade==-1)[,c(1,2)]
-    colnames(sell) <- c("sell_date","sell_price")
-    if( nrow(buy) != nrow(sell) ) {
-      MIN=min(nrow(buy),nrow(sell))
-      buy <- buy[1:MIN,]
-      sell <- sell[1:MIN,]
-    }
-    trades <- cbind(buy,sell)
-    trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-    return(c(prod(trades$diff),nrow(trades)))
-  } else {
-    return(c(1,0))
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
   }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+} else {
+  return(c(1,0))
 }
 }
 
@@ -134,24 +137,22 @@ if (n1 != n2) {
   price2$yesterday <- yesterday
   price2$trade <- price2$higher - price2$yesterday
   price2 <- price2[which(price2$trade!=0),]
-  if ( nrow(price2) >0 ) {
-    if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-    if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-    buy <- subset(price2,trade==1)[,c(1,2)]
-    colnames(buy) <- c("buy_date","buy_price")
-    sell <- subset(price2,trade==-1)[,c(1,2)]
-    colnames(sell) <- c("sell_date","sell_price")
-    if( nrow(buy) != nrow(sell) ) {
-      MIN=min(nrow(buy),nrow(sell))
-      buy <- buy[1:MIN,]
-      sell <- sell[1:MIN,]
-    }
-    trades <- cbind(buy,sell)
-    trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-    return(c(prod(trades$diff),nrow(trades)))
-  } else {
-    return(c(1,0))
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
   }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+} else {
+  return(c(1,0))
 }
 }
 
@@ -186,9 +187,9 @@ colnames(res_sma) <- c("MA1","MA2","returns","trades")
 res_sma$mean <- res_sma$returns^(1/res_sma$trades)
 
 best_sma <- res_sma[order(-res_sma$mean),]
-head(best_sma,20) %>% kbl(caption="Best ROI SMA strategies") %>%  kable_styling()
+head(best_sma,20) %>% kbl(caption="Best ROI SMA strategies",row.names=FALSE) %>%  kable_styling()
 best_sma <- head(res_sma[order(-res_sma$returns),],20)
-best_sma %>% kbl(caption="Highest returns SMA strategies") %>%  kable_styling()
+best_sma %>% kbl(caption="Highest returns SMA strategies",row.names=FALSE) %>%  kable_styling()
 
 ```
 
@@ -220,7 +221,6 @@ Here are the best 20 EMA cross strategies.
 res_ema <- mclapply(1:nrow(mas),function(n) {
  emacross(price,n,fee)
 } , mc.cores=NUMCORES)
-
 res_ema <- do.call(rbind,res_ema)
 mas1 <- as.data.frame(mas,stringsAsFactors=FALSE)
 res_ema <- cbind(mas1,res_ema)
@@ -228,9 +228,9 @@ colnames(res_ema) <- c("MA1","MA2","returns","trades")
 res_ema$mean <- res_ema$returns^(1/res_ema$trades)
 
 best_ema <- res_ema[order(-res_ema$mean),]    
-head(best_ema,20) %>% kbl(caption="Best ROI EMA strategies") %>%  kable_styling()
+head(best_ema,20) %>% kbl(caption="Best ROI EMA strategies",row.names=FALSE) %>%  kable_styling()
 best_ema <- head(res_ema[order(-res_ema$returns),],20)
-best_ema %>% kbl(caption="Highest returns EMA strategies") %>%  kable_styling()
+best_ema %>% kbl(caption="Highest returns EMA strategies",row.names=FALSE) %>%  kable_styling()
 
 ```
 
@@ -258,13 +258,6 @@ heatmap.2(w[7:50,1:30],scale="none",trace="none",dendrogram="none", Rowv=FALSE,
 Now let's take a closer look at the best SMA cross strategy.
 
 ```{r,best_sma,fig.width=10,fig.height=8}
-
-if ( nrow(subset(res_sma,mean>1.1)) == 0 ) {
-  res_sma <- head(res_sma[order(-res_sma$mean),],1)
-} else {
-  res_sma <- subset(res_sma,mean>1.1)
-  res_sma <- res_sma[order(-res_sma$returns),]
-}
 
 n1=best_sma[1,1]
 n2=best_sma[1,2]
@@ -305,21 +298,13 @@ message(paste("Number of trades:",nrow(sma_trades)))
 message(paste("Total ROI:",prod(sma_trades$diff)))
 message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
 
-sma_dat <- c("indicator"="SMAcross",
-  "parameter"=paste(n1,n2,sep=","),
-  "meanROI"= mean(sma_trades$diff) ,
-  "totalROI"= prod(sma_trades$diff) ,
-  "ntrades"= nrow(sma_trades) ,
-  "ndays"= nrow(price) ,
-  "xhodl"= prod(sma_trades$diff)/hodl )
-
 ```
 
 Here is a break down of all the trades executed for the best SMA cross strategy.
 
 ```{r,best_sma2,fig.width=10,fig.height=8}
 
-sma_trades %>% kbl() %>%  kable_styling()
+sma_trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 ```
 
@@ -337,7 +322,7 @@ lines(ma2~ as.Date(price$date) ,col="blue")
 
 ### SMA cross recent action
 
-```{r,sma_recent,fig.height=8,fig.width=8}
+```{r,sma_recent}
 
 plot(tail(price$Close,200)~tail(as.Date(price$date),200),type="l",log="y",
   xlab="Date",ylab="price (USD)",main=SMA_HEADER)
@@ -352,13 +337,6 @@ lines(tail(ma2,200) ~ tail(as.Date(price$date),200) ,col="blue")
 Same thing for the best EMA cross strategy.
 
 ```{r,best_ema,fig.width=10,fig.height=8}
-
-if ( nrow(subset(res_ema,mean>1.1)) == 0 ) {
-  res_ema <- head(res_ema[order(-res_ema$mean),],1)
-} else {
-  res_ema <- subset(res_ema,mean>1.1)
-  res_ema <- res_ema[order(-res_ema$returns),]
-}
 
 n1=best_ema[1,1]
 n2=best_ema[1,2]
@@ -399,21 +377,13 @@ message(paste("Number of trades:",nrow(ema_trades)))
 message(paste("Total ROI:",prod(ema_trades$diff)))
 message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
 
-ema_dat <- c("indicator"="EMAcross",
-  "parameter"=paste(n1,n2,sep=","),
-  "meanROI"= mean(ema_trades$diff) ,
-  "totalROI"= prod(ema_trades$diff) ,
-  "ntrades"= nrow(ema_trades) ,
-  "ndays"= nrow(price) ,
-  "xhodl"= prod(ema_trades$diff)/hodl )
-
 ```
 
 Here is a break down of all the trades executed for the best EMA cross strategy.
 
 ```{r,best_ema2,fig.width=10,fig.height=8}
 
-ema_trades %>% kbl() %>%  kable_styling()
+ema_trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 ```
 
@@ -478,47 +448,25 @@ It is good to see whether the strategy gives consistent returns over the years.
 
 years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
-
-if (nrow(sma_trades)>0) {
-
 sma_trades$year <- sapply(strsplit(sma_trades[,"sell_date"],"-"),"[[",1)
 sma_yearly <- sapply(years,function(y) { x <- subset(sma_trades,year==y)[,"diff"] } )
 sma_yearly <- sma_yearly[which(lapply(sma_yearly,length)>0)]
-vioplot(sma_yearly,ylab="trade ROI distribution",main="daily SMA cross strategy")
+vioplot(sma_yearly,ylab="trade ROI distribution",main="Daily SMA cross strategy")
 
 yr <- sapply(sma_yearly,prod)
-barplot(yr,ylab="yearly fold returns",main="daily SMA cross strategy")
+barplot(yr,ylab="yearly fold returns",main="Daily SMA cross strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
-
-}
-
-if (nrow(ema_trades)>0) {
 
 ema_trades$year <- sapply(strsplit(ema_trades[,"sell_date"],"-"),"[[",1)
 ema_yearly <- sapply(years,function(y) { x <- subset(ema_trades,year==y)[,"diff"] } )
 ema_yearly <- ema_yearly[which(lapply(ema_yearly,length)>0)]
-vioplot(ema_yearly,ylab="trade ROI distribution",main="daily EMA cross strategy")
+vioplot(ema_yearly,ylab="trade ROI distribution",main="Daily EMA cross strategy")
 
 yr <- sapply(ema_yearly,prod)
-barplot(yr,ylab="yearly fold returns",main="daily EMA cross strategy")
+barplot(yr,ylab="yearly fold returns",main="Daily EMA cross strategy")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
-
-}
-
-```
-
-
-## Data export
-
-Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
-
-```{r,export}
-
-filename <- paste("TICKER","_dat.txt",sep="")
-write.table(t(sma_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
-write.table(t(ema_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
 
 ```
 

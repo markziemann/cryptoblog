@@ -1,9 +1,9 @@
 ---
-title: "Trading TICKER based on the Donchian Channel"
+title: "<br>Trading XMR based on the Donchian Channel"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/donchian_channel_btc.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/donchian_channel_xmr.Rmd)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
@@ -48,18 +48,22 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
+Obtaining historical data (daily) from CoinMarketCap.com from 2014 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=TICKER&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
-#download.file(URL,destfile="dat.txt")
-dat <- fromJSON("dat.txt")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=BTC&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="xmrdat.txt")
+dat <- fromJSON("xmrdat.txt")
 price <- dat$data$quotes
-price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+price <- data.frame(price$time_close, price$quote$BTC$high, price$quote$BTC$low, price$quote$BTC$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+for (narow in which(is.na(price$close)) ) {
+  price[narow,] <- price[narow-1,]
+}
 
 ```
 
@@ -236,28 +240,13 @@ mtext("Mean and total returns")
 
 ```
 
-## Filtering
-
-Discard strategies with mean < 1.1 and select the one with the highest overall return.
-
-```{r,filt2}
-
-if ( nrow(subset(res,mean>1.1)) == 0 ) {
-  res <- head(res[order(-res$mean),],1)
-} else {
-  res <- subset(res,mean>1.1)
-  res <- res[order(-res$returns),]
-}
-
-```
-
 ## Optimised strategy
 
 Optimise for highest returns.
 
 ```{r,best1,fig.width=10,fig.height=8}
 
-best_n = res$nr[1]
+best_n = head(res[order(-res$returns),],1)$nr
 
 message(paste("Selected n period:",best_n))
 
@@ -290,16 +279,6 @@ trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +
 message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
-
-dc_dat <- c("indicator"="DC",
-  "parameter"=best_n ,
-  "meanROI"= mean(trades$diff) ,
-  "totalROI"= prod(trades$diff) ,
-  "ntrades"= nrow(trades) ,
-  "ndays"= nrow(price) ,
-  "xhodl"= prod(trades$diff)/hodl )
-
-trades %>% kbl() %>%  kable_styling()
 
 trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
@@ -373,19 +352,6 @@ abline(h=1,col="red",lty=2)
 
 There are many approaches to momentum trading.
 Here using the Donchian channel we have a strategy which scored 5x hodl returns which is not as good as the TSI but better than EMA.
-
-``
-
-## Data export
-
-Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
-
-```{r,export}
-
-filename <- paste("TICKER","_dat.txt",sep="")
-write.table(t(dc_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
-
-```
 
 ## Session information
 

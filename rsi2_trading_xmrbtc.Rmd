@@ -1,9 +1,9 @@
 ---
-title: "Trading TICKER based on double RSI"
+title: "<br>Trading XMR based on double RSI"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/rsi2_trading.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/rsi2_trading_xmr.Rmd)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
@@ -19,7 +19,7 @@ When the short period line crosses above the longer period one it is a buy signa
 short interval line passes under the longer interval line it is a sell signal.
 I will be testing different intervals for the short and long RSI lines to see which gives the best results.
 
-This report is time sensitive - today's date is shown below.
+This page is designed to be updated daily - today's date is shown below.
 
 ```{r,lib}
 
@@ -37,25 +37,28 @@ suppressPackageStartupMessages({
 Sys.Date()
 
 CORES = detectCores()
-
 ```
 
 Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining historical data (daily) from CoinMarketCap.com.
+Obtaining historical data (daily) from CoinMarketCap.com from 2014 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=TICKER&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
-#download.file(URL,destfile="dat.txt")
-dat <- fromJSON("dat.txt")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=BTC&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="xmrdat.txt")
+dat <- fromJSON("xmrdat.txt")
 price <- dat$data$quotes
-price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+price <- data.frame(price$time_close, price$quote$BTC$high, price$quote$BTC$low, price$quote$BTC$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+for (narow in which(is.na(price$close)) ) {
+  price[narow,] <- price[narow-1,]
+}
 
 ```
 
@@ -97,6 +100,18 @@ lines(as.Date(price2$date), rsi2  , col="red"  )
 grid()
 par(mfrow=c(1,1))
 
+par(mfrow=c(2,1))
+plot(price2$close ~ as.Date(price2$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(rsi1/rsi2 ~ as.Date(price2$date),type="l", 
+  xlab="Date",ylab="RSI ratio",main="RSI 14d/28d" )
+abline(h=1,lty=2,lwd=2)
+grid()
+par(mfrow=c(1,1))
+
+
 ```
 
 ## Double RSI trading function
@@ -120,24 +135,20 @@ rsi <- function(price,n1,n2,maType=EMA,fee=0.005) {
   price2$yesterday <- yesterday
   price2$trade <- price2$higher - price2$yesterday
   price2 <- price2[which(price2$trade!=0),]
-  if (nrow(price2)>0) {
-    if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-    if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-    buy <- subset(price2,trade==1)[,c("date","close")]
-    colnames(buy) <- c("buy_date","buy_price")
-    sell <- subset(price2,trade==-1)[,c("date","close")]
-    colnames(sell) <- c("sell_date","sell_price")
-    if( nrow(buy) != nrow(sell) ) {
-      MIN=min(nrow(buy),nrow(sell))
-      buy <- buy[1:MIN,]
-      sell <- sell[1:MIN,]
-    }
-    trades <- cbind(buy,sell)
-    trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-    return(c(prod(trades$diff),nrow(trades)))
-  } else {
-    return(c(0,0))
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c("date","close")]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c("date","close")]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
   }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
 }
 
 ```
@@ -166,50 +177,29 @@ colnames(res) <- c("returns","trades")
 res <-  as.data.frame(res)
 res$mean <- res$returns^(1/res$trades)
 res <- cbind(params,res,stringsAsFactors=FALSE)
+#res %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
 Here is a table of results.
 
-```{r,filt0}
-
-res2 <- res[order(-res$returns),]
-
-head(res2,20) %>%
-  kbl(caption="highest returning strategies") %>%
-  kable_styling("hover", full_width = F)
+```{r,filt1}
 
 res2 <- res[order(-res$mean),]
 
 head(res2,20) %>%
-  kbl(caption="highest mean return strategies") %>%
+  kbl(row.names=FALSE,caption="highest mean return strategies") %>%
   kable_styling("hover", full_width = F)
 
 res2 <- res[order(-res$returns),]
 
-head(res2,20) %>%
-  kbl(caption="highest total returning strategies") %>%
+head(res2,20) %>% 
+  kbl(row.names=FALSE,caption="highest returning strategies") %>%
   kable_styling("hover", full_width = F)
 
 ```
 
-I also tried SMA but the results were disappointing.
-
-
-## Filtering1
-
-Discard strategies with mean < 1.1 and select the one with the highest overall return.
-
-```{r,filt1}
-
-if ( nrow(subset(res2,mean>1.1)) == 0 ) {
-  res2 <- head(res2[order(-res2$mean),],1)
-} else {
-  res2 <- subset(res2,mean>1.1)
-  res2 <- res2[order(-res2$returns),]
-}
-
-```
+I also tried SMA smoothing but the results were disappointing.
 
 ## Plots
 
@@ -217,34 +207,27 @@ Let's examine some of the trends in the data with some charts.
 
 ```{r,plots,fig.height=8,fig.width=8}
 
-plot(res$trades,res$returns,log="y", cex=2, pch=19,col="gray",
+plot(res2$trades,res2$returns,log="y", cex=2, pch=19,col="gray",
   xlab="num trades",ylab="fold returns")
-text(res$trades,res$returns,labels=res$period,cex=1.5)
+text(res2$trades,res2$returns,labels=res$period,cex=1.5)
 abline(h=hodl,col="red")
 grid()
 
-plot(res$mean,res$returns,xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
+plot(res2$mean,res2$returns,xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
-text(res$mean,res$returns , cex=1, labels=res$period)
-abline(h=hodl,col="red")
-
-plot(res$mean,res$returns,log="y",xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
-grid()
-text(res$mean,res$returns , cex=1, labels=res$period)
+text(res2$mean,res2$returns , cex=1, labels=res$period)
 abline(h=hodl,col="red")
 
 ```
 
 ## Best RSI
 
-This is good indicator because mean gains are >1.08 and number of trades is less than 200.
+Highest return parameters.
 
 ```{r,best,fig.width=10,fig.height=8}
 
 best_n1 = res2[1,1]
 best_n2 = res2[1,2]
-if(is.na(best_n1)) { best_n1 = 3 }
-if(is.na(best_n2)) { best_n2 = 3 }
  
 message(paste("Selected RSI periods:",best_n1,best_n2))
 
@@ -259,35 +242,25 @@ yesterday <- yesterday[1:(length(yesterday)-1)]
 price2$yesterday <- yesterday
 price2$trade <- price2$higher - price2$yesterday
 price2 <- price2[which(price2$trade!=0),]
-if ( nrow(price2)>0 ) {
-  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-  buy <- subset(price2,trade==1)[,c("date","close")]
-  colnames(buy) <- c("buy_date","buy_price")
-  sell <- subset(price2,trade==-1)[,c("date","close")]
-  colnames(sell) <- c("sell_date","sell_price")
-  if( nrow(buy) != nrow(sell) ) {
-    MIN=min(nrow(buy),nrow(sell))
-    buy <- buy[1:MIN,]
-    sell <- sell[1:MIN,]
-  }
-  trades <- cbind(buy,sell)
-  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
 
 message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
-}
 
-rsi2_dat <- c("indicator"="RSI2",
-  "parameter"= paste(best_n1,best_n2,sep=",") ,
-  "meanROI"= mean(trades$diff) ,
-  "totalROI"= prod(trades$diff) ,
-  "ntrades"= nrow(trades) ,
-  "ndays"= nrow(price) ,
-  "xhodl"= prod(trades$diff)/hodl )
-
-trades %>% kbl() %>%  kable_styling()
+trades %>% kbl(row.names=FALSE) %>% kable_styling()
 
 HEADER=paste("n1:",best_n1,"n2:",best_n2)
 par(mfrow=c(2,1))
@@ -312,7 +285,7 @@ It is important to factor in the effect of fees because higher exchange fees wil
 fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
 
 res_fees <- sapply(fee_levels,function(x) { rsi(price,best_n1,best_n2,fee=x) } )
-plot(fee_levels,res_fees[1,] ,pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
 mtext(HEADER)
 abline(h=hodl,col="red")
 grid()
@@ -328,16 +301,14 @@ It is good to see whether the strategy gives consistent returns over the years.
 
 years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
-if (nrow(trades)>0) {
-  trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
-  yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
-  yearly <- yearly[which(lapply(yearly,length)>0)]
-  vioplot(yearly)
-  yr <- sapply(yearly,prod)
-  barplot(yr)
-  text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
-  abline(h=1,col="red",lty=2)
-}
+trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
+yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+yearly <- yearly[which(lapply(yearly,length)>0)]
+vioplot(yearly)
+yr <- sapply(yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
 
 ```
 
@@ -362,23 +333,24 @@ plot(price$rsi1 ~ as.Date(price$date),type="l",col="blue",
 lines(as.Date(price$date), price$rsi2  , col="red"  )
 grid()
 
+par(mfrow=c(2,1))
+plot(price$close ~ as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(price$rsi1/price$rsi2 ~ as.Date(price$date),type="l",
+  xlab="Date",ylab="RSI ratio",main=HEADER )
+abline(h=1,lty=2,lwd=2)
+grid()
+par(mfrow=c(1,1))
+
 tail(price ,20) %>%
-  kbl(caption="Last 20 days") %>%
+  kbl(row.names=FALSE,caption="Last 20 days") %>%
   kable_styling("hover", full_width = F)
 
-
 ```
 
-## Data export
-
-Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
-
-```{r,export}
-
-filename <- paste("TICKER","_dat.txt",sep="")
-write.table(t(rsi2_dat),file=filename,append=TRUE,row.names=FALSE,col.names=FALSE)
-
-```
+## Conclusion
 
 ## Session information
 

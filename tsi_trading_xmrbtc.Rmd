@@ -1,9 +1,9 @@
 ---
-title: "Trading TICKER based on True Strength Index (TSI)"
+title: "<br>Trading XMR based on True Strength Index (TSI)"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/tsi_trading.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/tsi_trading_xmr.Rmd)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
@@ -29,7 +29,7 @@ The standard values used are:
 
 however I will be seeing whether other intervals perform better.
 
-This report is time sensitive - today's date is shown below.
+This page is designed to be updated daily - today's date is shown below.
 
 ```{r,lib}
 
@@ -54,18 +54,22 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining historical data (daily) from CoinMarketCap.com.
+Obtaining historical data (daily) from CoinMarketCap.com from 2014 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=TICKER&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
-#download.file(URL,destfile="dat.txt")
-dat <- fromJSON("dat.txt")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=BTC&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="xmrdat.txt")
+dat <- fromJSON("xmrdat.txt")
 price <- dat$data$quotes
-price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+price <- data.frame(price$time_close, price$quote$BTC$high, price$quote$BTC$low, price$quote$BTC$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+for (narow in which(is.na(price$close)) ) {
+  price[narow,] <- price[narow-1,]
+}
 
 ```
 
@@ -147,24 +151,20 @@ mytsi <- function(price,n1,n2,ns,fee) {
   price2$yesterday <- yesterday
   price2$trade <- price2$higher - price2$yesterday
   price2 <- price2[which(price2$trade!=0),]
-  if (nrow(price2) > 0 ) {
-    if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-    if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-    buy <- subset(price2,trade==1)[,c("date","close")]
-    colnames(buy) <- c("buy_date","buy_price")
-    sell <- subset(price2,trade==-1)[,c("date","close")]
-    colnames(sell) <- c("sell_date","sell_price")
-    if( nrow(buy) != nrow(sell) ) {
-      MIN=min(nrow(buy),nrow(sell))
-      buy <- buy[1:MIN,]
-      sell <- sell[1:MIN,]
-    }
-    trades <- cbind(buy,sell)
-    trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-    return(c(prod(trades$diff),nrow(trades)))
-  } else {
-    return(c(0,0))
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c("date","close")]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c("date","close")]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
   }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
 }
 
 ```
@@ -202,7 +202,6 @@ res <- mclapply(X=1:nrow(params) , FUN=function(i) {
   ns=as.numeric(params[i,3])
   mytsi(price,n1=n1,n2=n2,ns=ns,fee=fee)
 } , mc.cores = CORES )
-
 res <- as.data.frame(do.call(rbind, res))
 colnames(res) <- c("returns","trades")
 res2 <- cbind(params,res)
@@ -220,7 +219,7 @@ These opportunities don't arise often but could be potential opportunities for l
 
 ```{r,backtest_res1}
 
-head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_styling("hover", full_width = F)
+head(res2[order(-res2$mean),],20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -230,17 +229,9 @@ This is less optimal if trades are executed manually.
 
 ```{r,backtest_res2}
 
-head(res2[order(-res2$returns),],20) %>% kbl() %>%  kable_styling("hover", full_width = F)
+res2 <- res2[order(-res2$returns),]
 
-```
-
-Now look at the strategies with mean ROI>1.1 and highest overall returns.
-
-```{r,backtest,res3}
-
-res3 <- res2[order(-res2$returns),]
-
-head(res3,20) %>% kbl() %>%  kable_styling("hover", full_width = F)
+head(res2,20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -259,27 +250,6 @@ points(basic_mean,basic_returns,col="red",pch=19,cex=2)
 abline(h=hodl,col="red")
 grid()
 
-plot(res3$mean , res3$returns, log="y",xlab="mean ROI", ylab="total returns")
-points(basic_mean,basic_returns,col="red",pch=19,cex=2)
-abline(h=hodl,col="red")
-grid()
-
-```
-
-## Filter part 1
-
-The strategy is to discard any strategies with a mean ROI<1.1 and then select the one with the
-highest overall return.
-
-```{r,filt1}
-
-if ( nrow(subset(res3,mean>1.1)) == 0 ) {
-  res3 <- head(res3[order(-res3$mean),],1)
-} else {
-  res3 <- subset(res3,mean>1.1)
-  res3 <- res3[order(-res3$returns),]
-}
-
 ```
 
 ## Backtest part 2
@@ -290,9 +260,9 @@ Now a fine search of the best parameter space.
 
 fee=0.005
 
-n1r <- seq(min(head(res3,20)$n1),max(head(res3,20)$n1),1)
-n2r <- seq(min(head(res3,20)$n2),max(head(res3,20)$n2),1)
-nsr <- seq(min(head(res3,20)$ns),max(head(res3,20)$ns),1)
+n1r <- seq(min(head(res2,20)$n1),max(head(res2,20)$n1),1)
+n2r <- seq(min(head(res2,20)$n2),max(head(res2,20)$n2),1)
+nsr <- seq(min(head(res2,20)$ns),max(head(res2,20)$ns),1)
 params <- expand.grid(n1r,n2r,nsr)
 colnames(params) <- c("n1","n2","nsignal")
 params <- params[which( params$n1 > params$n2) ,]
@@ -320,7 +290,7 @@ These opportunities don't arise often but could be potential opportunities for l
 
 ```{r,backtest_res4}
 
-head(res2[order(-res2$mean),],20) %>% kbl() %>%  kable_styling("hover", full_width = F)
+head(res2[order(-res2$mean),],20) %>% kbl(row.names=FALSE) %>% kable_styling("hover", full_width = F)
 
 ```
 
@@ -331,22 +301,7 @@ This is less optimal if trades are executed manually.
 ```{r,backtest_res5}
 
 res2 <- res2[order(-res2$returns),]
-head(res2,20) %>% kbl() %>%  kable_styling("hover", full_width = F)
-
-```
-
-## Filtering part 2
-
-Same filtering approach as above.
-
-```{r,filt2}
-
-if ( nrow(subset(res2,mean>1.1)) == 0 ) {
-  res2 <- head(res2[order(-res2$mean),],1)
-} else {
-  res2 <- subset(res2,mean>1.1)
-  res2 <- res2[order(-res2$returns),]
-}
+head(res2,20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -393,15 +348,7 @@ message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
-tsi_dat <- c("indicator"="TSI",
-  "parameter"=paste(best_n1,best_n2,best_ns,sep=",")  ,
-  "meanROI"= mean(trades$diff) ,
-  "totalROI"= prod(trades$diff) ,
-  "ntrades"= nrow(trades) ,
-  "ndays"= nrow(price) ,
-  "xhodl"= prod(trades$diff)/hodl )
-
-trades %>% kbl() %>%  kable_styling()
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 HEADER="TSI"
 par(mfrow=c(2,1))
@@ -461,8 +408,6 @@ It is good to see whether the strategy gives consistent returns over the years.
 
 years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
-if (nrow(trades)>0) {
-
 trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
 yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
 yearly <- yearly[which(lapply(yearly,length)>0)]
@@ -473,20 +418,9 @@ barplot(yr,ylab="fold return per year")
 text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
 abline(h=1,col="red",lty=2)
 
-}
-
 ```
 
-## Data export
-
-Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
-
-```{r,export}
-
-filename <- paste("TICKER","_dat.txt",sep="")
-write.table(t(tsi_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
-
-```
+## Conclusion
 
 ## Session information
 

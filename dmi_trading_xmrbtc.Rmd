@@ -1,9 +1,9 @@
 ---
-title: "Trading TICKER based on Directional Movement Index (DMI)"
+title: "<br>Trading XMR based on Directional Movement Index (DMI)"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/dmi_trading.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/dmi_trading_xmr.Rmd)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
@@ -20,7 +20,7 @@ Then sell when the negative indicator is larger than the positive indicator.
 What I am examining here is different intervals for the calculation of the DMI, typically 
 14 day is used, however I will be seeing whether other intervals perform better.
 
-This report is time sensitive - today's date is shown below.
+This page is designed to be updated daily - today's date is shown below.
 
 ```{r,lib}
 
@@ -42,18 +42,22 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining historical data (daily) from CoinMarketCap.com.
+Obtaining XMR historical data (daily) from CoinMarketCap.com from 2014 to present.
 
 ```{r,getdata}
 
 mydate <- Sys.Date()-1
-URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=TICKER&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
-#download.file(URL,destfile="dat.txt")
-dat <- fromJSON("dat.txt")
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=BTC&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+download.file(URL,destfile="xmrdat.txt")
+dat <- fromJSON("xmrdat.txt")
 price <- dat$data$quotes
-price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+price <- data.frame(price$time_close, price$quote$BTC$high, price$quote$BTC$low, price$quote$BTC$close,stringsAsFactors=FALSE)
 colnames(price) <- c("date","high","low","close")
 price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+for (narow in which(is.na(price$close)) ) {
+  price[narow,] <- price[narow-1,]
+}
 
 ```
 
@@ -98,7 +102,7 @@ par(mfrow=c(1,1))
 
 ## DMI trading function
 
-Here is the function for trading based on DMI crosses, buying when positive momentum indicator 
+Here is functions for trading based on DMI crosses, buying when positive momentum indicator 
 goes above the negative momentum indicator line, and sell when it falls below.
 
 All trades are executed at the end of the daily session (UTC midnight).
@@ -106,38 +110,30 @@ All trades are executed at the end of the daily session (UTC midnight).
 ```{r,dmi_func}
 
 dmi <- function(price,n,fee) {
-  if ( nrow(price) / n > 2.1 ) {
-    dmi.adx <- ADX(price[,c("high","low","close")],n=n)
-    price2 <- price
-    price2 <- cbind(price2,dmi.adx)
-    price2$higher <- price2$DIp > price2$DIn
-    yesterday <- price2$higher
-    yesterday <- c(NA,yesterday)
-    yesterday <- yesterday[1:(length(yesterday)-1)]
-    price2$yesterday <- yesterday
-    price2$trade <- price2$higher - price2$yesterday
-    price2 <- price2[which(price2$trade!=0),]
-    if (nrow(price2) >0 ) {
-      if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
-      if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
-      buy <- subset(price2,trade==1)[,c("date","close")]
-      colnames(buy) <- c("buy_date","buy_price")
-      sell <- subset(price2,trade==-1)[,c("date","close")]
-       colnames(sell) <- c("sell_date","sell_price")
-      if( nrow(buy) != nrow(sell) ) {
-        MIN=min(nrow(buy),nrow(sell))
-        buy <- buy[1:MIN,]
-        sell <- sell[1:MIN,]
-      }
-      trades <- cbind(buy,sell)
-      trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
-      return(c(prod(trades$diff),nrow(trades)))
-    } else {
-      return(c(0,0))
-    }
-  } else {
-    return(c(0,0))
+  dmi.adx <- ADX(price[,c("high","low","close")],n=n)
+  price2 <- price
+  price2 <- cbind(price2,dmi.adx)
+  price2$higher <- price2$DIp > price2$DIn
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c("date","close")]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c("date","close")]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
   }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
 }
 
 ```
@@ -162,7 +158,7 @@ res <-  as.data.frame(res)
 res$mean <- res$returns^(1/res$trades)
 res <- cbind(rownames(res),res,stringsAsFactors=FALSE)
 colnames(res)[1] <- "period"
-res %>% kbl() %>%  kable_styling("hover", full_width = F)
+res %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
 
 ```
 
@@ -177,6 +173,7 @@ plot(res$trades,res$returns,log="y", cex=2, pch=19,col="gray",
 text(res$trades,res$returns,labels=res$period,cex=1.5)
 abline(h=hodl,col="red")
 grid()
+
 
 plot(res$period,res$returns,pch=19,xlab="n interval (days)",ylab="fold return",main="DMI")
 abline(h=hodl,col="red")
@@ -197,41 +194,21 @@ grid()
 text(res$mean,res$returns , cex=1, labels=res$period)
 abline(h=hodl,col="red")
 
-plot(res$mean,res$returns,log="y",xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray",
-  ylim=c(100,1E4))
-grid()
-text(res$mean,res$returns , cex=1, labels=res$period)
-abline(h=hodl,col="red")
-
 plot(res[,3],res[,2],pch=19,cex=2,col="gray",main="DMI returns per trade",xlab="n trades",ylab="fold return USD")
 text(res[,3],res[,2],labels=res$period,pch=19,cex=1)
 abline(h=hodl,col="red")
 
-
 ```
 
-## Filtering
-
-Discard strategies with mean < 1.1 and select the one with the highest overall return.
-
-```{r,filt2}
-
-if ( nrow(subset(res,mean>1.1)) == 0 ) {
-  res <- head(res[order(-res$mean),],1)
-} else {
-  res <- subset(res,mean>1.1)
-  res <- res[order(-res$returns),]
-}
-
-```
 ## Best DMI
 
-This is good indicator because the frequency is lower, but the gains are still very good.
+Here we will look in more detail at the best performing time-frame.
 
-```{r,best_sma2,fig.width=10,fig.height=8}
+```{r,best_sma4,fig.width=10,fig.height=8}
 
-best_n = as.numeric(head(res$period,1))
+res <- res[order(-res$returns),]
 
+best_n = as.numeric(res[1,"period"])
 message(paste("Selected DMI period:",best_n))
 
 dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
@@ -261,15 +238,7 @@ message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
-dmi_dat <- c("indicator"="DMI",
-  "parameter"=best_n ,
-  "meanROI"= mean(trades$diff) ,
-  "totalROI"= prod(trades$diff) ,
-  "ntrades"= nrow(trades) ,
-  "ndays"= nrow(price) ,
-  "xhodl"= prod(trades$diff)/hodl )
-
-trades %>% kbl() %>%  kable_styling()
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 
 HEADER=paste(best_n,"DMI")
 par(mfrow=c(2,1))
@@ -278,14 +247,14 @@ plot(price$close~as.Date(price$date),type="l",log="y",
 grid()
 
 plot(dmi.adx[,1] ~ as.Date(price$date),type="l",col="blue",
-  xlab="Date",ylab="DMI",main="DMI 32d",ylim=c(0,60))
+  xlab="Date",ylab="DMI",main="DMI",ylim=c(0,60))
 lines(as.Date(price$date), dmi.adx[,2]  , col="red"  )
 grid()
 par(mfrow=c(1,1))
 
 ```
 
-## Best DMI recent action
+## DMI recent action
 
 ```{r,recent1,fig.height=8,fig.width=8}
 
@@ -296,7 +265,7 @@ plot(tail(price$close,200)~tail(as.Date(price$date),200),type="l",log="y",
 grid()
 
 plot(tail(dmi.adx[,1],200) ~ tail(as.Date(price$date),200),type="l",col="blue",
-  xlab="Date",ylab="DMI",main=HEADER,ylim=c(10,40))
+  xlab="Date",ylab="DMI",main="DMI",ylim=c(10,40))
 lines(tail(as.Date(price$date),200), tail(dmi.adx[,2],200)  , col="red"  )
 grid()
 par(mfrow=c(1,1))
@@ -328,28 +297,20 @@ It is good to see whether the strategy gives consistent returns over the years.
 
 years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
 
-if (nrow(trades)>0) {
-  trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
-  yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
-  yearly <- yearly[which(lapply(yearly,length)>0)]
-  vioplot(yearly)
-  yr <- sapply(yearly,prod)
-  barplot(yr)
-  text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
-  abline(h=1,col="red",lty=2)
-}
-```
-
-## Data export
-
-Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
-
-```{r,export}
-
-filename <- paste("TICKER","_dat.txt",sep="")
-write.table(t(dmi_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
+trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
+yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+yearly <- yearly[which(lapply(yearly,length)>0)]
+vioplot(yearly)
+yr <- sapply(yearly,prod)
+barplot(yr)
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
 
 ```
+
+## Conclusion
+
+The DMI gives a moderately successful indicator that is simple to implement.
 
 ## Session information
 
