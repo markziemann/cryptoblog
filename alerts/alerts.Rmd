@@ -817,7 +817,8 @@ today_count <- sum(indicators)
 message(paste("today_count_BTC",today_count,sep="="))
 today_signal <- today_count>=n
 
-prev_html <- readLines("https://mdz-analytics.com/crypto/alerts.html")
+system("wget https://mdz-analytics.com/crypto/alerts.html -O alerts.html")
+prev_html <- readLines("alerts.html")
 prev_signal <- length(grep("BTC ensemble indicator is BULLISH",prev_html))>1
 
 btc_signal <- "NONE"
