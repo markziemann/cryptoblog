@@ -237,6 +237,8 @@ Now let's select the two best approaches and show the history of trades.
 
 ```{r,best_sma,fig.width=10,fig.height=8}
 
+res_sma <- subset(res_sma,mean>1.1)
+
 best_sma = head(res_sma[order(-res_sma$returns),"MAperiod"],1)
 message(paste("Best SMA period:",best_sma))
 ma <- SMA(Cl(price),n=best_sma)
@@ -265,6 +267,7 @@ message(paste("Number of trades:",nrow(sma_trades)))
 sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trades$buy_price ) +1 - (2 * fee )
 message(paste("Total ROI:",prod(sma_trades$diff)))
 message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
+message(paste("Mean:",mean(sma_trades$diff)))
 sma_trades  %>% kbl(row.names = FALSE) %>%  kable_styling()
 SMA_HEADER=paste(best_sma,"day moving average")
 plot(price$close~as.Date(price$date),type="l",log="y",
@@ -279,6 +282,8 @@ lines(ma~ as.Date(price$date) ,col="red")
 Now have a look at the best EMA option.
 
 ```{r,best_ema,fig.width=10,fig.height=8}
+
+res_ema <- subset(res_ema,mean>1.1)
 
 best_ema = head(res_ema[order(-res_ema$returns),"MAperiod"],1)
 message(paste("Best EMA period:",best_ema))
@@ -308,6 +313,8 @@ ema_trades$diff <- ( ( ema_trades$sell_price - ema_trades$buy_price ) / ema_trad
 message(paste("Number of trades:",nrow(ema_trades)))
 message(paste("Total ROI:",prod(ema_trades$diff)))
 message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
+message(paste("Mean:",mean(ema_trades$diff)))
+
 sma_trades  %>% kbl(row.names = FALSE) %>%  kable_styling()
 EMA_HEADER=paste(best_ema,"day exponential moving average")
 plot(price$close~as.Date(price$date),type="l",log="y",

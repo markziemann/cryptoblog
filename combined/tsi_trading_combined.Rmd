@@ -296,6 +296,7 @@ This is less optimal if trades are executed manually.
 ```{r,backtest_res5}
 
 res2 <- res2[order(-res2$returns),]
+res2 <- subset(res2,mean>1.1)
 head(res2,20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
 
 ```
@@ -342,6 +343,7 @@ trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +
 message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+message(paste("Mean:",mean(trades$diff)))
 
 trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 

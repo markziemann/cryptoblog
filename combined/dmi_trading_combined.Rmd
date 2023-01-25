@@ -136,13 +136,13 @@ Let's assume a 0.5% trading fee.
 Here is a table of results.
 
 ```{r,backtest}
-CORES=detectCores()/2
+
+CORES=detectCores()
 
 fee=0.005
 myrange <- 5:200
 
 res <- mclapply(myrange,function(n) {dmi(price,n,fee)} ,mc.cores=8)
-
 
 res <- do.call(rbind,res)
 
@@ -200,6 +200,7 @@ Here we will look in more detail at the best performing time-frame.
 
 ```{r,best_sma4,fig.width=10,fig.height=8}
 
+res <- subset(res,mean>1.1)
 res <- res[order(-res$returns),]
 
 best_n = as.numeric(res[1,"period"])
@@ -233,6 +234,7 @@ trades$diff <- ( ( trades$sell - trades$buy ) / trades$buy ) +1 - ( 2 * fee )
 message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+message(paste("Mean:",mean(trades$diff)))
 
 trades %>% kbl(row.names=FALSE) %>%  kable_styling()
 

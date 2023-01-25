@@ -225,6 +225,7 @@ trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +
 message(paste("Number of trades:",nrow(trades)))
 message(paste("Total ROI:",prod(trades$diff)))
 message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+message(paste("Mean:",mean(trades$diff)))
 
 trades %>% kbl(row.names=FALSE) %>% kable_styling()
 
