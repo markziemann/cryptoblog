@@ -1,9 +1,9 @@
 ---
-title: "<br>Trading BTC based on the Stochastic indicator"
+title: "<br>Trading combined crypto price data based on the Stochastic indicator"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/stoch_trading_btc.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/combined/)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
@@ -37,7 +37,7 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining combined crypto data generated previously
+Obtaining combined crypto data generated previously.
 
 ```{r,getdata}
 

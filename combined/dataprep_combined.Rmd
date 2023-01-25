@@ -3,7 +3,7 @@ title: "<br>Combined analysis - data prep"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/dataprep_combined.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/combined/)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.

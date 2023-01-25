@@ -3,7 +3,8 @@ title: "<br>Trading combined cypto price data based on MA and EMAs"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/ma_trading_btc.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/combined/)
+
 This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
@@ -57,7 +58,6 @@ tail(price)
 It's important to calculate the returns for simply holding the asset rather than actively trading.
 
 The number shown here is the fold return on investment.
-BTC has appreciated a lot since 2013!
 
 ```{r,hodl}
 
@@ -165,22 +165,22 @@ Now let's look at which of these approaches works best.
 ```{r,plots1,fig.height=8,fig.width=8}
 
 plot(x=myrange, y=res_sma$returns, pch=19,
-  xlab="moving average interval (days)",ylab="fold return",main="BTC daily SMA")
+  xlab="moving average interval (days)",ylab="fold return",main="Daily SMA")
 abline(h=hodl,col="red")
 grid()
 
 plot(x=myrange,y=res_sma$returns, pch=19,
-  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="BTC daily SMA")
+  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="Daily SMA")
 abline(h=hodl,col="red")
 grid()
 
 plot(x=myrange,y=res_ema$returns, pch=19,
-  xlab="moving average interval (days)",ylab="fold return",main="BTC daily EMA")
+  xlab="moving average interval (days)",ylab="fold return",main="Daily EMA")
 abline(h=hodl,col="red")
 grid()
 
 plot(x=myrange,y=res_ema$returns, pch=19,
-  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="BTC daily EMA")
+  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="Daily EMA")
 abline(h=hodl,col="red")
 grid()
 
@@ -191,7 +191,7 @@ Could it mean that there are a lot of trades each with very small gains?
 
 ```{r,plots2,fig.height=8,fig.width=8}
 
-plot(res_sma$mean,res_sma$returns, main="BTC daily SMA",
+plot(res_sma$mean,res_sma$returns, main="Daily SMA",
   xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_sma$mean,res_sma$returns , cex=1, labels=res_sma$MAperiod)
@@ -199,7 +199,7 @@ abline(h=hodl,col="red")
 
 head(res_sma[order(-res_sma$mean),],20) %>% kbl(caption="Highest ROI SMA strategy",row.names = FALSE) %>%  kable_styling()
 
-plot(res_ema$mean,res_ema$returns, main="BTC daily EMA",
+plot(res_ema$mean,res_ema$returns, main="Daily EMA",
   xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_ema$mean,res_ema$returns , cex=1, labels=res_ema$MAperiod)
@@ -214,13 +214,13 @@ Ideally we don't want to be making trades every few days.
 
 ```{r,plots3,fig.height=8,fig.width=8}
 
-plot(res_sma$trades,res_sma$returns, main="BTC daily SMA",
+plot(res_sma$trades,res_sma$returns, main="Daily SMA",
   xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_sma$trades,res_sma$returns , cex=1, labels=res_sma$MAperiod)
 abline(h=hodl,col="red")
 
-plot(res_ema$trades,res_ema$returns, main="BTC daily EMA",
+plot(res_ema$trades,res_ema$returns, main="Daily EMA",
   xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
 grid()
 text(res_ema$trades,res_ema$returns , cex=1, labels=res_ema$MAperiod)

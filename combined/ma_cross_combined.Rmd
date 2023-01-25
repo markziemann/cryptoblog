@@ -3,7 +3,7 @@ title: "<br>Trading combined crypto price data based on MA and EMA crosses"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/ma_cross.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/combined/)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
@@ -15,7 +15,7 @@ but if you find it useful, consider a small tip.
 Trading off simple moving averages (SMAs), exponenial moving averages (EMAs) and crosses between these 
 lines are popular methods for timing entry and exit of positions.
 In this blog post I will be back-testing simple moving averages to find the one which performed the best for
-BTC's price history.
+the price history.
 
 This page is designed to be updated daily - today's date is shown below.
 
@@ -44,7 +44,7 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining combined crypto data generated previously
+Obtaining combined crypto data generated previously.
 
 ```{r,getdata}
 
@@ -64,7 +64,6 @@ It's important to calculate the returns for simply holding the asset rather than
 ely trading.
 
 The number shown here is the fold return on investment.
-BTC has appreciated a lot since 2013!
 
 ```{r,hodl}
 

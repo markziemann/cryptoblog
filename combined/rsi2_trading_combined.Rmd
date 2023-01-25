@@ -3,7 +3,7 @@ title: "<br>Trading bombined price data based on double RSI"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/rsi2_trading_btc.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/combined/)
 
 This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
@@ -44,7 +44,7 @@ Reminder: this is not financial advice.
 
 ## Get data
 
-Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
+Obtaining combined crypto data generated previously.
 
 ```{r,getdata}
 
@@ -62,7 +62,6 @@ tail(price)
 It's important to calculate the returns for simply holding the asset rather than actively trading.
 
 The number shown here is the fold return on investment.
-BTC has appreciated a lot since 2013!
 
 ```{r,hodl}
 
