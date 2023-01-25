@@ -201,7 +201,7 @@ message(paste("BTC SMA signal:",btc_signal))
 
 ```
 
-```{r, btc_sma_plot,fig.height=8,fig.width=8}
+```{r, btc_sma_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="BTC SMA")
@@ -250,7 +250,7 @@ message(paste("BTC EMA signal:",btc_signal))
 
 ```
 
-```{r, btc_ema_plot,fig.height=8,fig.width=8}
+```{r, btc_ema_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="BTC EMA")
@@ -303,7 +303,7 @@ message(paste("BTC SMA cross signal is",btc_signal))
 
 ```
 
-```{r, btc_cross_plot,fig.height=8,fig.width=8}
+```{r, btc_cross_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="BTC SMA cross")
@@ -357,7 +357,7 @@ message(paste("BTC EMA cross signal is",btc_signal))
 
 ```
 
-```{r, btc_ema_cross_plot,fig.height=8,fig.width=8}
+```{r, btc_ema_cross_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="BTC EMA cross")
@@ -371,7 +371,7 @@ lines(price2$ma2~ as.Date(price2$date) ,col="blue")
 
 Directional movement indicator is a good approach to identify trend changes.
 
-```{r,btc_dmi,fig.height=10,fig.width=8}
+```{r,btc_dmi,fig.height=7,fig.width=6}
 
 n <- as.numeric(params[params$indicator == "DMI",2])
 
@@ -407,7 +407,7 @@ message(paste("BTC DMI signal:",btc_signal))
 
 ```
 
-```{r,btc_dmi_plot,fig.height=10,fig.width=8}
+```{r,btc_dmi_plot,fig.height=7,fig.width=6}
 
 price2 <- as.data.frame(price2)
 par(mfrow=c(2,1))
@@ -425,7 +425,7 @@ lines(price2$DIn ~ as.Date(price2$date) ,col="red")
 
 Probably the best performing indicator across most price series data.
 
-```{r,btc_tsi,fig.height=10,fig.width=8}
+```{r,btc_tsi,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "TSI",2],",")))
 n1 <- n[1]
@@ -482,7 +482,7 @@ message(paste("BTC TSI signal:",btc_signal))
 
 ```
 
-```{r,btc_tsi_plot,fig.height=10,fig.width=8}
+```{r,btc_tsi_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -500,7 +500,7 @@ par(mfrow=c(1,1))
 
 ## BTC stochastic oscillator indicator
 
-```{r,btc_stoch,fig.height=10,fig.width=8}
+```{r,btc_stoch,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "stoch",2],",")))
 n1 <- n[1]
@@ -541,7 +541,7 @@ message(paste("BTC stoch signal:",btc_signal))
 
 ```
 
-```{r,btc_stoch_plot,fig.height=10,fig.width=8}
+```{r,btc_stoch_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -559,7 +559,7 @@ par(mfrow=c(1,1))
 
 ## BTC double RSI indicator
 
-```{r,btc_rsi1,fig.height=10,fig.width=8}
+```{r,btc_rsi1,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "RSI2",2],",")))
 n1 <- n[1]
@@ -600,7 +600,7 @@ message(paste("BTC RSI signal:",btc_signal))
 
 ```
 
-```{r,btc_rsi_plot,fig.height=10,fig.width=8}
+```{r,btc_rsi_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -627,7 +627,7 @@ par(mfrow=c(1,1))
 
 ## BTC Donchian channel indicator
 
-```{r,btc_dc1,fig.height=10,fig.width=8}
+```{r,btc_dc1,fig.height=7,fig.width=6}
 
 n <- as.numeric(params[params$indicator == "DC",2])
 
@@ -693,7 +693,7 @@ message(paste("BTC DC signal:",btc_signal))
 
 ```
 
-```{r,btc_dc_plot,fig.height=10,fig.width=8}
+```{r,btc_dc_plot,fig.height=7,fig.width=6}
 
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
@@ -719,7 +719,7 @@ lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
 
 Another high-performing indicator across different price series data.
 
-```{r,btc_kst,fig.height=10,fig.width=8}
+```{r,btc_kst,fig.height=7,fig.width=6}
 
 price2 <- price
 
@@ -764,7 +764,7 @@ message(paste("BTC KST signal:",btc_signal))
 
 ```
 
-```{r,btc_kst_plot,fig.height=10,fig.width=8}
+```{r,btc_kst_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -784,7 +784,7 @@ par(mfrow=c(1,1))
 
 This is a combination of a number of indicators.
 
-```{r,btc_ens1,fig.height=10,fig.width=8}
+```{r,btc_ens1,fig.height=7,fig.width=6}
 
 ens <- params[params$indicator=="Ensemble","parameter"]
 myrev <- intToUtf8(rev(utf8ToInt(ens)))
@@ -932,7 +932,7 @@ message(paste("ETH SMA signal:",eth_signal))
 
 ```
 
-```{r, eth_sma_plot,fig.height=8,fig.width=8}
+```{r, eth_sma_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="ETH SMA")
@@ -981,7 +981,7 @@ message(paste("ETH EMA signal:",eth_signal))
 
 ```
 
-```{r, eth_ema_plot,fig.height=8,fig.width=8}
+```{r, eth_ema_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="ETH EMA")
@@ -1034,7 +1034,7 @@ message(paste("ETH SMA cross signal:",eth_signal))
 
 ```
 
-```{r, eth_cross_plot,fig.height=8,fig.width=8}
+```{r, eth_cross_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="ETH SMA cross")
@@ -1088,7 +1088,7 @@ message(paste("ETH EMA cross signal:",eth_signal))
 
 ```
 
-```{r, eth_ema_cross_plot,fig.height=8,fig.width=8}
+```{r, eth_ema_cross_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="ETH EMA cross")
@@ -1100,7 +1100,7 @@ lines(price2$ma2~ as.Date(price2$date) ,col="blue")
 
 ## ETH DMI
 
-```{r,eth_dmi,fig.height=10,fig.width=8}
+```{r,eth_dmi,fig.height=7,fig.width=6}
 
 n <- as.numeric(params[params$indicator == "DMI",2])
 
@@ -1136,7 +1136,7 @@ message(paste("ETH DMI signal:",eth_signal))
 
 ```
 
-```{r, eth_dmi_plot,fig.height=10,fig.width=8}
+```{r, eth_dmi_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close~as.Date(price2$date),type="l",
@@ -1153,7 +1153,7 @@ lines(price2$DIn ~ as.Date(price2$date) ,col="red")
 
 Best indicator.
 
-```{r,eth_tsi,fig.height=10,fig.width=8}
+```{r,eth_tsi,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "TSI",2],",")))
 n1 <- n[1]
@@ -1194,7 +1194,7 @@ message(paste("ETH TSI signal:",eth_signal))
 
 ```
 
-```{r,eth_tsi_plot,fig.height=10,fig.width=8}
+```{r,eth_tsi_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -1212,7 +1212,7 @@ par(mfrow=c(1,1))
 
 ## ETH stochastic oscillator indicator
 
-```{r,eth_stoch,fig.height=10,fig.width=8}
+```{r,eth_stoch,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "stoch",2],",")))
 n1 <- n[1]
@@ -1253,7 +1253,7 @@ message(paste("ETH stoch signal:",eth_signal))
 
 ```
 
-```{r,eth_stoch_plot,fig.height=10,fig.width=8}
+```{r,eth_stoch_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -1271,7 +1271,7 @@ par(mfrow=c(1,1))
 
 ## ETH double RSI indicator
 
-```{r,eth_rsi1,fig.height=10,fig.width=8}
+```{r,eth_rsi1,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "RSI2",2],",")))
 n1 <- n[1]
@@ -1312,7 +1312,7 @@ message(paste("ETH RSI signal:",eth_signal))
 
 ```
 
-```{r,eth_rsi_plot,fig.height=10,fig.width=8}
+```{r,eth_rsi_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -1340,7 +1340,7 @@ par(mfrow=c(1,1))
 
 ## ETH Donchian channel indicator
 
-```{r,eth_dc1,fig.height=10,fig.width=8}
+```{r,eth_dc1,fig.height=7,fig.width=6}
 
 n <- as.numeric(params[params$indicator == "DC",2])
 
@@ -1406,7 +1406,7 @@ message(paste("ETH DC signal:",eth_signal))
 
 ```
 
-```{r,eth_dc_plot,fig.height=10,fig.width=8}
+```{r,eth_dc_plot,fig.height=7,fig.width=6}
 
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
@@ -1432,7 +1432,7 @@ lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
 
 Another high-performing indicator across different price series data.
 
-```{r,eth_kst,fig.height=10,fig.width=8}
+```{r,eth_kst,fig.height=7,fig.width=6}
 
 price2 <- price
 
@@ -1477,7 +1477,7 @@ message(paste("ETH KST signal:",eth_signal))
 
 ```
 
-```{r,eth_kst_plot,fig.height=10,fig.width=8}
+```{r,eth_kst_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -1498,7 +1498,7 @@ par(mfrow=c(1,1))
 This is a combination of a number of n=y indicators, where x/y
 are a buy/sell threshold.
 
-```{r,eth_ens1,fig.height=10,fig.width=8}
+```{r,eth_ens1,fig.height=7,fig.width=6}
 
 ens <- params[params$indicator=="Ensemble","parameter"]
 myrev <- intToUtf8(rev(utf8ToInt(ens)))
@@ -1644,7 +1644,7 @@ message(paste("XMR SMA signal:",xmr_signal))
 
 ```
 
-```{r, xmr_sma_plot,fig.height=8,fig.width=8}
+```{r, xmr_sma_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="XMR SMA")
@@ -1693,7 +1693,7 @@ message(paste("XMR EMA signal:",xmr_signal))
 
 ```
 
-```{r, xmr_ema_plot,fig.height=8,fig.width=8}
+```{r, xmr_ema_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="XMR EMA")
@@ -1746,7 +1746,7 @@ message(paste("XMR SMA cross signal is",xmr_signal))
 
 ```
 
-```{r, xmr_cross_plot,fig.height=8,fig.width=8}
+```{r, xmr_cross_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="XMR SMA cross")
@@ -1800,7 +1800,7 @@ message(paste("XMR EMA cross signal is",xmr_signal))
 
 ```
 
-```{r, xmr_ema_cross_plot,fig.height=8,fig.width=8}
+```{r, xmr_ema_cross_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="XMR EMA cross")
@@ -1814,7 +1814,7 @@ lines(price2$ma2~ as.Date(price2$date) ,col="blue")
 
 Directional movement indicator is a good approach to identify trend changes.
 
-```{r,xmr_dmi,fig.height=10,fig.width=8}
+```{r,xmr_dmi,fig.height=7,fig.width=6}
 
 n <- as.numeric(params[params$indicator == "DMI",2])
 
@@ -1850,7 +1850,7 @@ message(paste("XMR DMI signal:",xmr_signal))
 
 ```
 
-```{r,xmr_dmi_plot,fig.height=10,fig.width=8}
+```{r,xmr_dmi_plot,fig.height=7,fig.width=6}
 
 price2 <- as.data.frame(price2)
 par(mfrow=c(2,1))
@@ -1868,7 +1868,7 @@ lines(price2$DIn ~ as.Date(price2$date) ,col="red")
 
 Probably the best performing indicator across most price series data.
 
-```{r,xmr_tsi,fig.height=10,fig.width=8}
+```{r,xmr_tsi,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "TSI",2],",")))
 n1 <- n[1]
@@ -1925,7 +1925,7 @@ message(paste("XMR TSI signal:",xmr_signal))
 
 ```
 
-```{r,xmr_tsi_plot,fig.height=10,fig.width=8}
+```{r,xmr_tsi_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -1943,7 +1943,7 @@ par(mfrow=c(1,1))
 
 ## XMR stochastic oscillator indicator
 
-```{r,xmr_stoch,fig.height=10,fig.width=8}
+```{r,xmr_stoch,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "stoch",2],",")))
 n1 <- n[1]
@@ -1984,7 +1984,7 @@ message(paste("XMR stoch signal:",xmr_signal))
 
 ```
 
-```{r,xmr_stoch_plot,fig.height=10,fig.width=8}
+```{r,xmr_stoch_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -2002,7 +2002,7 @@ par(mfrow=c(1,1))
 
 ## XMR double RSI indicator
 
-```{r,xmr_rsi1,fig.height=10,fig.width=8}
+```{r,xmr_rsi1,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "RSI2",2],",")))
 n1 <- n[1]
@@ -2043,7 +2043,7 @@ message(paste("XMR RSI signal:",xmr_signal))
 
 ```
 
-```{r,xmr_rsi_plot,fig.height=10,fig.width=8}
+```{r,xmr_rsi_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -2070,7 +2070,7 @@ par(mfrow=c(1,1))
 
 ## XMR Donchian channel indicator
 
-```{r,xmr_dc1,fig.height=10,fig.width=8}
+```{r,xmr_dc1,fig.height=7,fig.width=6}
 
 n <- as.numeric(params[params$indicator == "DC",2])
 
@@ -2136,7 +2136,7 @@ message(paste("XMR DC signal:",xmr_signal))
 
 ```
 
-```{r,xmr_dc_plot,fig.height=10,fig.width=8}
+```{r,xmr_dc_plot,fig.height=7,fig.width=6}
 
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
@@ -2162,7 +2162,7 @@ lines(price2$dchigh~ as.Date(price2$date),lwd=1.5,col="limegreen")
 
 Another high-performing indicator across different price series data.
 
-```{r,xmr_kst,fig.height=10,fig.width=8}
+```{r,xmr_kst,fig.height=7,fig.width=6}
 
 price2 <- price
 
@@ -2207,7 +2207,7 @@ message(paste("XMR KST signal:",xmr_signal))
 
 ```
 
-```{r,xmr_kst_plot,fig.height=10,fig.width=8}
+```{r,xmr_kst_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -2228,7 +2228,7 @@ par(mfrow=c(1,1))
 This is a combination of a number of n=y indicators, where x/y
 are a buy/sell threshold.
 
-```{r,xmr_ens1,fig.height=10,fig.width=8}
+```{r,xmr_ens1,fig.height=7,fig.width=6}
 
 ens <- params[params$indicator=="Ensemble","parameter"]
 myrev <- intToUtf8(rev(utf8ToInt(ens)))
