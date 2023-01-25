@@ -20,6 +20,7 @@ The indicator used is the directional movement indicator (DMI).
 ```{r,lib}
 
 suppressPackageStartupMessages({
+  library("parallel")
   library("jsonlite")
   library("tidyverse")
   library("runner")

@@ -19,6 +19,7 @@ massive series that I will then analyse with my existing indicators.
 ```{r,lib}
 
 suppressPackageStartupMessages({
+  library("parallel")
   library("jsonlite")
   library("tidyverse")
   library("runner")
@@ -53,7 +54,7 @@ This is a washout period that appears between each series.
 
 cryptos <- c("BTC","ETH","BNB","XRP","ADA","DOGE","LTC","XMR","FIL","XTZ","DASH","FTC")
 
-set.seed(100)
+set.seed(300)
 cryptos <- sample(cryptos)
 
 message("here is the reshuffles set of cryptos")
