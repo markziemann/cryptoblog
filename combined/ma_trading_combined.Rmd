@@ -150,7 +150,7 @@ colnames(res) <- c("MAperiod","returns","trades")
 res$mean <- res$returns^(1/res$trades)
 res_sma <- res
 
-res <- t(sapply(myrange,function(n) { ema(price,n,fee) } )) 
+res <- t(sapply(myrange,function(n) { ema(price,n,fee) } ))
 res <- as.data.frame(cbind(myrange,res))
 colnames(res) <- c("MAperiod","returns","trades")
 res$mean <- res$returns^(1/res$trades)
@@ -237,7 +237,13 @@ Now let's select the two best approaches and show the history of trades.
 
 ```{r,best_sma,fig.width=10,fig.height=8}
 
-res_sma <- subset(res_sma,mean>1.1)
+if (nrow(subset(res_sma,mean>1.1)>0)) {
+  res_sma <- subset(res_sma,mean>1.1)
+  res_sma <- res_sma[order(-res_sma$returns),]
+} else {
+  res_sma <- res_sma[order(-res_sma$mean),]
+}
+
 
 best_sma = head(res_sma[order(-res_sma$returns),"MAperiod"],1)
 message(paste("Best SMA period:",best_sma))
@@ -283,7 +289,12 @@ Now have a look at the best EMA option.
 
 ```{r,best_ema,fig.width=10,fig.height=8}
 
-res_ema <- subset(res_ema,mean>1.1)
+if (nrow(subset(res_ema,mean>1.1)>0)) {
+  res_ema <- subset(res_ema,mean>1.1)
+  res_ema <- res_ema[order(-res_ema$returns),]
+} else {
+  res_ema <- res_ema[order(-res_ema$mean),]
+}
 
 best_ema = head(res_ema[order(-res_ema$returns),"MAperiod"],1)
 message(paste("Best EMA period:",best_ema))
