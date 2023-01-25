@@ -200,13 +200,14 @@ Here we will look in more detail at the best performing time-frame.
 
 ```{r,best_sma4,fig.width=10,fig.height=8}
 
+#res$mean <- res$returns^(1/res$trades)
 res <- subset(res,mean>1.1)
 res <- res[order(-res$returns),]
 
 best_n = as.numeric(res[1,"period"])
 message(paste("Selected DMI period:",best_n))
 
-dmi.adx <- ADX(price[,c("high","low","close")],n=n)
+dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
 price2 <- data.frame(price)
 price2 <- cbind(price2,dmi.adx)
 price2$higher <- price2$DIp > price2$DIn
