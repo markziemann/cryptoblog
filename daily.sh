@@ -6,11 +6,12 @@ MYCMD=$(echo $0)
 MYDIR=$(dirname $MYCMD)
 cd $MYDIR
 git pull
-alias SCP="scp -P 21098 -i ~/.ssh/mdza/id_rsa -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedKeyTypes=+ssh-rsa"
+shopt -s expand_aliases
+alias SCP='scp -P 21098 -i /home/mdz/.ssh/mdza/id_rsa -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedKeyTypes=+ssh-rsa'
 Rscript -e "rmarkdown::render('index0.Rmd')"
 Rscript -e "rmarkdown::render('alerts/alerts.Rmd')" && \
 SCP alerts/alerts.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
-SCP mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/index.html
+SCP index.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/index.html
 
 for RMD in alerts/alerts_*Rmd ; do
   COIN=$(echo $RMD | sed 's#alerts/alerts_##' | sed 's/.Rmd//')
@@ -70,7 +71,7 @@ Rscript -e "rmarkdown::render('tsi_trading_eth.Rmd')" && \
   SCP tsi_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('tsi_trading_xmr.Rmd')" && \
-  SCP xmr_trading_eth.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
+  SCP tsi_trading_xmr.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
 
 Rscript -e "rmarkdown::render('rsi2_trading_btc.Rmd')" && \
   SCP rsi2_trading_btc.html mdzascfs@mdz-analytics.com:/home/mdzascfs/public_html/crypto
