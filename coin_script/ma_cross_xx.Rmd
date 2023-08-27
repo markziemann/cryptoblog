@@ -3,9 +3,9 @@ title: "Trading TICKER based on MA and EMA crosses"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/ma_cross.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/ma_cross.Rmd)
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
@@ -162,7 +162,7 @@ if (n1 != n2) {
 Now let's go back in time to test the performance of the different MA cross strategies on the daily
 timeframe, using MA intervals from 4 to 200 days.
 
-Let's assume a 0.2% trading fee.
+Let's assume a 0.5% trading fee.
 
 First looking at SMA crosses.
 Below, I show the 20 highest returning indicators.
@@ -259,6 +259,13 @@ Now let's take a closer look at the best SMA cross strategy.
 
 ```{r,best_sma,fig.width=10,fig.height=8}
 
+if ( nrow(subset(res_sma,mean>1.1)) == 0 ) {
+  res_sma <- head(res_sma[order(-res_sma$mean),],1)
+} else {
+  res_sma <- subset(res_sma,mean>1.1)
+  res_sma <- res_sma[order(-res_sma$returns),]
+}
+
 n1=best_sma[1,1]
 n2=best_sma[1,2]
 message(paste("Best short SMA period:",n2))
@@ -345,6 +352,13 @@ lines(tail(ma2,200) ~ tail(as.Date(price$date),200) ,col="blue")
 Same thing for the best EMA cross strategy.
 
 ```{r,best_ema,fig.width=10,fig.height=8}
+
+if ( nrow(subset(res_ema,mean>1.1)) == 0 ) {
+  res_ema <- head(res_ema[order(-res_ema$mean),],1)
+} else {
+  res_ema <- subset(res_ema,mean>1.1)
+  res_ema <- res_ema[order(-res_ema$returns),]
+}
 
 n1=best_ema[1,1]
 n2=best_ema[1,2]

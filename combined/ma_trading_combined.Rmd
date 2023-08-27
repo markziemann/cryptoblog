@@ -1,0 +1,380 @@
+---
+title: "<br>Trading combined cypto price data based on MA and EMAs"
+date: "`r Sys.Date()`"
+---
+
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/combined/)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+Trading off simple moving averages (SMA), exponenial moving averages (EMA) and crosses between these is
+a popular method for timing entry and exit of positions.
+In this blog post I will be exploring MA strategies on the daily timeframe to find the ones which
+perform best.
+
+This page is designed to be updated daily - today's date is shown below.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("parallel")
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+Sys.Date()
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining combined crypto data generated previously
+
+```{r,getdata}
+
+price <- readRDS("combined_price.rds")
+#price <- as.matrix(price)
+
+price <-data.frame("date"=as.Date(rownames(price)),"close"=price$close)
+
+head(price)
+tail(price)
+
+```
+
+## Calculate hodl returns
+
+It's important to calculate the returns for simply holding the asset rather than actively trading.
+
+The number shown here is the fold return on investment.
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),2][2]
+mystart <- price[c(1,nrow(price)),2][1]
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## Moving average function
+
+Here are the functions for trading based on SMA and EMAs, buying when the price breaks through the
+MA line and sell when it falls below the MA line. All trades are executed at the end of the daily session (UTC midnight).
+
+```{r,functions}
+
+sma <- function(price,n,fee) {
+ma <- SMA(Cl(price),n=n)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(c(prod(trades$diff),nrow(trades)))
+}
+
+ema <- function(price,n,fee) {
+ma <- EMA(Cl(price),n=n)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+return(c(prod(trades$diff),nrow(trades)))
+}
+
+```
+
+## Backtesting
+
+Let's look back in time and trial SMA and EMA strategies with an interval from 3 to 200 days.
+
+Let's assume a 0.5% trading fee.
+
+
+```{r,backtest}
+
+fee=0.005
+
+myrange <- 3:200
+
+res <- t(sapply(myrange,function(n) { sma(price,n,fee) } ))
+res <- as.data.frame(cbind(myrange,res))
+colnames(res) <- c("MAperiod","returns","trades")
+res$mean <- res$returns^(1/res$trades)
+res_sma <- res
+
+res <- t(sapply(myrange,function(n) { ema(price,n,fee) } ))
+res <- as.data.frame(cbind(myrange,res))
+colnames(res) <- c("MAperiod","returns","trades")
+res$mean <- res$returns^(1/res$trades)
+res_ema <- res
+
+```
+
+## Plots
+
+Now let's look at which of these approaches works best.
+
+```{r,plots1,fig.height=8,fig.width=8}
+
+plot(x=myrange, y=res_sma$returns, pch=19,
+  xlab="moving average interval (days)",ylab="fold return",main="Daily SMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(x=myrange,y=res_sma$returns, pch=19,
+  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="Daily SMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(x=myrange,y=res_ema$returns, pch=19,
+  xlab="moving average interval (days)",ylab="fold return",main="Daily EMA")
+abline(h=hodl,col="red")
+grid()
+
+plot(x=myrange,y=res_ema$returns, pch=19,
+  xlim=c(1,50),xlab="moving average interval (days)",ylab="fold return",main="Daily EMA")
+abline(h=hodl,col="red")
+grid()
+
+```
+
+Some of those gains look very high, but the time frames are quite short.
+Could it mean that there are a lot of trades each with very small gains?
+
+```{r,plots2,fig.height=8,fig.width=8}
+
+plot(res_sma$mean,res_sma$returns, main="Daily SMA",
+  xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
+grid()
+text(res_sma$mean,res_sma$returns , cex=1, labels=res_sma$MAperiod)
+abline(h=hodl,col="red")
+
+head(res_sma[order(-res_sma$mean),],20) %>% kbl(caption="Highest ROI SMA strategy",row.names = FALSE) %>%  kable_styling()
+
+plot(res_ema$mean,res_ema$returns, main="Daily EMA",
+  xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
+grid()
+text(res_ema$mean,res_ema$returns , cex=1, labels=res_ema$MAperiod)
+abline(h=hodl,col="red")
+
+head(res_ema[order(-res_ema$mean),],20) %>% kbl(caption="Highest ROI EMA strategy",row.names = FALSE) %>%  kable_styling()
+
+```
+
+Now we'll have a look at how many trades are required for these approaches.
+Ideally we don't want to be making trades every few days.
+
+```{r,plots3,fig.height=8,fig.width=8}
+
+plot(res_sma$trades,res_sma$returns, main="Daily SMA",
+  xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
+grid()
+text(res_sma$trades,res_sma$returns , cex=1, labels=res_sma$MAperiod)
+abline(h=hodl,col="red")
+
+plot(res_ema$trades,res_ema$returns, main="Daily EMA",
+  xlab="no. trades",ylab="total ROI",cex=2,pch=19,col="gray")
+grid()
+text(res_ema$trades,res_ema$returns , cex=1, labels=res_ema$MAperiod)
+abline(h=hodl,col="red")
+
+
+```
+
+## Optimisation
+
+Now let's select the two best approaches and show the history of trades.
+
+### Best SMA
+
+```{r,best_sma,fig.width=10,fig.height=8}
+
+if (nrow(subset(res_sma,mean>1.1)>0)) {
+  res_sma <- subset(res_sma,mean>1.1)
+  res_sma <- res_sma[order(-res_sma$returns),]
+} else {
+  res_sma <- res_sma[order(-res_sma$mean),]
+}
+
+
+best_sma = head(res_sma[order(-res_sma$returns),"MAperiod"],1)
+message(paste("Best SMA period:",best_sma))
+ma <- SMA(Cl(price),n=best_sma)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]  
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+sma_trades <- cbind(buy,sell)
+message(paste("Number of trades:",nrow(sma_trades)))
+sma_trades$diff <- ( ( sma_trades$sell_price - sma_trades$buy_price ) / sma_trades$buy_price ) +1 - (2 * fee )
+message(paste("Total ROI:",prod(sma_trades$diff)))
+message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
+message(paste("Mean:",mean(sma_trades$diff)))
+sma_trades  %>% kbl(row.names = FALSE) %>%  kable_styling()
+SMA_HEADER=paste(best_sma,"day moving average")
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=SMA_HEADER)
+grid()
+lines(ma~ as.Date(price$date) ,col="red")
+
+```
+
+### Best EMA
+
+Now have a look at the best EMA option.
+
+```{r,best_ema,fig.width=10,fig.height=8}
+
+if (nrow(subset(res_ema,mean>1.1)>0)) {
+  res_ema <- subset(res_ema,mean>1.1)
+  res_ema <- res_ema[order(-res_ema$returns),]
+} else {
+  res_ema <- res_ema[order(-res_ema$mean),]
+}
+
+best_ema = head(res_ema[order(-res_ema$returns),"MAperiod"],1)
+message(paste("Best EMA period:",best_ema))
+ma <- EMA(Cl(price),n=best_ema)
+price2 <- price
+price2$ma <- ma
+price2$higher <- price2$close > price2$ma
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+ema_trades <- cbind(buy,sell)
+ema_trades$diff <- ( ( ema_trades$sell_price - ema_trades$buy_price ) / ema_trades$buy_price ) +1 - ( 2 * fee )
+message(paste("Number of trades:",nrow(ema_trades)))
+message(paste("Total ROI:",prod(ema_trades$diff)))
+message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
+message(paste("Mean:",mean(ema_trades$diff)))
+
+sma_trades  %>% kbl(row.names = FALSE) %>%  kable_styling()
+EMA_HEADER=paste(best_ema,"day exponential moving average")
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=EMA_HEADER)
+grid()
+lines(ma~ as.Date(price$date) ,col="red")
+
+```
+
+## Effect of fees
+
+The fee levels are a serious consideration because they will erode the profits if fees are too high.
+
+```{r,fees,fig.width=8,fig.height=7}
+
+fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
+
+res_sma_fees <- sapply(fee_levels,function(x) { sma(price,best_sma,fee=x) } )[1,]
+plot(fee_levels,res_sma_fees ,pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext(SMA_HEADER)
+abline(h=hodl,col="red")
+grid()
+
+res_ema_fees <- sapply(fee_levels,function(x) { ema(price,best_ema,fee=x) } )[1,]
+plot(fee_levels,res_ema_fees ,pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext(EMA_HEADER)
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Conclusion
+
+While this strategy wasprofitable, there are a few signs indicating that performance was poor.
+Firstly, the mean returns per trade was less than 5% for the optimal approach.
+Second, the fees curve showed profits rapidly diminish with fees above 1%.
+Overall this approach gave a relatively poor performance.
+
+## Session information
+
+For reproducibility
+
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
+
+</details>

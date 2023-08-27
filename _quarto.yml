@@ -1,0 +1,37 @@
+project:
+  type: website
+  output-dir: "."
+
+toc: true
+
+format:
+  html:
+    toc: true
+    self-contained: TRUE
+code-fold: true
+theme:
+  dark: cyborg
+  light: darkly
+
+website:
+  navbar:
+    title: MDZ Analytics
+    href: https://mdz-analytics.com
+    background: dark
+    right:
+      - icon: envelope
+        href: mailto:info@mdz-analytics.com
+      - text: "Email"
+        href: mailto:info@mdz-analytics.com
+      - icon: github
+        href: https://github.com/markziemann/cryptoblog
+      - text: "GitHub"
+        href: https://github.com/markziemann/cryptoblog
+      - icon: bell
+        href: https://mdz-analytics.com/crypto/alerts.html
+      - text: "Alerts"
+        href: https://mdz-analytics.com/crypto/alerts.html
+      - icon: bag-fill
+        href: https://mdz-analytics.com/products.html
+      - text: "Products"
+        href: https://mdz-analytics.com/products.html

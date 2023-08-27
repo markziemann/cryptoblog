@@ -3,9 +3,9 @@ title: "Trading TICKER based on the Stochastic indicator"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/stoch_trading.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/stoch_trading.Rmd)
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
@@ -171,8 +171,7 @@ message(paste("Returns over hodl:",prod(trades$diff)/hodl))
 
 ## Stoch trading function
 
-Assuming 0.1% trading fee.
-
+Assuming 0.5% trading fee.
 
 ```{r,stofunc1}
 
@@ -286,6 +285,21 @@ res5 %>% kbl() %>%  kable_styling("hover", full_width = F)
 
 ```
 
+## Filtering1
+
+Discard strategies with mean < 1.1 and select the one with the highest overall return.
+
+```{r,filt1}
+
+if ( nrow(subset(res5,mean>1.1)) == 0 ) {
+  res5 <- head(res5[order(-res5$mean),],1)
+} else {
+  res5 <- subset(res5,mean>1.1)
+  res5 <- res5[order(-res5$returns),]
+}
+
+```
+
 Now that I know which ranges of values work well, I will zoom in and do a more comprehensive
 backtesting for the following values nfastk(32:52),nfastd/nslowd(42:82) and smooth (1:5).
 
@@ -320,6 +334,21 @@ Here are the highest returning strategies with the improved parameters.
 res3 <- res2[order(-res2$returns),]
 
 head(res3,10) %>% kbl() %>%  kable_styling("hover", full_width = F)
+
+```
+
+## Filtering part 2
+
+Discard strategies with mean < 1.1 and select the one with the highest overall return.
+
+```{r,filt2}
+
+if ( nrow(subset(res3,mean>1.1)) == 0 ) {
+  res3 <- head(res3[order(-res3$mean),],1)
+} else {
+  res3 <- subset(res3,mean>1.1)
+  res3 <- res3[order(-res3$returns),]
+}
 
 ```
 

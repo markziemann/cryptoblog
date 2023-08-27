@@ -3,9 +3,9 @@ title: "Trading TICKER based on the Know Sure Thing (KST) indicator"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/coin_script/kst_trading_xx.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/coin_script/kst_trading_xx.Rmd)
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
@@ -180,7 +180,7 @@ timeframe, here are the ranges tested:
 
 * n_signal: from 3 to 20 days
 
-Let's assume a 0.1% exchange fee, as per binance current rate.
+Let's assume a 0.5% exchange fee.
 
 There are a lot of possibilities, so the best way to get a feel for the results is to see which combinations of parameters performed best using different
 performance metrics.
@@ -250,6 +250,21 @@ plot(res2$mean , res2$returns, log="y",xlab="mean ROI", ylab="total returns")
 points(basic_mean,basic_returns,col="red",pch=19,cex=2)
 abline(h=hodl,col="red")
 grid()
+
+```
+
+## Filtering
+
+Discard strategies with mean < 1.1 and select the one with the highest overall return.
+
+```{r,filt2}
+
+if ( nrow(subset(res2,mean>1.1)) == 0 ) {
+  res2 <- head(res2[order(-res2$mean),],1)
+} else {
+  res2 <- subset(res2,mean>1.1)
+  res2 <- res2[order(-res2$returns),]
+}
 
 ```
 

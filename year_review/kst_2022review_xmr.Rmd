@@ -1,0 +1,289 @@
+---
+title: "<br>XMR KST indicator 2022 review"
+date: "`r Sys.Date()`"
+---
+
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/kst_trading_xmr.Rmd)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="../images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+In this analysis I'm developing indicators based on price data from 2013 to 2021,
+and then checking to see how those indicators performed in 2022.
+
+This should prove whether backtesting based indicators are worth it or not.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+  library("parallel")
+})
+
+Sys.Date()
+
+CORES=detectCores()
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining XMR historical data (daily) from CoinMarketCap.com from June 2013 to 2021.
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&time_start=2013-06-01&time_end=2021-12-31",sep="")
+download.file(URL,destfile="xmrdat.txt")
+xmrdat <- fromJSON("xmrdat.txt")
+price <- xmrdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+From 2013 to end of 2021.
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),4][2]
+mystart <- price[c(1,nrow(price)),4][1]
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## KST trading function
+
+Here is the function for trading based on KST indicator, buying when short interval indicator
+goes above the longer interval line, and sell when it falls below.
+
+All trades are executed at the end of the daily session (UTC midnight).
+
+```{r,kstfunc1}
+
+mykst <- function(price,nScale=1,nrocScale=1,nSig=9,fee=0.005) {
+  nn <- c(10, 10, 10, 15) * nScale
+  nroc <- c(10, 15, 20, 30) * nrocScale
+  kst <- KST(price$close, n = nn, nROC = nroc, nSig = nSig)
+  price2 <- price
+  price2 <- cbind(price2,kst)
+  price2$higher <- price2$kst > price2$signal
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c("date","close")]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c("date","close")]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+}
+
+```
+
+## Backtesting
+
+Now let's go back in time to test the performance of the different interval strategies on the daily
+timeframe, here are the ranges tested:
+
+* n1: from 10 to 107 days
+
+* n2: from 3 to 25 days
+
+* n_signal: from 3 to 20 days
+
+Let's assume a 0.5% exchange fee.
+
+There are a lot of possibilities, so the best way to get a feel for the results is to see which combinations of parameters performed best using different
+performance metrics.
+
+```{r,backtest1}
+
+fee=0.005
+
+nScale <- seq(1,3,0.1)
+nrocScale <- seq(0.1,1,0.02)
+nSigs <- seq(5,60,1)
+
+params <- expand.grid(nScale,nrocScale,nSigs)
+colnames(params) <- c("nScale","nrocScale","nSigs")
+
+res <- mclapply(X=1:nrow(params) , FUN=function(i) {
+  nScale=as.numeric(params[i,1])
+  nrocScale=as.numeric(params[i,2])
+  nSigs=as.numeric(params[i,3])
+  mykst(price,nScale=nScale,nrocScale=nrocScale,nSig=nSigs,fee=fee)
+} , mc.cores = CORES )
+
+res <- as.data.frame(do.call(rbind, res))
+colnames(res) <- c("returns","trades")
+res2 <- cbind(params,res)
+res2$returnspertrade <- res2$returns/res2$trades
+res2$mean <- res2$returns^(1/res2$trades)
+
+```
+
+## Optimised strategy
+
+Filter for mean >1.1 and highest overall returns.
+
+```{r,best1,fig.width=10,fig.height=8}
+
+res2 <- subset(res2,mean>1.1)
+res2 <- res2[order(-res2$returns),]
+
+best_nScale = res2[1,1]
+best_nrocScale = res2[1,2]
+best_nSigs = res2[1,3]
+
+message(paste("Selected n scale factor:",best_nScale))
+message(paste("Selected nROC scale factor:",best_nrocScale))
+message(paste("Selected n.signal period:",best_nSigs))
+
+price2 <- price
+kst <- KST(price2$close,n=best_nScale * c(10, 10, 10, 15) ,
+  nROC= best_nrocScale * c(10, 15, 20, 30),
+  nSig=best_nSigs )
+
+price2 <- cbind(price2,kst)
+price2$higher <- price2$kst > price2$signal
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+## Recent action 2022
+
+```{r,recent,fig.height=8,fig.width=8}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=XMR&convert=USD&interval=daily&time_start=2013-06-01&time_end=2022-12-31",sep="")
+download.file(URL,destfile="xmrdat.txt")
+xmrdat <- fromJSON("xmrdat.txt")
+price <- xmrdat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+price2 <- price
+kst <- KST(price2$close,n=best_nScale * c(10, 10, 10, 15) ,
+  nROC= best_nrocScale * c(10, 15, 20, 30),
+  nSig=best_nSigs )
+
+price2 <- cbind(price2,kst)
+price2$higher <- price2$kst > price2$signal
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+## Trades by year
+
+It is good to see whether the strategy gives consistent returns over the years.
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
+yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+yearly <- yearly[which(lapply(yearly,length)>0)]
+vioplot(yearly)
+
+yr <- sapply(yearly,prod)
+barplot(yr,ylab="fold return per year")
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+```
+
+## Conclusion
+
+KST gave relatively poor performance in this time.
+
+## Session information
+
+For reproducibility
+
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
+
+</details>

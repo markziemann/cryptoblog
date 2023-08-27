@@ -3,9 +3,9 @@ title: "<br>Crypto 101: Why bother with digital currencies?"
 date: "2022-01-09"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/learning_resources.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/learning_resources.Rmd)
 
-This document is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This document is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />

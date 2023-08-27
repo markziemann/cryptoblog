@@ -240,6 +240,10 @@ Backtesting: [BTC](crypto/ensembl_trading_btc.html), [ETH](crypto/ensembl_tradin
 
 * [Bitcoin's fatal flaw nobody is talking about](crypto/bitcoin_flaw.html)
 
+## Year in review
+
+* [2022 Cryptocurrency market and indicators in review](https://mdz-analytics.com/crypto/review2022.html).
+
 <hr>
 
 ## <br>Discussion
@@ -250,7 +254,7 @@ Join the discussion on Discord.
 
 ## <br>Suggestions and feedback
 
-Mail me info@mdz-analytics.com or raise an issue at the [GitHub repo](https://github.com/markziemann/cryptoblog).
+Mail me info@mdz-analytics.com or raise an issue at the [GitHub repo](https://github.com/MDZanalytics/cryptoblog).
 
 ## <br>Support this site
 
@@ -264,8 +268,8 @@ For subscription to notifications and custom backtesting analysis, please visit 
 
 ## <br>License and source code
 
-This website and materials are distributed in accordance with the [MIT License](https://github.com/markziemann/cryptoblog/blob/main/LICENSE).
-Underlying code for this work and other experimental work can be found on my [GitHub repo](https://github.com/markziemann/cryptoblog).
+This website and materials are distributed in accordance with the [MIT License](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE).
+Underlying code for this work and other experimental work can be found on my [GitHub repo](https://github.com/MDZanalytics/cryptoblog).
 
 <hr>
 

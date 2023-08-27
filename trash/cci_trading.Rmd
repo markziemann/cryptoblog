@@ -3,9 +3,9 @@ title: "<br>Trading BTC based on CCI"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/cci_trading.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/cci_trading.Rmd)
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
@@ -135,7 +135,7 @@ parameters:
 
 * n=10:20
 
-Let's assume a 0.1% trading fee, as per binance current rate.
+Let's assume a 0.5% trading fee.
 
 Here is a table of results.
 

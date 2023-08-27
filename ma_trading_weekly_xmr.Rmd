@@ -3,9 +3,9 @@ title: "<br>Trading XMR based on weekly MA and EMAs"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/ma_trading_weekly_xmr.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/ma_trading_weekly_xmr.Rmd)
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
@@ -139,7 +139,7 @@ return(c(prod(trades$diff),nrow(trades)))
 
 Let's look back in time and trial SMA and EMA strategies with an interval from 3 to 200 weeks.
 
-Let's assume a 0.1% trading fee, as per binance current rate.
+Let's assume a 0.5% trading fee.
 
 
 ```{r,backtest}

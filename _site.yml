@@ -12,7 +12,7 @@ navbar:
       href: mailto:info@mdz-analytics.com
     - text: "GitHub"
       icon: fa-github
-      href: https://github.com/markziemann/cryptoblog
+      href: https://github.com/MDZanalytics/cryptoblog
     - text: "Alerts"
       icon: fa-bell
       href: https://mdz-analytics.com/crypto/alerts.html

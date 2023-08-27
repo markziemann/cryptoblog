@@ -1,0 +1,467 @@
+---
+title: "Indicators with universal performance"
+---
+
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Concept
+
+The indicators I've developed on the daily timeframe are specialised for
+each cryptocurrency, as each has distinctive patterns of price action
+driven by the psychology of market participants.
+These are subtle modifications to the time periods, signal lines, etc,
+which change when buy and sell signals are flashed.
+
+In this post I ask "is it possible to obtain indicators with exceptional
+performance that could be applied to any cryptocurrency?"
+
+The idea of a universal indicator would be attractive as it would simplify
+the process of daily checking, and could allow us to apply these indicators
+with more confidence to cryptos that are new or have a relatively short
+price history.
+
+## Data preparation
+
+The first part of this analysis is to generate some price data for identifying
+optimum indicators.
+In doing this, I selected several major cryptocurrencies with relatively
+long price histories including BTC, ETH, BNB, XRP, ADA, DOGE, LTC, XMR, FIL, XTZ,
+DASH and FTC.
+You will notice that among this list there are some that have fallen from favour,
+including XTZ, FTC, FIL and DASH.
+I have included these to add an extra "challenge" to the indicators.
+The way I see it, developing profitable indicators based on BTC performance on early BTC
+data is easy compared to one that has been struggling, like DASH.
+
+To undertake this analysis, I concatenated the price history of these currencies.
+I had to normalise the prices, so that the starting price of the next coin matched the ending
+price of the previous coin.
+In addition, a spacer of 30 days was added to the end of each coin's price series,
+effectively repeating the high-low-close sequence 30 times before starting the next coin's
+data.
+In total the dataset had a massive 34500 days of price action (94.5 years), so it should
+be comprehensive enough to get good results.
+
+The combined price data was generated and saved for future use.
+I had a suspicion that the order of coins in the series might impact the results,
+so I pseudo-randomised the order of coins, setting a seed to allow reproducibility.
+This was repeated five times to save five different combined datasets.
+
+## Indicators identified
+
+The indicators that I used include SMA, EMA, SMA cross, EMA cross, Directional Movement
+Index (DMI), Donchian Channel (DC), Know Sure Thing (KST), Stochastic oscillator (STO),
+Double RSI (dRSI) and True Strength Index (TSI).
+
+The codes I already had to optimise these indicators were modified to accept this new
+dataset and I added an additional filter, discarding any strategy where the mean returns
+per trade were lass than +10%.
+
+Below are the results for the five runs conducted.
+The optimum parameters identified might vary as the price series are arranged in
+different order.
+The performance of the indicator is expressed as "xHODL" which is the returns
+using the strategy divided by the returns of just holding the underlying asset.
+
+```{r}
+#| label: indic1
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+  library("parallel")
+})
+
+x <- read.table("indicators.tsv")
+colnames(x) <- c("indicator","parameters","xHODL")
+x  %>% kbl(caption="Backtesting results") %>% kable_styling("hover", full_width = F)
+
+```
+
+This is quite a busy table of data, so let's unpack what's happening.
+
+We would expect the returns to vary a lot as the order of coins in the price data is
+different.
+We expect the indicator parameters might vary slightly, as they did, however the
+results did converve within a narrow range, and I was able to summarise this data
+by using the median value.
+
+This gives us the following summary table, ranked by total returns.
+
+```{r}
+#| label: indic2
+
+y <- read.table("indicators2.tsv",header=TRUE)
+y %>% kbl(caption="Results summary") %>% kable_styling("hover", full_width = F)
+
+```
+
+As you can see from the table the Donchian channel is the best performing indicator,
+followed by the MA crossed and then the TSI.
+Of these top four indicators, the TSI required the fewest number of trades, while the
+SMA cross had the overall best mean return per trade at +58%.
+
+Further down the list were the STO, KST, DMI, SMA, EMA and lastly dRSI.
+The simple EMA and SMA had the highest number of trades and probably suffered from
+a large number of fake-outs.
+The dRSI signal barely made a profit at all.
+
+To better visialise the results I can make a barplot.
+
+```{r}
+#| label: barplot1
+
+par(mar=c(7,6,3,1))
+barplot(y$xHODL,log="y",names.arg=y$Indicator,las=2,ylab="xHODL")
+
+```
+
+## Validation
+
+Now that we have our top performing indicators, I thought it might be a
+good idea to assess their performance on cryptos that weren't included
+in the backtesting.
+
+This should give us some idea as to whether these indicators have universally
+good performance, or whether they only do well with the data they are tested against.
+
+For that reason, I will see how they perform against Enjin coin (launched in 2017).
+
+```{r}
+#| label: enj_data
+
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ENJ&convert=USD&interval=daily&time_start=2014-01-01&time_end=","2023-01-25",sep="")
+download.file(URL,destfile="dat.txt")
+dat <- fromJSON("dat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+myend <- price[c(1,nrow(price)),4][2]
+mystart <- price[c(1,nrow(price)),4][1]
+hodl <- (myend - mystart) / mystart
+hodl
+
+plot(price$close ~ as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="Enjin price")
+grid()
+
+```
+
+### DC
+
+Donchian channel, 19 days.
+
+```{r}
+#| label: dc1
+
+best_n = 19
+
+fee=0.005
+
+message(paste("Selected n period:",best_n))
+
+price2 <- price
+dc <- DonchianChannel(price2$close,n=best_n)
+price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {dc[i,"high"] > dc[(i-1),"high"] } ))
+price2$lower <- c(NA,sapply(2:nrow(dc),function(i) {dc[i,"low"] < dc[(i-1),"low"] } ))
+price2 <- price2[price2$higher != price2$lower,]
+# show changing rows only
+price2 <- price2[c(NA,unlist(lapply(2:nrow(price2) , function(i) {
+  price2$higher[i] != price2$higher[i-1]
+}))),]
+price2 <- price2[!is.na(price2$higher),]
+# cannot begin with sell
+if ( price2[1,"higher"] == FALSE ) { price2 <- price2[2:nrow(price2),] }
+# cannot end with buy
+if ( price2[nrow(price2),"higher"] == TRUE ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,higher==TRUE)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,lower==TRUE)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+message(paste("Mean:",mean(trades$diff)))
+resDC<- prod(trades$diff)
+
+HEADER="Donchian channel"
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+lines(dc[,"high"] ~ as.Date(price$date) ,col="darkgreen",lwd=2)
+lines(dc[,"low"] ~ as.Date(price$date) ,col="red",lwd=2)
+
+```
+
+<br><details><summary><b>Click HERE to show all trades</b></summary><br><p>
+
+```{r}
+#| label: dc2
+
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+</details>
+
+### SMA cross
+
+```{r}
+#| label: smacross
+
+n1=43
+n2=6
+message(paste("Best short SMA period:",n2))
+message(paste("Best long SMA period:",n1))
+if (n1 != n2) {
+  ma1 <- SMA(Cl(price),n=n1)
+  ma2 <- SMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  returns <- prod(trades$diff)
+} else {
+  returns <- 1
+}
+sma_trades <- trades
+message(paste("Number of trades:",nrow(sma_trades)))
+message(paste("Total ROI:",prod(sma_trades$diff)))
+message(paste("Returns over hodl:",prod(sma_trades$diff)/hodl))
+message(paste("Mean:",mean(sma_trades$diff)))
+resSMAcross<- prod(trades$diff)
+
+SMA_HEADER=paste(n2 , "and", n1 ,"period SMA cross")
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=SMA_HEADER)
+grid()
+lines(ma1~ as.Date(price$date) ,col="red")
+lines(ma2~ as.Date(price$date) ,col="blue")
+
+```
+
+<br><details><summary><b>Click HERE to show all trades</b></summary><br><p>
+
+```{r}
+#| label: smacross2
+
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+</details>
+
+### EMA cross
+
+```{r}
+#| label: emacross
+
+n1=26
+n2=8
+message(paste("Best short EMA period:",n2))
+message(paste("Best long EMA period:",n1))
+if (n1 != n2) {
+  ma1 <- EMA(Cl(price),n=n1)
+  ma2 <- EMA(Cl(price),n=n2)
+  price2 <- price
+  price2$ma1 <- ma1
+  price2$ma2 <- ma2
+  price2$higher <- price2$ma2 > price2$ma1
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c(1,2)]
+  colnames(buy) <- c("buy_date","buy_price")
+  sell <- subset(price2,trade==-1)[,c(1,2)]
+  colnames(sell) <- c("sell_date","sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- cbind(buy,sell)
+  trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+  returns <- prod(trades$diff)
+} else {
+  returns <- 1
+}
+ema_trades <- trades
+message(paste("Number of trades:",nrow(ema_trades)))
+message(paste("Total ROI:",prod(ema_trades$diff)))
+message(paste("Returns over hodl:",prod(ema_trades$diff)/hodl))
+message(paste("Mean:",mean(ema_trades$diff)))
+resEMAcross<- prod(trades$diff)
+
+EMA_HEADER=paste(n2 , "and", n1 ,"period EMA cross")
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main=EMA_HEADER)
+grid()
+lines(ma1~ as.Date(price$date) ,col="red")
+lines(ma2~ as.Date(price$date) ,col="blue")
+
+```
+
+<br><details><summary><b>Click HERE to show all trades</b></summary><br><p>
+
+```{r}
+#| label: emacross2
+
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+</details>
+
+
+### TSI
+
+```{r}
+#| label: tsi
+
+best_n1 = 175
+best_n2 = 50
+best_ns = 11
+
+message(paste("Selected n1 period:",best_n1))
+message(paste("Selected n2 period:",best_n2))
+message(paste("Selected n.signal period:",best_ns))
+
+TSI <- function(x, n.first = 25, n.second = 13, n.signal = 7) {
+  #True Strength Indicator
+  #https://school.stockcharts.com/doku.php?id=technical_indicators:true_strength_index
+  x <- try.xts(x, error = as.matrix)
+  pc <- x - lag.xts(x, na.pad = T) #force lag.xts to get na padding
+  dspc <- EMA(EMA(pc, n = n.first), n = n.second)
+  dsapc <- EMA(EMA(abs(pc), n = n.first), n = n.second)
+  tsi <- 100 * (dspc/dsapc)
+  signal <- EMA(tsi, n = n.signal)
+  r <- cbind(tsi, signal)
+  r <- reclass(r, x)
+  if (!is.null(dim(r))) colnames(r) <- c("tsi", "signal")
+  return(r)
+}
+
+tsi <- TSI(price$close , n.first = best_n1, n.second = best_n2, n.signal = best_ns )
+price2 <- price
+price2 <- cbind(price2,tsi)
+price2$higher <- price2$tsi > price2$signal
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,trade==-1)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+message(paste("Mean:",mean(trades$diff)))
+resTSI<- prod(trades$diff)
+
+HEADER="TSI"
+par(mfrow=c(2,1))
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(tsi[,1] ~ as.Date(price$date),type="l",col="blue",
+  xlab="Date",ylab="TSI",main="TSI")
+lines(as.Date(price$date), tsi[,2]  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+```
+
+<br><details><summary><b>Click HERE to show all trades</b></summary><br><p>
+
+```{r}
+#| label: tsi2
+
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+```
+
+</details>
+
+## Summary
+
+Enjin coin was used as a validation for these indicators,it has a hodl value of 20.3 at time of writing.
+DC performed poorly with results under hodl, but EMA cross and TSI performing best with ~29x returns.
+
+```{r}
+#| label: smry1
+
+barplot(c(resDC,resEMAcross,resSMAcross,resTSI),
+  names.arg=c("DC","EMAcross","SMAcross","TSI"),
+  ylab="Total ROI",ylim=c(0,30),main="strategy performance on Enjin")
+abline(h=hodl,col="red")
+
+```
+
+Based on this limited indicator validation, EMAcross and TSI with the supplied parameters would be reasonably good approaches for
+trading your favourite altcoin.
+
+## Source code
+
+Underlying code for this work can be found on my [GitHub repo](https://github.com/MDZanalytics/cryptoblog/combined/).
+
+## Disclaimer
+
+This is not financial advice, it is for informational purposes only.
+

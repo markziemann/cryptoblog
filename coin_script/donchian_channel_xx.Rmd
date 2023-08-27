@@ -3,9 +3,9 @@ title: "Trading TICKER based on the Donchian Channel"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/donchian_channel_btc.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/donchian_channel_btc.Rmd)
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
@@ -40,7 +40,7 @@ suppressPackageStartupMessages({
 
 Sys.Date()
 
-CORES=detectCores()/2
+CORES=detectCores()
 
 ```
 
@@ -151,7 +151,7 @@ timeframe, here are the ranges tested:
 
 * n: from 3 to 200 days
 
-Let's assume a 0.2% exchange fee.
+Let's assume a 0.5% exchange fee.
 
 ```{r,backtest1}
 
@@ -236,13 +236,28 @@ mtext("Mean and total returns")
 
 ```
 
+## Filtering
+
+Discard strategies with mean < 1.1 and select the one with the highest overall return.
+
+```{r,filt2}
+
+if ( nrow(subset(res,mean>1.1)) == 0 ) {
+  res <- head(res[order(-res$mean),],1)
+} else {
+  res <- subset(res,mean>1.1)
+  res <- res[order(-res$returns),]
+}
+
+```
+
 ## Optimised strategy
 
 Optimise for highest returns.
 
 ```{r,best1,fig.width=10,fig.height=8}
 
-best_n = head(res[order(-res$returns),],1)$nr
+best_n = res$nr[1]
 
 message(paste("Selected n period:",best_n))
 

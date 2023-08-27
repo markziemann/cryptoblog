@@ -1,14 +1,6 @@
 ---
-title: "<br>MDZ Analytics"
-author: "Mark Ziemann"
-format:
-  html:
-    self-contained: TRUE
-theme: cyborg
-toc: true
+title: "MDZ Analytics"
 ---
-
-<br>
 
 In the cryptocurrency markets, inexperienced investors get caught up in
 fear and greed, emotions which are detrimental to investor performance.
@@ -23,9 +15,7 @@ your favourite alt-coin, please visit the [product page](products.html).
 
 No material here should be considered financial advice.
 
-<hr>
-
-## <br>Daily alerts for BTC, ETH and XMR
+## Daily alerts for BTC, ETH and XMR
 
 At the daily open, a script checks for changes in market momentum indicators.
 These include the simple moving average, directional movement index, true strength index and the stochastic oscillator.
@@ -54,8 +44,8 @@ Current state if the indicators as at MYTIME:
 <tr class="even">
 <td>EMA</td>
 <td style="color:BTC_EMA_COL"><b>BTC_EMA_DAILY</b></td>
-<td style="color:ETH_EMA_COL"><b>ETH_SMA_DAILY</b></td>
-<td style="color:XMR_EMA_COL"><b>XMR_SMA_DAILY</b></td>
+<td style="color:ETH_EMA_COL"><b>ETH_EMA_DAILY</b></td>
+<td style="color:XMR_EMA_COL"><b>XMR_EMA_DAILY</b></td>
 </tr>
 <tr class="odd">
 <td>SMA cross</td>
@@ -99,8 +89,13 @@ Current state if the indicators as at MYTIME:
 <td style="color:ETH_DC_COL"><b>ETH_DC_DAILY</b></td>
 <td style="color:XMR_DC_COL"><b>XMR_DC_DAILY</b></td>
 </tr>
-</tr>
 <tr class="even">
+<td>KST</td>
+<td style="color:BTC_KST_COL"><b>BTC_KST_DAILY</b></td>
+<td style="color:ETH_KST_COL"><b>ETH_KST_DAILY</b></td>
+<td style="color:XMR_KST_COL"><b>XMR_KST_DAILY</b></td>
+</tr>
+<tr class="odd">
 <td>Ensemble indicator</td>
 <td style="color:BTC_ENS_COL"><b>BTC_ENS_DAILY</b></td>
 <td style="color:ETH_ENS_COL"><b>ETH_ENS_DAILY</b></td>
@@ -113,7 +108,9 @@ Current state if the indicators as at MYTIME:
 <img src="images/banner1.png" alt="banner" width=600" height="80"/>
 </a>
 
-## <br>News and updates
+## News and updates
+
+* *2022/09/27* - Know Sure Thing has been added as a new indicator!
 
 * *2022/09/12* - The ensemble indicator has been added to BTC/ETH/XMR alerts!
 
@@ -131,7 +128,7 @@ Current state if the indicators as at MYTIME:
 
 <hr>
 
-## <br>Our indicators
+## Our indicators
 
 #### **Moving averages**
 
@@ -192,6 +189,19 @@ upper line and sell when the price dips under the lower line.
 Backtesting: [BTC](crypto/donchian_channel_btc.html), [ETH](crypto/donchian_channel_eth.html) and
 [XMR](crypto/donchian_channel_xmr.html).
 
+#### **Know Sure Thing**
+
+The [Know Sure Thing (KST)](https://www.investopedia.com/terms/k/know-sure-thing-kst.asp)
+is a momentum oscillator developed by Martin Pring to make rate-of-change readings easier
+for traders to interpret.
+The KST is calculated by taking the simple moving average (SMA) of four different
+rate-of-change (ROC) periods, adding them together to come up with the KST,
+and creating a signal line by taking the 9-period SMA of the KST.
+Like other indicators, it is an oscillator with a signal line to distinguish bullish and bearish
+conditions.
+Backtesting: [BTC](crypto/kst_trading_btc.html), [ETH](crypto/kst_trading_eth.html) and
+[XMR](crypto/kst_trading_xmr.html).
+
 #### **Ensemble indicator**
 
 The above indicators are very good, but do they work better when combined?
@@ -218,7 +228,7 @@ Backtesting: [BTC](crypto/ensembl_trading_btc.html), [ETH](crypto/ensembl_tradin
 
 <hr>
 
-## <br>Blog posts (opinion and perspectives)
+## Blog posts (opinion and perspectives)
 
 * [Crypto 101: Why bother with digital currencies?](crypto/learning_resources.html)
 
@@ -228,17 +238,21 @@ Backtesting: [BTC](crypto/ensembl_trading_btc.html), [ETH](crypto/ensembl_tradin
 
 <hr>
 
-## <br>Discussion
+## Year in review
+
+* [2022 Cryptocurrency market and indicators in review](https://mdz-analytics.com/crypto/review2022.html).
+
+## Discussion
 
 Join the discussion on Discord.
 
 <iframe src="https://discordapp.com/widget?id=1009650524544565433&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
 
-## <br>Suggestions and feedback
+## Suggestions and feedback
 
-Mail me mark.ziemann{αt}gmail.com or raise an issue at the [GitHub repo](https://github.com/markziemann/cryptoblog).
+Mail me info@mdz-analytics.com or raise an issue at the [GitHub repo](https://github.com/MDZanalytics/cryptoblog).
 
-## <br>Support this site
+## Support this site
 
 If you find this resource useful, consider a small tip.
 It will help fund more research and analysis.
@@ -248,13 +262,13 @@ It will help fund more research and analysis.
 For subscription to notifications and custom backtesting analysis, please visit the [product page](products.html)
 
 
-## <br>License and source code
+## License and source code
 
-This website and materials are distributed in accordance with the [MIT License](https://github.com/markziemann/cryptoblog/blob/main/LICENSE).
-Underlying code for this work and other experimental work can be found on my [GitHub repo](https://github.com/markziemann/cryptoblog).
+This website and materials are distributed in accordance with the [MIT License](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE).
+Underlying code for this work and other experimental work can be found on my [GitHub repo](https://github.com/MDZanalytics/cryptoblog).
 
 <hr>
 
-Shout out to the developers of the [downcute rmarkdown template](https://github.com/juba/rmdformats) for making this site look 100% better.
+These analysis are made possible by data from the [CoinMarketCap](https://coinmarketcap.com/) API.
 
 <hr>

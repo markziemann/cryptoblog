@@ -1,0 +1,145 @@
+---
+title: "<br>Combined analysis - data prep"
+date: "`r Sys.Date()`"
+---
+
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/combined/)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+So far we have analysed each cryptocurrency separately, but in this analysis I will
+be downloading price data from a basket of cryptocurrencies and combining it into a
+massive series that I will then analyse with my existing indicators.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("parallel")
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+Sys.Date()
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining historical data (daily) from CoinMarketCap.com for a basket of cryptocurrencies.
+
+I use a basket of dominant crypto projects as well as some that have struggled.
+
+Total market days is >34000.
+Each crypto has >1000 days and most have >3000 days, so it should be a good dataset
+to analyze.
+
+Can always add more in future without extensive code changes.
+
+Note that the last price value of each series is repeated 30 times.
+This is a washout period that appears between each series.
+
+```{r,getdata}
+
+cryptos <- c("BTC","ETH","BNB","XRP","ADA","DOGE","LTC","XMR","FIL","XTZ","DASH","FTC")
+
+set.seed(300)
+cryptos <- sample(cryptos)
+
+message("here is the reshuffles set of cryptos")
+cryptos
+
+mydate <- Sys.Date()-1
+
+TICKER=cryptos[1]
+
+prices <- lapply(cryptos,function(TICKER) {
+  URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=",
+    TICKER,"&convert=USD&interval=daily&time_start=2010-06-01&time_end=",mydate,sep="")
+  download.file(URL,destfile="dat.txt")
+  dat <- fromJSON("dat.txt")
+  price <- dat$data$quotes
+  price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+  colnames(price) <- c("date","high","low","close")
+  price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+  price2 <- price[rep(nrow(price),30),]
+  price <- rbind(price,price2)
+  Sys.sleep(1)
+  return(price)
+})
+
+names(prices) <- cryptos
+lapply(prices,nrow)
+sum(unlist(lapply(prices,nrow)))
+
+```
+
+# relative prices
+
+In order to combine the price series, the following price series needs to be multiplied by a factor
+so it begins at the same price as the previous one ends.
+
+So I need to calculate the relative prices based on the start and end price of each series.
+
+It is a bit complicated, so it has a few steps.
+
+```{r,relprice}
+
+for ( i in 2:length(prices) ) {
+  prev <- prices[[i-1]][nrow(prices[[i-1]]),"close"]
+  new <- prices[[i]][1,"close"]
+  prices[[i]] <- prices[[i]][,2:4] * prev/new }
+
+prices[[1]] <- prices[[1]][,2:4]
+
+message("check that normalisation has worked")
+lapply(prices,function(x) { c1 <- head(x,1) ; c2 <- tail(x,1) ; rbind(c1,c2) })
+
+combined_price <- do.call(rbind,prices)
+rownames(combined_price) <- as.Date(1:nrow(combined_price))
+str(combined_price)
+
+head(combined_price)
+tail(combined_price)
+
+# save data to file
+write.table(combined_price,file="combined_price.csv",sep=",")
+saveRDS(combined_price,"combined_price.rds")
+
+```
+
+## Plots
+
+Let's examine some of the trends in the data with some charts.
+
+```{r,plots,fig.height=8,fig.width=8}
+
+plot(combined_price$close ~ as.Date(rownames(combined_price)),
+  type="l",log="y",ylab="USD price index",xlab="date (fictional)")
+
+```
+
+## Session information
+
+For reproducibility
+
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
+
+</details>

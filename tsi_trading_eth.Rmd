@@ -3,9 +3,9 @@ title: "<br>Trading ETH based on True Strength Index (TSI)"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/tsi_trading_eth.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/tsi_trading_eth.Rmd)
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
@@ -177,7 +177,7 @@ timeframe, here are the ranges tested:
 
 * n_signal: from 3 to 20 days
 
-Let's assume a 0.1% exchange fee, as per binance current rate.
+Let's assume a 0.5% exchange fee.
 
 There are a lot of possibilities, so the best way to get a feel for the results is to see which combinations of parameters performed best using different
 performance metrics.

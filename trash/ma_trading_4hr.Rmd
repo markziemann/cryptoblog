@@ -3,7 +3,7 @@ title: "<br>Trading BTC based on MA and EMA crosses"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/ma_trading_4hr.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/ma_trading_4hr.Rmd)
 
 If you find this resource useful, consider a small tip.
 
@@ -139,7 +139,7 @@ return(c(prod(trades$diff),nrow(trades)))
 
 Let's look back in time and trial SMA and EMA strategies with an interval from 3 to 1000 periods.
 
-Let's assume a 0.1% trading fee, as per binance current rate.
+Let's assume a 0.5% trading fee.
 
 
 ```{r,backtest}

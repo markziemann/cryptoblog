@@ -3,7 +3,7 @@ title: "<br>Daily trade alerts for TRX"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/alerts_TRX.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/alerts_TRX.Rmd)
 
 ## Intro
 
@@ -47,7 +47,7 @@ https://www.pushbullet.com/channel?tag=trx_signal
 If you need some help to design your own trading signals/strategies, I am happy to help for a fee.
 email me at info@mdz-analytics.com for any enquiries/suggestions/feedback.
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
@@ -159,7 +159,7 @@ message(paste("TRX SMA signal:",trx_signal))
 
 ```
 
-```{r, trx_sma_plot,fig.height=8,fig.width=8}
+```{r, trx_sma_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="TRX w SMA")
@@ -212,7 +212,7 @@ message(paste("TRX EMA signal:",trx_signal))
 
 ```
 
-```{r, trx_ema_plot,fig.height=8,fig.width=8}
+```{r, trx_ema_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="TRX EMA")
@@ -224,7 +224,7 @@ lines(price2$ma~ as.Date(price2$date) ,col="red")
 ```{r,trx_ema_push}
 
 if ( trx_signal != "NONE") {
-  MYNOTE <- paste("The TRX EMA signal is", trx_signal,".")
+  MYNOTE <- paste(MYNOTE, "The TRX EMA signal is", trx_signal,".")
 }
 
 ```
@@ -269,7 +269,7 @@ message(paste("TRX SMA cross signal:",trx_signal))
 
 ```
 
-```{r, trx_cross_plot,fig.height=8,fig.width=8}
+```{r, trx_cross_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="TRX w SMA cross")
@@ -327,7 +327,7 @@ message(paste("TRX EMA cross signal is",trx_signal))
 
 ```
 
-```{r, trx_ema_cross_plot,fig.height=8,fig.width=8}
+```{r, trx_ema_cross_plot,fig.height=6,fig.width=6}
 
 plot(price2$close~as.Date(price2$date),type="l",
   xlab="Date",ylab="price (USD)",main="TRX EMA cross")
@@ -349,7 +349,7 @@ if ( trx_signal != "NONE") {
 
 Directional movement indicator is a good approach to identify trend changes.
 
-```{r,trx_dmi,fig.height=10,fig.width=8}
+```{r,trx_dmi,fig.height=7,fig.width=6}
 
 n <- as.numeric(params[params$indicator == "DMI",2])
 
@@ -381,7 +381,7 @@ message(paste("TRX DMI signal:",trx_signal))
 
 ```
 
-```{r,trx_dmi_plot,fig.height=10,fig.width=8}
+```{r,trx_dmi_plot,fig.height=7,fig.width=6}
 
 price2 <- as.data.frame(price2)
 par(mfrow=c(2,1))
@@ -410,7 +410,7 @@ Its success lies in how it changes rapidly when momentum shifts.
 For most coins, this indicator performs "best" in backtesting analysis, which means it
 should carry relatively more weight than other indicators.
 
-```{r,trx_tsi,fig.height=10,fig.width=8}
+```{r,trx_tsi,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "TSI",2],",")))
 n1 <- n[1]
@@ -463,7 +463,7 @@ message(paste("TRX TSI signal:",trx_signal))
 
 ```
 
-```{r,trx_tsi_plot,fig.height=10,fig.width=8}
+```{r,trx_tsi_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -492,7 +492,7 @@ if ( trx_signal != "NONE") {
 Similar to the TSI, the stoch can pinpoint early changes in momentum, however it may give many
 false positives.
 
-```{r,trx_stoch,fig.height=10,fig.width=8}
+```{r,trx_stoch,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "stoch",2],",")))
 n1 <- n[1]
@@ -529,7 +529,7 @@ message(paste("TRX stoch signal:",trx_signal))
 
 ```
 
-```{r,trx_stoch_plot,fig.height=10,fig.width=8}
+```{r,trx_stoch_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -557,7 +557,7 @@ if ( trx_signal != "NONE") {
 
 Double RSI is simply two RSI lines.
 
-```{r,trx_rsi1,fig.height=10,fig.width=8}
+```{r,trx_rsi1,fig.height=7,fig.width=6}
 
 n <- as.numeric(unlist(strsplit(params[params$indicator == "RSI2",2],",")))
 n1 <- n[1]
@@ -594,7 +594,7 @@ message(paste("TRX RSI signal:",trx_signal))
 
 ```
 
-```{r,trx_rsi_plot,fig.height=10,fig.width=8}
+```{r,trx_rsi_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -629,7 +629,7 @@ if ( trx_signal != "NONE") {
 
 ## TRX Donchian channel indicator
 
-```{r,trx_dc1,fig.height=10,fig.width=8}
+```{r,trx_dc1,fig.height=7,fig.width=6}
 
 n <- as.numeric(params[params$indicator == "DC",2])
 
@@ -691,7 +691,7 @@ message(paste("TRX DC signal:",trx_signal))
 
 ```
 
-```{r,trx_dc_plot,fig.height=10,fig.width=8}
+```{r,trx_dc_plot,fig.height=7,fig.width=6}
 
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
   xlab="Date",ylab="price (USD)",main="USD price",lwd=2)
@@ -724,7 +724,7 @@ if ( trx_signal != "NONE") {
 
 Another high-performing indicator across different price series data.
 
-```{r,trx_kst,fig.height=10,fig.width=8}
+```{r,trx_kst,fig.height=7,fig.width=6}
 
 price2 <- price
 
@@ -738,34 +738,35 @@ kst <- KST(price2$close,n=nScale * c(10, 10, 10, 15) ,
   nSig=nSigs)
 
 price2 <- cbind(price2,kst)
-price2$KST <- as.numeric(kst[,1]>kst[,2])
+price2$KST <- kst[,1]>kst[,2]
 
 tail(price2) %>% kbl(row.names = FALSE) %>%  kable_styling("hover", full_width = F)
 
 today_signal <- price2[nrow(price2),"KST"]
 previous_signal <- price2[(nrow(price2)-1),"KST"]
+
 if (today_signal != previous_signal ) {
   if ( (today_signal == TRUE ) & (previous_signal == FALSE ) ) {
-    signal="BUY"
+    trx_signal="BUY"
   }
   if ( (today_signal == FALSE ) & (previous_signal == TRUE ) ) {
-    signal="SELL"
+    trx_signal="SELL"
   }
 } else {
-  signal <- "NONE"
+  trx_signal <- "NONE"
 }
 
 if (today_signal==TRUE) {
-  ens_DMI=TRUE
+  ens_KST=TRUE
 } else {
-  ens_DMI=FALSE
+  ens_KST=FALSE
 }
 
 message(paste("TRX KST signal:",trx_signal))
 
 ```
 
-```{r,trx_kst_plot,fig.height=10,fig.width=8}
+```{r,trx_kst_plot,fig.height=7,fig.width=6}
 
 par(mfrow=c(2,1))
 plot(price2$close ~ as.Date(price2$date),type="l",log="y",
@@ -793,7 +794,7 @@ if ( trx_signal != "NONE") {
 
 This is a combination of a number of indicators.
 
-```{r,trx_ens1,fig.height=10,fig.width=8}
+```{r,trx_ens1,fig.height=7,fig.width=6}
 
 ens <- params[params$indicator=="Ensemble","parameter"]
 myrev <- intToUtf8(rev(utf8ToInt(ens)))
@@ -816,7 +817,8 @@ indicators <- c("SMA"=ens_SMA,
   "TSI"=ens_TSI,
   "stoch"=ens_stoch,
   "RSI2"=ens_RSI2,
-  "DC"=ens_DC)
+  "DC"=ens_DC,
+  "KST"=ens_KST)
 
 indicators <- indicators[names(indicators) %in% combo]
 message("State of the indicators:")
@@ -825,7 +827,8 @@ today_count <- sum(indicators)
 message(paste("today_count_TRX",today_count,sep="="))
 today_signal <- today_count>=n
 
-prev_html <- readLines("https://mdz-analytics.com/coins/TRX/alerts_TRX.html")
+system("wget https://mdz-analytics.com/coins/TRX/alerts_TRX.html -O alerts_TRX.html")
+prev_html <- readLines("alerts_TRX.html")
 prev_signal <- length(grep("TRX ensemble indicator is BULLISH",prev_html))>2
 
 trx_signal <- "NONE"

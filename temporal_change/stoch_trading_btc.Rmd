@@ -9,9 +9,9 @@ output:
 theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/stoch_trading.Rmd
+Source: https://github.com/MDZanalytics/cryptoblog/blob/main/stoch_trading.Rmd
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 
@@ -204,7 +204,7 @@ message(paste("Returns over hodl:",prod(trades$adj_diff)/hodl))
 
 ## Stoch trading function
 
-Assuming 0.1% trading fee, as per binance current rate.
+Assuming 0.5% trading fee.
 
 offset is the exponent for time 0. For example if it is 0.5 and return is 3x, the day1 trade is 3 ^ 0.5 = 1.7
 

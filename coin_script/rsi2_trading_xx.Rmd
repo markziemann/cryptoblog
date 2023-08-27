@@ -3,9 +3,9 @@ title: "Trading TICKER based on double RSI"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/rsi2_trading.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/rsi2_trading.Rmd)
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 <img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
@@ -146,7 +146,7 @@ rsi <- function(price,n1,n2,maType=EMA,fee=0.005) {
 
 Now let's go back in time to test the performance of the double RSI indicator using different intervals.
 
-Let's assume a 0.2% trading fee.
+Let's assume a 0.5% trading fee.
 
 ```{r,backtestema}
 
@@ -171,11 +171,11 @@ res <- cbind(params,res,stringsAsFactors=FALSE)
 
 Here is a table of results.
 
-```{r,filt1}
+```{r,filt0}
 
 res2 <- res[order(-res$returns),]
 
-head(res2,20) %>% 
+head(res2,20) %>%
   kbl(caption="highest returning strategies") %>%
   kable_styling("hover", full_width = F)
 
@@ -194,6 +194,22 @@ head(res2,20) %>%
 ```
 
 I also tried SMA but the results were disappointing.
+
+
+## Filtering1
+
+Discard strategies with mean < 1.1 and select the one with the highest overall return.
+
+```{r,filt1}
+
+if ( nrow(subset(res2,mean>1.1)) == 0 ) {
+  res2 <- head(res2[order(-res2$mean),],1)
+} else {
+  res2 <- subset(res2,mean>1.1)
+  res2 <- res2[order(-res2$returns),]
+}
+
+```
 
 ## Plots
 

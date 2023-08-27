@@ -1,0 +1,385 @@
+---
+title: "Trading ICP based on the Donchian Channel"
+date: "`r Sys.Date()`"
+---
+
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/donchian_channel_btc.Rmd)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+Donchian channel (DC) was developed by Richard Donchian.
+It is a simple type of channel consisting of 3 lines.
+The upper line is simply the highest price achieved over the last 20 periods.
+The lower line is the lowest price achieved over the last 20 periods.
+The middle line is the average of the upper and lower lines.
+The simplest way to apply DC trading is to buy/long when the middle line starts to
+move up and sell/short when the middle line start moving down.
+
+While the default values of DC are 20 periods, I will be testing other periods
+to see if they perform better.
+
+This page is designed to be updated daily - today's date is shown below.
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+  library("parallel")
+})
+
+Sys.Date()
+
+CORES=detectCores()/2
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining BTC historical data (daily) from CoinMarketCap.com from June 2013 to present.
+
+```{r,getdata}
+
+mydate <- Sys.Date()-1
+URL=paste("https://web-api.coinmarketcap.com/v1/cryptocurrency/ohlcv/historical?symbol=ICP&convert=USD&interval=daily&time_start=2013-06-01&time_end=",mydate,sep="")
+#download.file(URL,destfile="dat.txt")
+dat <- fromJSON("dat.txt")
+price <- dat$data$quotes
+price <- data.frame(price$time_close, price$quote$USD$high, price$quote$USD$low, price$quote$USD$close,stringsAsFactors=FALSE)
+colnames(price) <- c("date","high","low","close")
+price$date <- sapply(strsplit(as.character(price$date),"T"),"[[",1)
+
+```
+
+## Calculate hodl returns
+
+It's important to calculate the returns for simply holding the asset rather than actively trading.
+
+The number shown here is the fold return on investment.
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),4][2]
+mystart <- price[c(1,nrow(price)),4][1]
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## Basic look at the Donchian channel
+
+Here we can see the DC over the past 730 days, using the default settings.
+
+```{r,dc1,fig.height=10,fig.width=8}
+
+price2 <- tail(price,730)
+
+dc <- DonchianChannel(HLC(price2)[,1:2],n=10)
+
+plot(price2$close ~ as.Date(price2$date),type="l",xlab="date",ylab="USD price",log="y")
+
+lines(dc[,"high"] ~ as.Date(price2$date),col="darkgreen",lwd=2)
+lines(dc[,"low"] ~ as.Date(price2$date),col="red",lwd=2)
+
+```
+
+## DC trading function
+
+Here is the function for trading based on DC indicator.
+Buy when the green line ticks up and sell when the red line ticks down.
+
+There are two variations on the function.
+One approach uses the high and low range to create the channel while the one
+implemented here uses the closing price only.
+My testing shows that using the closing price only was superior.
+
+All trades are executed at the end of the daily session (UTC midnight).
+
+```{r,dcfunc1}
+
+mydc <- function(price,n=10,fee=0.005) {
+  price2 <- price
+  dc <- DonchianChannel(price2$close,n=n)
+  price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {dc[i,"high"] > dc[(i-1),"high"] } ))
+  price2$lower <- c(NA,sapply(2:nrow(dc),function(i) {dc[i,"low"] < dc[(i-1),"low"] } ))
+  price2 <- price2[price2$higher != price2$lower,]
+  # show changing rows only
+  price2 <- price2[c(NA,unlist(lapply(2:nrow(price2) , function(i) {
+    price2$higher[i] != price2$higher[i-1]
+  }))),]
+  price2 <- price2[!is.na(price2$higher),]
+  if (nrow(price2) > 0 ) {
+    # cannot begin with sell
+    if ( price2[1,"higher"] == FALSE ) { price2 <- price2[2:nrow(price2),] }
+    # cannot end with buy
+    if ( price2[nrow(price2),"higher"] == TRUE ) { price2 <- price2[1:(nrow(price2)-1),] }
+    buy <- subset(price2,higher==TRUE)[,c("date","close")]
+    colnames(buy) <- c("buy_date","buy_price")
+    sell <- subset(price2,lower==TRUE)[,c("date","close")]
+    colnames(sell) <- c("sell_date","sell_price")
+    if( nrow(buy) != nrow(sell) ) {
+      MIN=min(nrow(buy),nrow(sell))
+      buy <- buy[1:MIN,]
+      sell <- sell[1:MIN,]
+    }
+    trades <- cbind(buy,sell)
+    trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+    return(c(prod(trades$diff),nrow(trades)))
+  } else {
+    return(c(1,0))
+  }
+}
+
+```
+
+## Backtesting
+
+Now let's go back in time to test the performance of the different interval strategies on the daily
+timeframe, here are the ranges tested:
+
+* n: from 3 to 200 days
+
+Let's assume a 0.5% exchange fee.
+
+```{r,backtest1}
+
+fee=0.005
+
+nr <- seq(3,200,1)
+
+res <- mclapply(X=nr , FUN=function(n) {
+  mydc(price,n=n,fee=fee)
+} , mc.cores = CORES )
+res <- as.data.frame(do.call(rbind, res))
+colnames(res) <- c("returns","trades")
+res2 <- cbind(nr,res)
+res2$returnspertrade <- res2$returns/res2$trades
+res2$mean <- res2$returns^(1/res2$trades)
+res2$freq <- res2$trades/nrow(price)
+res2$xhodl <- res2$returns / hodl
+res <- res2
+
+
+```
+
+Here are the strategies which had the highest mean return per trade.
+These opportunities don't arise often but could be potential opportunities for leveraged trades.
+
+```{r,backtest_res1}
+
+head(res2[order(-res2$mean),],20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
+
+```
+
+Here are the strategies which had the highest overall returns.
+This involves more frequent trading and the returns on each trade were smaller.
+This is less optimal if trades are executed manually.
+
+```{r,backtest_res2}
+
+head( res2[order(-res2$returns),] ,20) %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
+
+```
+
+## Plots
+
+
+```{r,plots1,fig.height=8,fig.width=8}
+
+plot(res$nr,res$returns,log="y",xlab="period",ylab="returns")
+mtext("Effect of Donchian channel period on returns")
+abline(h=hodl,col="red")
+
+plot(res$nr,res$returns,log="y",xlab="period",ylab="returns",
+  xlim=c(1,100))
+mtext("Effect of Donchian channel period on returns")
+abline(h=hodl,col="red")
+grid()
+
+plot(res$nr,res$xhodl,xlab="period",ylab="returns over hodl",xlim=c(1,50))
+mtext("Effect of Donchian channel period on returns (hodl baseline)")
+abline(h=hodl,col="red")
+grid()
+
+plot(res$trades/nrow(price),res$returns,log="y",xlab="trade frequency",
+  ylab="returns",pch=19,cex=3,col="gray")
+text(res$trades/nrow(price),res$returns,labels=res$nr)
+abline(h=hodl,col="red")
+grid()
+mtext("Trade frequency and returns")
+
+plot(res2$mean , res2$returns, log="y",xlab="mean ROI",
+  ylab="total returns", pch=19,cex=3,col="gray")
+text(res2$mean , res2$returns,labels=res$nr)
+abline(h=hodl,col="red")
+grid()
+mtext("Mean and total returns")
+
+plot(res2$mean , res2$returns, log="y",xlab="mean ROI",
+  ylab="total returns", pch=19,cex=3,col="gray", xlim=c(1,1.6))
+text(res2$mean , res2$returns,labels=res$nr)
+abline(h=hodl,col="red")
+grid()
+mtext("Mean and total returns")
+
+```
+
+## Optimised strategy
+
+Optimise for highest returns.
+
+```{r,best1,fig.width=10,fig.height=8}
+
+best_n = head(res[order(-res$returns),],1)$nr
+
+message(paste("Selected n period:",best_n))
+
+price2 <- price
+dc <- DonchianChannel(price2$close,n=best_n)
+price2$higher <- c(NA,sapply(2:nrow(dc),function(i) {dc[i,"high"] > dc[(i-1),"high"] } ))
+price2$lower <- c(NA,sapply(2:nrow(dc),function(i) {dc[i,"low"] < dc[(i-1),"low"] } ))
+price2 <- price2[price2$higher != price2$lower,]
+# show changing rows only
+price2 <- price2[c(NA,unlist(lapply(2:nrow(price2) , function(i) {
+  price2$higher[i] != price2$higher[i-1]
+}))),]
+price2 <- price2[!is.na(price2$higher),]
+# cannot begin with sell
+if ( price2[1,"higher"] == FALSE ) { price2 <- price2[2:nrow(price2),] }
+# cannot end with buy
+if ( price2[nrow(price2),"higher"] == TRUE ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,higher==TRUE)[,c("date","close")]
+colnames(buy) <- c("buy_date","buy_price")
+sell <- subset(price2,lower==TRUE)[,c("date","close")]
+colnames(sell) <- c("sell_date","sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- cbind(buy,sell)
+trades$diff <- ( ( trades$sell_price - trades$buy_price ) / trades$buy_price ) +1 - ( 2 * fee )
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+
+dc_dat <- c("indicator"="DC",
+  "parameter"=best_n ,
+  "meanROI"= mean(trades$diff) ,
+  "totalROI"= prod(trades$diff) ,
+  "ntrades"= nrow(trades) ,
+  "ndays"= nrow(price) ,
+  "xhodl"= prod(trades$diff)/hodl )
+
+trades %>% kbl() %>%  kable_styling()
+
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+HEADER="Donchian channel"
+plot(price$close~as.Date(price$date),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+lines(dc[,"high"] ~ as.Date(price$date) ,col="darkgreen",lwd=2)
+lines(dc[,"low"] ~ as.Date(price$date) ,col="red",lwd=2)
+
+```
+
+## Recent action
+
+```{r,recent}
+
+HEADER="Donchian channel"
+price2 <- tail(price,200)
+dc <- DonchianChannel(price2$close)
+
+plot( price2$close ~ as.Date(price2$date), type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+lines(dc[,"high"] ~ as.Date(price2$date) ,col="darkgreen",lwd=2)
+lines(dc[,"low"] ~ as.Date(price2$date) ,col="red",lwd=2)
+
+```
+
+## Effect of fees
+
+It is important to factor in the effect of fees because higher exchange fees will erode profits.
+
+```{r,fees,fig.width=8,fig.height=7}
+
+fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
+
+res_fees <- sapply(fee_levels,function(x) {
+  mydc(price,n=best_n,fee=x)
+} )
+
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",
+  ylab="fold return",main="Effect of fees on returns")
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Trades by year
+
+It is good to see whether the strategy gives consistent returns over the years.
+
+```{r,yearly}
+
+years <- unique(sapply(strsplit(price[,1],"-"),"[[",1))
+
+trades$year <- sapply(strsplit(trades[,3],"-"),"[[",1)
+yearly <- sapply(years,function(y) { x <- subset(trades,year==y)[,5] } )
+yearly <- yearly[which(lapply(yearly,length)>0)]
+vioplot(yearly)
+
+yr <- sapply(yearly,prod)
+barplot(yr,ylab="fold return per year")
+text(x=(1:length(yr)*1.2)-0.4,y=yr*0.9,labels=signif(yr,2),cex=1.2)
+abline(h=1,col="red",lty=2)
+
+```
+
+## Conclusion
+
+There are many approaches to momentum trading.
+Here using the Donchian channel we have a strategy which scored 5x hodl returns which is not as good as the TSI but better than EMA.
+
+``
+
+## Data export
+
+Saving data: indicator, parameter, meanROI, returns, ntrades, ndays, xhodl
+
+```{r,export}
+
+filename <- paste("ICP","_dat.txt",sep="")
+write.table(t(dc_dat),file=filename,append=TRUE,col.names=FALSE,row.names=FALSE)
+
+```
+
+## Session information
+
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
+
+</details>

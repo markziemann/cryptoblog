@@ -9,9 +9,9 @@ output:
 theme: cosmo
 ---
 
-Source: https://github.com/markziemann/cryptoblog/blob/main/ma_trading.Rmd
+Source: https://github.com/MDZanalytics/cryptoblog/blob/main/ma_trading.Rmd
 
-This report is distributed for FREE under the [MIT licence](https://github.com/markziemann/cryptoblog/blob/main/LICENSE),
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
 but if you find it useful, consider a small tip.
 
 
@@ -178,7 +178,7 @@ return(c(prod(trades$diff),nrow(trades)))
 Let's look back in time and trial SMA and EMA strategies with an interval from 3 to 200 days.
 This is performed separately for period0 and period1.
 
-Let's assume a 0.1% trading fee, as per binance current rate.
+Let's assume a 0.5% trading fee.
 
 
 ```{r,backtest}

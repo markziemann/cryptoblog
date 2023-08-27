@@ -1,0 +1,289 @@
+---
+title: "<br>Trading combined crypto data based on Directional Movement Index (DMI)"
+date: "`r Sys.Date()`"
+---
+
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/combined/)
+
+This report is distributed for FREE under the [MIT licence](https://github.com/MDZanalytics/cryptoblog/blob/main/LICENSE),
+but if you find it useful, consider a small tip.
+
+<img src="images/donations.png" alt="Monero Address" height="250" width="250" border="0" />
+
+## Intro
+
+So far we have analysed each cryptocurrency separately, but in this analysis I will
+be analysing combined price data from a basket of cryptocurrencies.
+
+The indicator used is the directional movement indicator (DMI).
+
+```{r,lib}
+
+suppressPackageStartupMessages({
+  library("parallel")
+  library("jsonlite")
+  library("tidyverse")
+  library("runner")
+  library("quantmod")
+  library("TTR")
+  library("vioplot")
+  library("kableExtra")
+})
+
+Sys.Date()
+
+```
+
+Reminder: this is not financial advice.
+
+## Get data
+
+Obtaining combined crypto data generated previously.
+
+```{r,getdata}
+
+price <- readRDS("combined_price.rds")
+price <- as.matrix(price)
+
+head(price)
+tail(price)
+
+```
+
+## Calculate hodl returns
+
+It's important to calculate the returns for simply holding the asset rather than actively trading.
+
+The number shown here is the fold return on investment.
+
+```{r,hodl}
+
+myend <- price[c(1,nrow(price)),3][2]
+mystart <- price[c(1,nrow(price)),3][1]
+hodl <- (myend - mystart) / mystart
+hodl
+
+```
+
+## Basic look at the DMI indicator
+
+Here we can see the DMI over the past 730 days, using the default interval of 14d.
+The default moving average algorithm is the Welles Wilder EMA.
+
+```{r,dmi1,fig.height=10,fig.width=8}
+
+par(mfrow=c(2,1))
+price2 <- tail(price,730)
+dmi.adx <- ADX(price2[,c("high","low","close")])
+plot(price2[,"close"] ~ as.Date(rownames(price2)),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(dmi.adx[,1] ~ as.Date(rownames(price2)),type="l",col="blue",
+  xlab="Date",ylab="DMI",main="DMI",ylim=c(0,60))
+lines(as.Date(rownames(price2)), dmi.adx[,2]  , col="red"  )
+grid()
+
+par(mfrow=c(1,1))
+
+```
+
+## DMI trading function
+
+Here is functions for trading based on DMI crosses, buying when positive momentum indicator
+goes above the negative momentum indicator line, and sell when it falls below.
+
+All trades are executed at the end of the daily session (UTC midnight).
+
+```{r,dmi_func}
+
+dmi <- function(price,n,fee) {
+  dmi.adx <- ADX(price[,c("high","low","close")],n=n)
+  price2 <- data.frame(price)
+  price2 <- cbind(price2,dmi.adx)
+  price2$higher <- price2$DIp > price2$DIn
+  yesterday <- price2$higher
+  yesterday <- c(NA,yesterday)
+  yesterday <- yesterday[1:(length(yesterday)-1)]
+  price2$yesterday <- yesterday
+  price2$trade <- price2$higher - price2$yesterday
+  price2 <- price2[which(price2$trade!=0),]
+  if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+  if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+  buy <- subset(price2,trade==1)[,c("close"),drop=FALSE]
+  colnames(buy) <- c("buy_price")
+  sell <- subset(price2,trade==-1)[,c("close"),drop=FALSE]
+  colnames(sell) <- c("sell_price")
+  if( nrow(buy) != nrow(sell) ) {
+    MIN=min(nrow(buy),nrow(sell))
+    buy <- buy[1:MIN,]
+    sell <- sell[1:MIN,]
+  }
+  trades <- as.data.frame(cbind(buy,sell))
+  colnames(trades) <- c("buy","sell")
+  trades$diff <- ( ( trades$sell - trades$buy ) / trades$buy ) +1 - ( 2 * fee )
+  return(c(prod(trades$diff),nrow(trades)))
+}
+
+```
+
+## Backtesting
+
+Now let's go back in time to test the performance of the DMI indicator using different 
+intervals from 4 days to 200 days.
+
+Let's assume a 0.5% trading fee.
+
+Here is a table of results.
+
+```{r,backtest}
+
+CORES=detectCores()
+
+fee=0.005
+myrange <- 5:200
+
+res <- mclapply(myrange,function(n) {dmi(price,n,fee)} ,mc.cores=8)
+
+res <- do.call(rbind,res)
+
+rownames(res) <- myrange
+colnames(res) <- c("returns","trades")
+res <-  as.data.frame(res)
+res$mean <- res$returns^(1/res$trades)
+res <- cbind(rownames(res),res,stringsAsFactors=FALSE)
+colnames(res)[1] <- "period"
+res %>% kbl(row.names=FALSE) %>%  kable_styling("hover", full_width = F)
+
+```
+
+## Plots
+
+Let's examine some of the trends in the data with some charts.
+
+```{r,plots,fig.height=8,fig.width=8}
+
+plot(res$trades,res$returns,log="y", cex=2, pch=19,col="gray",
+  xlab="num trades",ylab="fold returns")
+text(res$trades,res$returns,labels=res$period,cex=1.5)
+abline(h=hodl,col="red")
+grid()
+
+
+plot(res$period,res$returns,pch=19,xlab="n interval (days)",ylab="fold return",main="DMI")
+abline(h=hodl,col="red")
+grid()
+
+plot(res$period,res$returns,pch=19,xlim=c(1,50),xlab="n interval (days)",ylab="fold return",
+  main="DMI",log="y")
+abline(h=hodl,col="red")
+grid()
+
+plot(res$mean,res$returns,xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
+grid()
+text(res$mean,res$returns , cex=1, labels=res$period)
+abline(h=hodl,col="red")
+
+plot(res$mean,res$returns,log="y",xlab="mean ROI",ylab="total ROI",cex=2,pch=19,col="gray")
+grid()
+text(res$mean,res$returns , cex=1, labels=res$period)
+abline(h=hodl,col="red")
+
+plot(res[,3],res[,2],pch=19,cex=2,col="gray",main="DMI returns per trade",xlab="n trades",ylab="fold return USD")
+text(res[,3],res[,2],labels=res$period,pch=19,cex=1)
+abline(h=hodl,col="red")
+
+```
+
+## Best DMI
+
+Here we will look in more detail at the best performing time-frame.
+
+```{r,best_sma4,fig.width=10,fig.height=8}
+
+#res$mean <- res$returns^(1/res$trades)
+res <- subset(res,mean>1.1)
+res <- res[order(-res$returns),]
+
+best_n = as.numeric(res[1,"period"])
+message(paste("Selected DMI period:",best_n))
+
+dmi.adx <- ADX(price[,c("high","low","close")],n=best_n)
+price2 <- data.frame(price)
+price2 <- cbind(price2,dmi.adx)
+price2$higher <- price2$DIp > price2$DIn
+yesterday <- price2$higher
+yesterday <- c(NA,yesterday)
+yesterday <- yesterday[1:(length(yesterday)-1)]
+price2$yesterday <- yesterday
+price2$trade <- price2$higher - price2$yesterday
+price2 <- price2[which(price2$trade!=0),]
+if ( price2$trade[1] == -1 ) { price2 <- price2[2:nrow(price2),] }
+if ( tail(price2,1)$trade ) { price2 <- price2[1:(nrow(price2)-1),] }
+buy <- subset(price2,trade==1)[,c("close"),drop=FALSE]
+colnames(buy) <- c("buy_price")
+sell <- subset(price2,trade==-1)[,c("close"),drop=FALSE]
+colnames(sell) <- c("sell_price")
+if( nrow(buy) != nrow(sell) ) {
+  MIN=min(nrow(buy),nrow(sell))
+  buy <- buy[1:MIN,]
+  sell <- sell[1:MIN,]
+}
+trades <- as.data.frame(cbind(buy,sell))
+colnames(trades) <- c("buy","sell")
+trades$diff <- ( ( trades$sell - trades$buy ) / trades$buy ) +1 - ( 2 * fee )
+
+message(paste("Number of trades:",nrow(trades)))
+message(paste("Total ROI:",prod(trades$diff)))
+message(paste("Returns over hodl:",prod(trades$diff)/hodl))
+message(paste("Mean:",mean(trades$diff)))
+
+trades %>% kbl(row.names=FALSE) %>%  kable_styling()
+
+HEADER=paste(best_n,"DMI")
+par(mfrow=c(2,1))
+plot(price[,"close"] ~ as.Date(rownames(price)),type="l",log="y",
+  xlab="Date",ylab="price (USD)",main="USD price")
+grid()
+
+plot(dmi.adx[,1] ~ as.Date(rownames(price)),type="l",col="blue",
+  xlab="Date",ylab="DMI",main="DMI",ylim=c(0,60))
+lines(as.Date(rownames(price)), dmi.adx[,2]  , col="red"  )
+grid()
+par(mfrow=c(1,1))
+
+```
+
+## Effect of fees
+
+It is important to factor in the effect of fees because higher exchange fees will erode profits.
+
+```{r,fees,fig.width=8,fig.height=7}
+
+fee_levels <- c(0,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01)
+
+res_fees <- sapply(fee_levels,function(x) { dmi(price,best_n,fee=x) } )
+plot(fee_levels,res_fees[1,] ,log="y",pch=19,xlab="fee proportion",ylab="fold return",main="Effect of fees on returns")
+mtext(HEADER)
+abline(h=hodl,col="red")
+grid()
+
+```
+
+## Conclusion
+
+The 25d DMI is a moderately successful indicator that is simple to implement.
+
+## Session information
+
+For reproducibility
+
+<br><details><summary><b>Click HERE to show session info</b></summary><br><p>
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
+
+</details>

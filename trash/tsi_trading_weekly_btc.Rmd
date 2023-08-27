@@ -3,7 +3,7 @@ title: "<br>Trading BTC based on the weekly True Strength Index (TSI)"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/tsi_trading_weekly_btc.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/tsi_trading_weekly_btc.Rmd)
 
 If you find this resource useful, consider a small tip.
 
@@ -174,7 +174,7 @@ timeframe, here are the ranges tested:
 
 * n_signal: from 2 to 5 weeks
 
-Let's assume a 0.1% exchange fee, as per binance current rate.
+Let's assume a 0.5% exchange fee.
 
 There are a lot of possibilities, so the best way to get a feel for the results is to see which combinations of parameters performed best using different
 performance metrics.

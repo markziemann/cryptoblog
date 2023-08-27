@@ -3,7 +3,7 @@ title: "<br>Trading ETH/BTC based on Directional Movement Index (DMI)"
 date: "`r Sys.Date()`"
 ---
 
-[Source code](https://github.com/markziemann/cryptoblog/blob/main/dmi_trading_ethbtc.Rmd)
+[Source code](https://github.com/MDZanalytics/cryptoblog/blob/main/dmi_trading_ethbtc.Rmd)
 
 If you find this resource useful, consider a small tip.
 
@@ -142,7 +142,7 @@ dmi <- function(price,n,fee) {
 Now let's go back in time to test the performance of the DMI indicator using different 
 intervals from 4 days to 200 days.
 
-Let's assume a 0.1% trading fee, as per binance current rate.
+Let's assume a 0.5% trading fee.
 
 Here is a table of results.
 
