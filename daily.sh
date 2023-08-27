@@ -1,5 +1,7 @@
 #!/bin/bash
 #55 9 * * * bash /home/pi/projects/cryptoblog/daily.sh
+HR=$(date --utc '+%d-%m-%Y %H:%M:%S' | cut -d ' ' -f2 | cut -d ':' -f1)
+if [ $HR -lt 23 ] ; then sleep 1h ; fi
 MYCMD=$(echo $0)
 MYDIR=$(dirname $MYCMD)
 cd $MYDIR
